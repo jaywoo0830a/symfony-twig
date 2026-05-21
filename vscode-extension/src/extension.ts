@@ -1,8 +1,43 @@
 import * as vscode from 'vscode';
+import * as path from 'path';
+import * as fs from 'fs';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
 
 const execFileAsync = promisify(execFile);
+
+// ---- Resolve analyzer command ----
+
+function getAnalyzerCommand(): { cmd: string; prefixArgs: string[] } {
+    const config = vscode.workspace.getConfiguration('twigAnalyzer');
+
+    // Strategy 1: Use configured pythonPath
+    const configured = config.get<string>('pythonPath', '');
+    if (configured) {
+        return { cmd: configured, prefixArgs: ['-m', 'twig_analyzer'] };
+    }
+
+    // The extension is installed at: ~/.vscode-server/extensions/twig-static-analyzer/
+    // (or ~/.vscode/extensions/... on desktop)
+    // The twig_analyzer Python package is copied inside the extension dir.
+    const extDir = path.resolve(__dirname, '..');
+
+    // Strategy 2: Python package inside extension dir
+    const extVenvPython = path.join(extDir, '..', '..', '..', '..', '..', 'symfony-twig', '.venv', 'bin', 'python3');
+    if (fs.existsSync(extVenvPython)) {
+        return { cmd: extVenvPython, prefixArgs: ['-m', 'twig_analyzer'] };
+    }
+
+    // Strategy 3: Look for symfony-twig/.venv in HOME
+    const homeDir = process.env.HOME || '/home/rlawjddn';
+    const homeVenvPython = path.join(homeDir, 'symfony-twig', '.venv', 'bin', 'python3');
+    if (fs.existsSync(homeVenvPython)) {
+        return { cmd: homeVenvPython, prefixArgs: ['-m', 'twig_analyzer'] };
+    }
+
+    // Strategy 4: Try twig-analyze CLI on PATH
+    return { cmd: 'twig-analyze', prefixArgs: [] };
+}
 
 // ---- LSP-compatible types (matches twig_analyzer.diagnostics output) ----
 
@@ -168,32 +203,34 @@ async function analyzeDocument(document: vscode.TextDocument): Promise<void> {
             env: { ...process.env, PYTHONUNBUFFERED: '1' },
         };
 
-        // Try multiple execution strategies in order
+        const { cmd, prefixArgs } = getAnalyzerCommand();
+        const allArgs = [...prefixArgs, ...commonArgs];
+
+        console.log(`[twig-analyzer] Running: ${cmd} ${allArgs.join(' ')}`);
+
         let stdout = '';
         let stderr = '';
 
-        // Strategy 1: twig-analyze CLI (installed via pip)
         try {
-            const result = await execFileAsync('twig-analyze', commonArgs, execOptions);
+            const result = await execFileAsync(cmd, allArgs, execOptions);
             stdout = result.stdout;
             stderr = result.stderr;
-        } catch {
-            // Strategy 2: python3 -m twig_analyzer
+        } catch (err1: any) {
+            // Fallback: try 'twig-analyze' CLI directly
             try {
-                const python = config.get<string>('pythonPath', 'python3');
-                const result = await execFileAsync(python, ['-m', 'twig_analyzer', ...commonArgs], execOptions);
+                const result = await execFileAsync('twig-analyze', commonArgs, execOptions);
                 stdout = result.stdout;
                 stderr = result.stderr;
             } catch (err2: any) {
                 if (err2.code === 'ENOENT') {
                     vscode.window.showWarningMessage(
-                        'Twig Static Analyzer: twig-analyze not found. ' +
-                        'Run: bash ./vscode-extension/install.sh'
+                        'Twig Static Analyzer: Python analyzer not found. ' +
+                        'Run: bash ./vscode-extension/install.sh from the symfony-twig directory'
                     );
                 } else if (err2.killed) {
-                    console.warn('Twig analyzer timed out');
+                    console.warn('[twig-analyzer] Timed out');
                 } else {
-                    console.error('Twig analyzer error:', err2.message || err2);
+                    console.error('[twig-analyzer] Error:', err2.message || err2);
                 }
                 return;
             }

@@ -22,10 +22,26 @@
   ],
   "activationEvents": [
     "onLanguage:twig",
-    "onLanguage:html"
+    "onLanguage:html",
+    "onStartupFinished"
   ],
   "main": "./out/extension.js",
   "contributes": {
+    "languages": [
+      {
+        "id": "twig",
+        "extensions": [".twig", ".html.twig"],
+        "aliases": ["Twig", "twig"],
+        "configuration": "./twig-language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "twig",
+        "scopeName": "text.html.twig",
+        "path": "./twig.tmLanguage.json"
+      }
+    ],
     "commands": [
       {
         "command": "twig-analyzer.analyze",

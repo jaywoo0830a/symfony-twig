@@ -8,7 +8,20 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 EXT_NAME="twig-static-analyzer"
-EXT_DIR="${HOME}/.vscode/extensions/${EXT_NAME}"
+
+# Detect VS Code extensions directory (support remote/server/desktop)
+if [ -d "${HOME}/.vscode-server/extensions" ]; then
+    VSCODE_EXT_DIR="${HOME}/.vscode-server/extensions"
+elif [ -d "${HOME}/.vscode/extensions" ]; then
+    VSCODE_EXT_DIR="${HOME}/.vscode/extensions"
+elif [ -n "${VSCODE_EXTENSIONS_DIR:-}" ]; then
+    VSCODE_EXT_DIR="${VSCODE_EXTENSIONS_DIR}"
+else
+    VSCODE_EXT_DIR="${HOME}/.vscode-server/extensions"
+    mkdir -p "${VSCODE_EXT_DIR}"
+fi
+
+EXT_DIR="${VSCODE_EXT_DIR}/${EXT_NAME}"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -132,18 +145,20 @@ echo -e "${YELLOW}[4/4] Installing extension into VS Code...${NC}"
 mkdir -p "${EXT_DIR}"
 
 # Copy all necessary files
-cp -r "${SCRIPT_DIR}/package.json"   "${EXT_DIR}/"
-cp -r "${SCRIPT_DIR}/out"            "${EXT_DIR}/"
-cp -r "${SCRIPT_DIR}/README.md"      "${EXT_DIR}/" 2>/dev/null || true
+cp -r "${SCRIPT_DIR}/package.json"               "${EXT_DIR}/"
+cp -r "${SCRIPT_DIR}/out"                        "${EXT_DIR}/"
+cp -r "${SCRIPT_DIR}/README.md"                  "${EXT_DIR}/" 2>/dev/null || true
+cp -r "${SCRIPT_DIR}/twig.tmLanguage.json"       "${EXT_DIR}/" 2>/dev/null || true
+cp -r "${SCRIPT_DIR}/twig-language-configuration.json" "${EXT_DIR}/" 2>/dev/null || true
 
 # Also copy the Python analyzer into the extension dir so it's self-contained
 mkdir -p "${EXT_DIR}/twig_analyzer"
 cp -r "${PROJECT_ROOT}/twig_analyzer/"* "${EXT_DIR}/twig_analyzer/"
 cp "${PROJECT_ROOT}/pyproject.toml"    "${EXT_DIR}/" 2>/dev/null || true
 
-echo -e "  ${GREEN}✓${NC} Extension installed to: ${EXT_DIR}"
-
+echo -e "  Extension installed to: ${EXT_DIR}"
 echo ""
+echo -e "  ${GREEN}►${NC} Restart VS Code: ${CYAN}Ctrl+Shift+P → Developer: Reload Window${NC}"
 
 # ── Summary ──────────────────────────────────────
 echo -e "${CYAN}╔══════════════════════════════════════════════╗${NC}"

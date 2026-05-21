@@ -1,0 +1,55 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Twig",
+  "scopeName": "text.html.twig",
+  "patterns": [
+    {
+      "name": "comment.block.twig",
+      "begin": "\\{#",
+      "end": "#\\}",
+      "patterns": [{ "include": "#twig-tag-content" }]
+    },
+    {
+      "name": "meta.tag.block.twig",
+      "begin": "\\{%",
+      "end": "%\\}",
+      "beginCaptures": { "0": { "name": "punctuation.definition.tag.twig" } },
+      "endCaptures": { "0": { "name": "punctuation.definition.tag.twig" } },
+      "patterns": [{ "include": "#twig-tag-content" }]
+    },
+    {
+      "name": "meta.tag.output.twig",
+      "begin": "\\{\\{",
+      "end": "\\}\\}",
+      "beginCaptures": { "0": { "name": "punctuation.definition.tag.twig" } },
+      "endCaptures": { "0": { "name": "punctuation.definition.tag.twig" } },
+      "patterns": [{ "include": "#twig-tag-content" }]
+    }
+  ],
+  "repository": {
+    "twig-tag-content": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.twig",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [{ "name": "constant.character.escape.twig", "match": "\\\\." }]
+        },
+        {
+          "name": "string.quoted.single.twig",
+          "begin": "'",
+          "end": "'",
+          "patterns": [{ "name": "constant.character.escape.twig", "match": "\\\\." }]
+        },
+        { "name": "constant.numeric.twig", "match": "\\b\\d[\\d_]*(?:\\.\\d[\\d_]*)?\\b" },
+        { "name": "constant.language.twig", "match": "\\b(?:true|false|null|none)\\b" },
+        { "name": "keyword.control.twig", "match": "\\b(?:if|elseif|else|endif|for|endfor|block|endblock|extends|include|import|from|macro|endmacro|set|endset|do|apply|endapply|embed|endembed|use|with|endwith|autoescape|endautoescape|verbatim|endverbatim|sandbox|endsandbox|cache|endcache|deprecated|enddeprecated|guard|endguard|types|endtypes|flush)\\b" },
+        { "name": "support.function.twig", "match": "\\b(?:range|cycle|constant|date|dump|include|max|min|parent|random|source|attribute|block|template_from_string|path|url|asset|render|is_granted|csrf_token)\\b" },
+        { "name": "keyword.operator.twig", "match": "\\b(?:and|or|not|in|is|same as|divisible by|starts with|ends with|matches|has some|has every|b-and|b-or|b-xor)\\b" },
+        { "name": "keyword.operator.twig", "match": "(?:\\|\\||&&|==|!=|<=>|<=|>=|===|!==|\\.\\.|=>|\\?\\?|\\?\\.)" },
+        { "name": "support.function.twig.filter", "match": "\\|\\s*([a-zA-Z_][a-zA-Z0-9_]*)", "captures": { "1": { "name": "entity.name.function.twig" } } },
+        { "name": "variable.other.twig", "match": "\\b[a-zA-Z_][a-zA-Z0-9_]*\\b" }
+      ]
+    }
+  }
+}

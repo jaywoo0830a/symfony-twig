@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "twig-analyzer"
+version = "1.0.0"
+description = "A static analyzer for Twig 3.x templates"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+dependencies = [
+    "colorama>=0.4.6",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+]
+
+[project.scripts]
+twig-analyze = "twig_analyzer.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["twig_analyzer*"]

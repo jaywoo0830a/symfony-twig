@@ -1,0 +1,93 @@
+{
+  "name": "twig-static-analyzer",
+  "displayName": "Twig Static Analyzer",
+  "description": "Twig 3.x template static analyzer – detects syntax errors, undefined variables, deprecated features, and security issues",
+  "version": "1.0.0",
+  "publisher": "twig-analyzer",
+  "license": "MIT",
+  "icon": "icon.png",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Linters",
+    "Programming Languages"
+  ],
+  "keywords": [
+    "twig",
+    "symfony",
+    "lint",
+    "static analysis",
+    "template"
+  ],
+  "activationEvents": [
+    "onLanguage:twig",
+    "onLanguage:html"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "twig-analyzer.analyze",
+        "title": "Twig: Analyze Current File"
+      }
+    ],
+    "configuration": {
+      "title": "Twig Static Analyzer",
+      "properties": {
+        "twigAnalyzer.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable/disable the Twig static analyzer"
+        },
+        "twigAnalyzer.pythonPath": {
+          "type": "string",
+          "default": "python3",
+          "description": "Python interpreter path (or 'twig-analyze' if installed globally)"
+        },
+        "twigAnalyzer.command": {
+          "type": "string",
+          "default": "twig-analyze",
+          "description": "Command to run the analyzer: 'twig-analyze' (CLI) or 'python3 -m twig_analyzer' (module)"
+        },
+        "twigAnalyzer.runOnSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "Run analysis on file save"
+        },
+        "twigAnalyzer.runOnOpen": {
+          "type": "boolean",
+          "default": true,
+          "description": "Run analysis when file is opened"
+        },
+        "twigAnalyzer.disabledRules": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [],
+          "description": "List of rule IDs to disable (e.g. ['raw-filter', 'hardcoded-text'])"
+        },
+        "twigAnalyzer.severityOverrides": {
+          "type": "object",
+          "default": {},
+          "description": "Override rule severities. e.g. {\"raw-filter\": \"error\"}"
+        },
+        "twigAnalyzer.fileExtensions": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [".twig", ".html.twig"],
+          "description": "File extensions to analyze (also applied to .html files in template directories)"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.80.0",
+    "typescript": "^5.0.0"
+  }
+}

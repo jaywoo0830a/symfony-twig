@@ -1,0 +1,22 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Good Example - Clean Template{% endblock %}
+
+{% block content %}
+    <h1>Welcome, {{ user.name|e }}</h1>
+
+    <p>You have {{ notifications|length }} new notifications.</p>
+
+    {% if user.isAdmin %}
+        <p>Admin panel: <a href="{{ path('admin') }}">Go</a></p>
+    {% endif %}
+
+    <ul>
+    {% for item in items %}
+        <li>{{ item.title|e }} - {{ item.date|date('Y-m-d') }}</li>
+    {% endfor %}
+    </ul>
+
+    {% set greeting = 'Hello' %}
+    <p>{{ greeting }}, {{ user.name|e }}</p>
+{% endblock %}

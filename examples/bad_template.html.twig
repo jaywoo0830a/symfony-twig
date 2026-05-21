@@ -1,0 +1,33 @@
+{# BAD: extends is not the first tag #}
+Hello, world!
+
+{% extends 'base.html.twig' %}
+
+{% block content %}
+    {# BAD: undefined variable #}
+    {{ undefinedVar }}
+
+    {# BAD: unknown filter #}
+    {{ name|unknowFilter }}
+
+    {# BAD: unknown function #}
+    {{ unknownFunc() }}
+
+    {# BAD: raw filter without escaping - security risk #}
+    {{ userContent|raw }}
+
+    {# BAD: deprecated spaceless filter #}
+    {{ html|spaceless }}
+
+    {# BAD: hardcoded text that should be translated #}
+    <p>This is a very long hardcoded string that should probably be translated into multiple languages for better user experience.</p>
+
+    {# BAD: undefined variable in loop #}
+    {% for item in items %}
+        {{ nonexistentProperty }}
+    {% endfor %}
+
+    {% if user %}
+        <p>Welcome!</p>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends 'layout.html.twig' %}
+
+{% block body %}
+    <h1>{{ title|e }}</h1>
+
+    {% for post in posts %}
+        <article>
+            <h2>{{ post.title|e }}</h2>
+            <p>{{ post.excerpt|e }}</p>
+            <time>{{ post.publishedAt|date('Y-m-d') }}</time>
+        </article>
+    {% endfor %}
+
+    {% if posts is empty %}
+        <p>{{ 'No posts found.'|trans }}</p>
+    {% endif %}
+{% endblock %}

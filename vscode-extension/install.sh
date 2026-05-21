@@ -155,7 +155,47 @@ cp -r "${SCRIPT_DIR}/twig-language-configuration.json" "${EXT_DIR}/" 2>/dev/null
 mkdir -p "${EXT_DIR}/twig_analyzer"
 cp -r "${PROJECT_ROOT}/twig_analyzer/"* "${EXT_DIR}/twig_analyzer/"
 cp "${PROJECT_ROOT}/pyproject.toml"    "${EXT_DIR}/" 2>/dev/null || true
+# Register in VS Code Server's extensions.json
+_register_extension() {
+    local ext_json="${VSCODE_EXT_DIR}/extensions.json"
+    local ext_id="twig-analyzer.twig-static-analyzer"
 
+    if [ -f "${ext_json}" ]; then
+        python3 -c "
+import json, sys, uuid
+ext_json = '${ext_json}'
+ext_id = '${ext_id}'
+ext_dir = '${EXT_DIR}'
+
+with open(ext_json) as f:
+    data = json.load(f)
+
+# Remove old entry if exists
+data = [e for e in data if e.get('identifier',{}).get('id') != ext_id]
+
+# Add new entry
+data.append({
+    'identifier': {'id': ext_id},
+    'version': '1.0.0',
+    'location': {
+        '\$mid': 1,
+        'path': ext_dir,
+        'scheme': 'file'
+    },
+    'relativeLocation': ext_dir.split('/')[-1],
+    'metadata': {
+        'installedTimestamp': $(date +%s)000,
+        'pinned': True,
+        'source': 'vsix'
+    }
+})
+
+with open(ext_json, 'w') as f:
+    json.dump(data, f, indent=2)
+" 2>/dev/null && echo -e "  ${GREEN}✓${NC} Registered in extensions.json" || true
+    fi
+}
+_register_extension
 echo -e "  Extension installed to: ${EXT_DIR}"
 echo ""
 echo -e "  ${GREEN}►${NC} Restart VS Code: ${CYAN}Ctrl+Shift+P → Developer: Reload Window${NC}"

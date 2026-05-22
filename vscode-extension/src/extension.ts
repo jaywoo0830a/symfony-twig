@@ -4,369 +4,668 @@ import * as fs from 'fs';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
 
-const execFileAsync = promisify(execFile);
+// ═══════════════════════════════════════════════════════════════════════
+// 1. Types — algebraic, immutable data descriptions
+// ═══════════════════════════════════════════════════════════════════════
 
-// ---- Resolve analyzer command ----
-
-function getAnalyzerCommand(): { cmd: string; args: string[]; env: NodeJS.ProcessEnv } {
-    const config = vscode.workspace.getConfiguration('twigAnalyzer');
-
-    // Strategy 1: User-configured pythonPath
-    const configured = config.get<string>('pythonPath', '');
-    if (configured && fs.existsSync(configured)) {
-        return { cmd: configured, args: ['-m', 'twig_analyzer'], env: { ...process.env } };
-    }
-
-    const extDir = path.resolve(__dirname, '..'); // twig-static-analyzer/
-    const homeDir = process.env.HOME || '/home/rlawjddn';
-
-    // Strategy 2: Known project venv
-    const candidates = [
-        path.join(homeDir, 'symfony-twig', '.venv', 'bin', 'python3'),
-        path.join(homeDir, 'symfony-twig', '.venv', 'bin', 'python'),
-    ];
-    for (const python of candidates) {
-        if (fs.existsSync(python)) {
-            // Use the project's installed twig_analyzer
-            return { cmd: python, args: ['-m', 'twig_analyzer'], env: { ...process.env } };
-        }
-    }
-
-    // Strategy 3: python3 on PATH, with extension dir as fallback
-    const env = { ...process.env };
-    const twigPath = path.join(extDir, 'twig_analyzer');
-    if (fs.existsSync(twigPath)) {
-        env.PYTHONPATH = extDir + (env.PYTHONPATH ? ':' + env.PYTHONPATH : '');
-    }
-
-    return { cmd: 'python3', args: ['-m', 'twig_analyzer'], env };
-}
-
-// ---- LSP-compatible types (matches twig_analyzer.diagnostics output) ----
+// ---- LSP protocol types ----
 
 interface LspPosition {
-    line: number;      // 0-indexed
-    character: number; // 0-indexed
+    readonly line: number;
+    readonly character: number;
 }
 
 interface LspRange {
-    start: LspPosition;
-    end: LspPosition;
+    readonly start: LspPosition;
+    readonly end: LspPosition;
 }
 
 interface LspDiagnostic {
-    message: string;
-    severity: number;  // 1=Error, 2=Warning, 3=Info, 4=Hint
-    range: LspRange;
-    code: string;
-    source: string;
+    readonly message: string;
+    readonly severity: number; // LSP: 1=Error, 2=Warning, 3=Info, 4=Hint
+    readonly range: LspRange;
+    readonly code: string;
+    readonly source: string;
 }
 
 interface AnalyzerOutput {
-    files: Record<string, LspDiagnostic[]>;
-    diagnostics: LspDiagnostic[];
-    summary: {
-        total: number;
-        errors: number;
-        warnings: number;
-        info: number;
-        hints: number;
+    readonly files: Record<string, readonly LspDiagnostic[]>;
+    readonly diagnostics: readonly LspDiagnostic[];
+    readonly summary: {
+        readonly total: number;
+        readonly errors: number;
+        readonly warnings: number;
+        readonly info: number;
+        readonly hints: number;
     };
 }
 
-// ---- Diagnostics Collection ----
+// ---- CLI command representation ----
 
-const diagnosticCollection = vscode.languages.createDiagnosticCollection('twig-analyzer');
+interface CliCommand {
+    readonly cmd: string;
+    readonly args: readonly string[];
+    readonly env: NodeJS.ProcessEnv;
+}
 
-// ---- Extension Activation ----
+// ---- Result type — eliminates try-catch in control flow ----
 
-export function activate(context: vscode.ExtensionContext) {
-    console.log('Twig Static Analyzer is now active');
+type Result<T, E = string> =
+    | { readonly ok: true;  readonly value: T }
+    | { readonly ok: false; readonly error: E };
 
-    // Register command: manual analysis
-    const analyzeCmd = vscode.commands.registerCommand('twig-analyzer.analyze', () => {
-        const editor = vscode.window.activeTextEditor;
-        if (editor) {
-            analyzeDocument(editor.document);
-        }
-    });
-    context.subscriptions.push(analyzeCmd);
+const ok = <T>(value: T): Result<T, never> => ({ ok: true, value });
+const fail = <E = string>(error: E): Result<never, E> => ({ ok: false, error });
 
-    // Watch for file changes
+// ---- Error discriminants — no `any` types ----
+
+type CliError =
+    | { readonly type: 'ENOENT'; readonly path: string }
+    | { readonly type: 'timeout' }
+    | { readonly type: 'module_not_found'; readonly stderr: string }
+    | { readonly type: 'no_output'; readonly message: string }
+    | { readonly type: 'exit_code'; readonly code: number };
+
+const cliErrorLabel: Record<CliError['type'], string> = {
+    ENOENT: 'Python not found or twig_analyzer not installed',
+    timeout: 'Analysis timed out',
+    module_not_found: 'twig_analyzer module not found',
+    no_output: 'CLI produced no output',
+    exit_code: 'CLI exited with non-zero code',
+};
+
+// ---- Diagnostic partition (pure) ----
+
+interface DiagnosticPartition {
+    readonly errors: readonly vscode.Diagnostic[];
+    readonly warnings: readonly vscode.Diagnostic[];
+    readonly infos: readonly vscode.Diagnostic[];
+    readonly hints: readonly vscode.Diagnostic[];
+    readonly total: number;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// 2. Pure functions — no side effects, deterministic, explicit returns
+// ═══════════════════════════════════════════════════════════════════════
+
+// ---- File detection (pure predicate) ----
+
+const isTwigFile = (doc: Pick<vscode.TextDocument, 'languageId' | 'fileName'>): boolean => {
     const config = vscode.workspace.getConfiguration('twigAnalyzer');
+    const extensions: readonly string[] = config.get<string[]>('fileExtensions', ['.twig', '.html.twig']);
 
-    if (config.get<boolean>('runOnOpen', true)) {
-        // Analyze currently open files on activation
-        vscode.window.visibleTextEditors.forEach(editor => {
-            if (isTwigFile(editor.document)) {
-                analyzeDocument(editor.document);
+    if (doc.languageId === 'twig') return true;
+    return extensions.some(ext => doc.fileName.endsWith(ext));
+};
+
+// ---- Severity mapping (pure, exhaustive) ----
+
+const SEVERITY_MAP = new Map<number, vscode.DiagnosticSeverity>([
+    [1, vscode.DiagnosticSeverity.Error],
+    [2, vscode.DiagnosticSeverity.Warning],
+    [3, vscode.DiagnosticSeverity.Information],
+    [4, vscode.DiagnosticSeverity.Hint],
+]);
+
+const lspSeverityToVsCode = (lspSeverity: number): vscode.DiagnosticSeverity =>
+    SEVERITY_MAP.get(lspSeverity) ?? vscode.DiagnosticSeverity.Warning;
+
+// ---- Range conversion (pure) ----
+
+const lspRangeToVsCodeRange = (r: LspRange): vscode.Range =>
+    new vscode.Range(
+        new vscode.Position(r.start.line, r.start.character),
+        new vscode.Position(r.end.line, r.end.character),
+    );
+
+// ---- Diagnostic conversion (pure) ----
+
+const lspDiagToVsCodeDiag = (d: LspDiagnostic): vscode.Diagnostic => {
+    const diag = new vscode.Diagnostic(
+        lspRangeToVsCodeRange(d.range),
+        d.message,
+        lspSeverityToVsCode(d.severity),
+    );
+    diag.source = d.source ?? 'twig-analyzer';
+    diag.code = d.code ?? '';
+    return diag;
+};
+
+// ---- Partition diagnostics (pure) ----
+
+const partitionDiagnostics = (diags: readonly vscode.Diagnostic[]): DiagnosticPartition => ({
+    errors: diags.filter(d => d.severity === vscode.DiagnosticSeverity.Error),
+    warnings: diags.filter(d => d.severity === vscode.DiagnosticSeverity.Warning),
+    infos: diags.filter(d => d.severity === vscode.DiagnosticSeverity.Information),
+    hints: diags.filter(d => d.severity === vscode.DiagnosticSeverity.Hint),
+    total: diags.length,
+});
+
+// ---- CLI argument builder (pure) ----
+
+const buildAnalyzerArgs = (): readonly string[] => {
+    const config = vscode.workspace.getConfiguration('twigAnalyzer');
+    const disabledRules: readonly string[] = config.get<string[]>('disabledRules', []);
+    const severityOverrides: Readonly<Record<string, string>> = config.get<Record<string, string>>('severityOverrides', {});
+
+    const disableArg = disabledRules.length > 0
+        ? ['--disable', disabledRules.join(',')]
+        : [];
+
+    const severityArgs = Object.entries(severityOverrides)
+        .flatMap(([ruleId, severity]) => ['--severity', `${ruleId}=${severity}`]);
+
+    return [...disableArg, ...severityArgs];
+};
+
+// ---- Parse JSON output (pure, returns Result) ----
+
+const parseAnalyzerOutput = (stdout: string): Result<AnalyzerOutput> => {
+    try {
+        return ok(JSON.parse(stdout) as AnalyzerOutput);
+    } catch (e) {
+        return fail(`JSON parse error: ${e instanceof Error ? e.message : String(e)}`);
+    }
+};
+
+// ---- Extract diagnostics for a file (pure) ----
+
+const findFileDiagnostics = (
+    output: AnalyzerOutput,
+    filePath: string,
+): readonly LspDiagnostic[] =>
+    output.files[filePath] ?? [];
+
+// ---- Filename extraction (pure) ----
+
+const basename = (filePath: string): string =>
+    filePath.split('/').pop() ?? filePath;
+
+// ═══════════════════════════════════════════════════════════════════════
+// 3. Strategy functions — find commands via ordered strategies
+// ═══════════════════════════════════════════════════════════════════════
+
+type Strategy = () => CliCommand | undefined;
+
+const firstOf = (strategies: readonly Strategy[]): CliCommand => {
+    for (const s of strategies) {
+        const result = s();
+        if (result !== undefined) return result;
+    }
+    return { cmd: 'python3', args: ['-m', 'twig_analyzer'], env: { ...process.env } };
+};
+
+const findAnalyzerCommand = (): CliCommand => {
+    const config = vscode.workspace.getConfiguration('twigAnalyzer');
+    const extDir = path.resolve(__dirname, '..');
+    const homeDir = process.env.HOME ?? '/home/rlawjddn';
+
+    const strategies: readonly Strategy[] = [
+        // Strategy 1: User-configured pythonPath
+        () => {
+            const configured = config.get<string>('pythonPath', '');
+            if (configured && fs.existsSync(configured)) {
+                return { cmd: configured, args: ['-m', 'twig_analyzer'], env: { ...process.env } };
             }
+            return undefined;
+        },
+        // Strategy 2: Known project venv
+        () => {
+            const candidates = [
+                path.join(homeDir, 'symfony-twig', '.venv', 'bin', 'python3'),
+                path.join(homeDir, 'symfony-twig', '.venv', 'bin', 'python'),
+            ];
+            const found = candidates.find(p => fs.existsSync(p));
+            return found
+                ? { cmd: found, args: ['-m', 'twig_analyzer'], env: { ...process.env } }
+                : undefined;
+        },
+        // Strategy 3: python3 on PATH, with extension dir as fallback
+        () => {
+            const env = { ...process.env };
+            const twigPath = path.join(extDir, 'twig_analyzer');
+            if (fs.existsSync(twigPath)) {
+                env.PYTHONPATH = extDir + (env.PYTHONPATH ? `:${env.PYTHONPATH}` : '');
+            }
+            return { cmd: 'python3', args: ['-m', 'twig_analyzer'], env };
+        },
+    ];
+
+    return firstOf(strategies);
+};
+
+// ═══════════════════════════════════════════════════════════════════════
+// 4. IO functions — side effects, wrapped in Result
+// ═══════════════════════════════════════════════════════════════════════
+
+const execFileAsync = promisify(execFile);
+
+interface CliResult {
+    readonly stdout: string;
+    readonly stderr: string;
+}
+
+const runAnalyzerCli = async (cmd: CliCommand, filePath: string): Promise<Result<CliResult, CliError>> => {
+    const analyzerArgs = buildAnalyzerArgs();
+    const allArgs = [...cmd.args, ...analyzerArgs, '--format', 'json', filePath];
+
+    try {
+        const { stdout, stderr } = await execFileAsync(cmd.cmd, allArgs, {
+            timeout: 30000,
+            maxBuffer: 10 * 1024 * 1024,
+            env: cmd.env,
         });
+        return ok({ stdout, stderr });
+    } catch (err: any) {
+        const stdout: string = err.stdout ?? '';
+        const stderr: string = err.stderr ?? '';
+
+        if (err.code === 'ENOENT') return fail({ type: 'ENOENT', path: cmd.cmd });
+        if (err.killed) return fail({ type: 'timeout' });
+        if (stderr.includes('No module named')) return fail({ type: 'module_not_found', stderr });
+        if (stdout.trim() === '') return fail({ type: 'no_output', message: err.message ?? 'unknown' });
+
+        console.log(`[twig-analyzer] CLI exited with code ${err.code}, processing stdout`);
+        return ok({ stdout, stderr });
     }
+};
 
-    // Analyze on file open
-    context.subscriptions.push(
-        vscode.window.onDidChangeActiveTextEditor(editor => {
-            if (editor && config.get<boolean>('runOnOpen', true)) {
-                if (isTwigFile(editor.document)) {
-                    analyzeDocument(editor.document);
-                }
-            }
-        })
+const setDiagnostics = (uri: vscode.Uri, diags: readonly vscode.Diagnostic[]): void => {
+    if (diags.length > 0) {
+        diagnosticCollection.set(uri, [...diags]);
+    } else {
+        diagnosticCollection.delete(uri);
+    }
+};
+
+const showStatusMessage = (fileName: string, partition: DiagnosticPartition): void => {
+    vscode.window.setStatusBarMessage(
+        `$(check) Twig: ${fileName} – ${partition.errors.length} errors, ${partition.warnings.length} warnings`,
+        5000,
     );
+};
 
-    // Analyze on save
-    context.subscriptions.push(
-        vscode.workspace.onDidSaveTextDocument(document => {
-            if (config.get<boolean>('runOnSave', true)) {
-                if (isTwigFile(document)) {
-                    analyzeDocument(document);
-                }
-            }
-        })
-    );
+const reportCliError = (error: CliError): void => {
+    const homeDir = process.env.HOME ?? '~';
+    const installCmd = `bash ${homeDir}/symfony-twig/vscode-extension/install.sh`;
 
-    // Analyze on change (debounced)
-    let changeTimer: NodeJS.Timeout | undefined;
-    context.subscriptions.push(
-        vscode.workspace.onDidChangeTextDocument(event => {
-            if (config.get<boolean>('runOnSave', true)) {
-                return; // Only run on save
-            }
-            if (!isTwigFile(event.document)) {
-                return;
-            }
-            if (changeTimer) {
-                clearTimeout(changeTimer);
-            }
-            changeTimer = setTimeout(() => {
-                analyzeDocument(event.document);
-            }, 1000);
-        })
-    );
+    switch (error.type) {
+        case 'ENOENT':
+            vscode.window.showErrorMessage(`Twig Analyzer: ${cliErrorLabel.ENOENT}\nRun: ${installCmd}`);
+            break;
+        case 'timeout':
+            console.warn('[twig-analyzer] Timed out');
+            break;
+        case 'module_not_found':
+            vscode.window.showErrorMessage(`Twig Analyzer: ${cliErrorLabel.module_not_found}\nRun: ${installCmd}`);
+            break;
+        case 'no_output':
+            console.error('[twig-analyzer] CLI failed with no output:', error.message);
+            break;
+        case 'exit_code':
+            console.log(`[twig-analyzer] CLI exited with code ${error.code}`);
+            break;
+    }
+};
 
-    // Clean up on close
-    context.subscriptions.push(
-        vscode.workspace.onDidCloseTextDocument(document => {
-            diagnosticCollection.delete(document.uri);
-        })
-    );
+// ═══════════════════════════════════════════════════════════════════════
+// 5. Composition — pipeline the analysis
+// ═══════════════════════════════════════════════════════════════════════
 
-    // Status bar item
-    const statusBarItem = vscode.window.createStatusBarItem(
-        vscode.StatusBarAlignment.Right, 100
-    );
-    statusBarItem.command = 'twig-analyzer.analyze';
-    statusBarItem.text = '$(check) Twig';
-    statusBarItem.tooltip = 'Twig Static Analyzer';
-    statusBarItem.show();
-    context.subscriptions.push(statusBarItem);
-
-    // ---- Formatting Provider ----
-    const formattingProvider = vscode.languages.registerDocumentFormattingEditProvider(
-        { language: 'twig', scheme: 'file' },
-        new TwigFormattingProvider()
-    );
-    context.subscriptions.push(formattingProvider);
-
-    // Also register for HTML files that are actually Twig
-    const htmlFormattingProvider = vscode.languages.registerDocumentFormattingEditProvider(
-        { language: 'html', scheme: 'file' },
-        new TwigFormattingProvider()
-    );
-    context.subscriptions.push(htmlFormattingProvider);
-}
-
-export function deactivate() {
-    diagnosticCollection.clear();
-}
-
-// ---- Core Logic ----
-
-function isTwigFile(document: vscode.TextDocument): boolean {
+const analyzeDocument = async (document: vscode.TextDocument): Promise<void> => {
     const config = vscode.workspace.getConfiguration('twigAnalyzer');
-    const extensions: string[] = config.get('fileExtensions', ['.twig', '.html.twig']);
-
-    if (document.languageId === 'twig') {
-        return true;
-    }
-
-    // Check file extensions
-    for (const ext of extensions) {
-        if (document.fileName.endsWith(ext)) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-async function analyzeDocument(document: vscode.TextDocument): Promise<void> {
-    const config = vscode.workspace.getConfiguration('twigAnalyzer');
-
-    if (!config.get<boolean>('enabled', true)) {
-        diagnosticCollection.delete(document.uri);
+    if (config.get<boolean>('enabled', true) === false) {
+        setDiagnostics(document.uri, []);
         return;
     }
 
-    try {
-        const filePath = document.uri.fsPath;
-        const analyzerArgs = buildAnalyzerArgs();
-        const commonArgs = [...analyzerArgs, '--format', 'json', filePath];
+    const filePath = document.uri.fsPath;
+    const cmd = findAnalyzerCommand();
+    const cliResult = await runAnalyzerCli(cmd, filePath);
 
-        const { cmd, args, env } = getAnalyzerCommand();
-        const allArgs = [...args, ...commonArgs];
-
-        console.log(`[twig-analyzer] ${cmd} ${allArgs.join(' ')}`);
-
-        const { stdout, stderr } = await execFileAsync(cmd, allArgs, {
-            timeout: 30000,
-            maxBuffer: 10 * 1024 * 1024,
-            env: env,
-        });
-
-        if (stderr && stderr.trim()) {
-            console.warn('twig-analyzer stderr:', stderr);
-        }
-
-        const output: AnalyzerOutput = JSON.parse(stdout);
-        const fileDiags = output.files[filePath];
-
-        if (fileDiags) {
-            const vsDiags: vscode.Diagnostic[] = fileDiags.map(d =>
-                lspToVsCodeDiagnostic(d, document)
-            );
-            diagnosticCollection.set(document.uri, vsDiags);
-        } else {
-            diagnosticCollection.delete(document.uri);
-        }
-
-    } catch (err: any) {
-        const homeDir = process.env.HOME || '~';
-        if (err.code === 'ENOENT') {
-            vscode.window.showErrorMessage(
-                `Twig Analyzer: python3 not found or twig_analyzer not installed.\n` +
-                `Run: bash ${homeDir}/symfony-twig/vscode-extension/install.sh`
-            );
-        } else if (err.killed) {
-            console.warn('[twig-analyzer] Timed out');
-        } else if (err.stderr && err.stderr.includes('No module named')) {
-            vscode.window.showErrorMessage(
-                `Twig Analyzer: twig_analyzer module not found.\n` +
-                `Run: bash ${homeDir}/symfony-twig/vscode-extension/install.sh`
-            );
-        } else {
-            console.error('[twig-analyzer] Error:', err.message || err);
-        }
+    if (cliResult.ok === false) {
+        reportCliError(cliResult.error);
+        return;
     }
-}
 
-function buildAnalyzerArgs(): string[] {
+    const parseResult = parseAnalyzerOutput(cliResult.value.stdout);
+    if (parseResult.ok === false) {
+        console.error('[twig-analyzer]', parseResult.error);
+        return;
+    }
+
+    const lspDiags = findFileDiagnostics(parseResult.value, filePath);
+    const vsDiags = lspDiags.map(lspDiagToVsCodeDiag);
+    const partition = partitionDiagnostics(vsDiags);
+
+    setDiagnostics(document.uri, vsDiags);
+    showStatusMessage(basename(document.fileName), partition);
+};
+
+// ═══════════════════════════════════════════════════════════════════════
+// 6. Event wiring — functional event → handler mapping
+// ═══════════════════════════════════════════════════════════════════════
+
+const mkDebouncer = (ms: number) => {
+    let timer: NodeJS.Timeout | undefined;
+    return (fn: () => void) => {
+        if (timer !== undefined) clearTimeout(timer);
+        timer = setTimeout(() => { timer = undefined; fn(); }, ms);
+    };
+};
+
+const wireEvents = (context: vscode.ExtensionContext): void => {
     const config = vscode.workspace.getConfiguration('twigAnalyzer');
-    const args: string[] = [];
+    const runOnOpen = config.get<boolean>('runOnOpen', true);
+    const runOnSave = config.get<boolean>('runOnSave', true);
+    const debounce = mkDebouncer(1000);
 
-    // Disabled rules
-    const disabledRules: string[] = config.get('disabledRules', []);
-    if (disabledRules.length > 0) {
-        args.push('--disable', disabledRules.join(','));
-    }
-
-    // Severity overrides
-    const severityOverrides: Record<string, string> = config.get('severityOverrides', {});
-    for (const [ruleId, severity] of Object.entries(severityOverrides)) {
-        args.push('--severity', `${ruleId}=${severity}`);
-    }
-
-    return args;
-}
-
-function lspToVsCodeDiagnostic(
-    lspDiag: LspDiagnostic,
-    document: vscode.TextDocument
-): vscode.Diagnostic {
-    // Convert LSP severity to VS Code severity
-    const severityMap: Record<number, vscode.DiagnosticSeverity> = {
-        1: vscode.DiagnosticSeverity.Error,
-        2: vscode.DiagnosticSeverity.Warning,
-        3: vscode.DiagnosticSeverity.Information,
-        4: vscode.DiagnosticSeverity.Hint,
+    const analyzeIfTwig = (doc: vscode.TextDocument) => {
+        if (isTwigFile(doc)) analyzeDocument(doc);
     };
 
-    const range = new vscode.Range(
-        new vscode.Position(lspDiag.range.start.line, lspDiag.range.start.character),
-        new vscode.Position(lspDiag.range.end.line, lspDiag.range.end.character)
+    // Initial sweep
+    if (runOnOpen) {
+        vscode.window.visibleTextEditors.forEach(editor => analyzeIfTwig(editor.document));
+        const active = vscode.window.activeTextEditor;
+        if (active !== undefined) analyzeIfTwig(active.document);
+    }
+
+    // Editor switches
+    context.subscriptions.push(
+        vscode.window.onDidChangeActiveTextEditor(editor => {
+            if (editor !== undefined && runOnOpen) analyzeIfTwig(editor.document);
+        }),
     );
 
-    const diag = new vscode.Diagnostic(
-        range,
-        lspDiag.message,
-        severityMap[lspDiag.severity] || vscode.DiagnosticSeverity.Warning
+    // Save
+    context.subscriptions.push(
+        vscode.workspace.onDidSaveTextDocument(doc => {
+            if (runOnSave && isTwigFile(doc)) analyzeDocument(doc);
+        }),
     );
 
-    diag.source = lspDiag.source || 'twig-analyzer';
-    diag.code = lspDiag.code;
+    // Change (debounced, only when not runOnSave)
+    context.subscriptions.push(
+        vscode.workspace.onDidChangeTextDocument(event => {
+            if (runOnSave) return;
+            if (!isTwigFile(event.document)) return;
+            debounce(() => analyzeDocument(event.document));
+        }),
+    );
 
-    return diag;
+    // Cleanup on close
+    context.subscriptions.push(
+        vscode.workspace.onDidCloseTextDocument(doc => {
+            diagnosticCollection.delete(doc.uri);
+        }),
+    );
+};
+
+// ═══════════════════════════════════════════════════════════════════════
+// 7. HTML IntelliSense — pure data + composable providers
+// ═══════════════════════════════════════════════════════════════════════
+
+interface TagCompletion {
+    readonly label: string;
+    readonly detail: string;
+    readonly insertText: string;
 }
 
-// ---- Formatting Provider ----
+const HTML_TAGS: readonly TagCompletion[] = [
+    { label: 'div',        detail: 'HTML Block Container',       insertText: 'div' },
+    { label: 'span',       detail: 'HTML Inline Container',      insertText: 'span' },
+    { label: 'p',          detail: 'HTML Paragraph',             insertText: 'p' },
+    { label: 'a',          detail: 'HTML Anchor/Link',           insertText: 'a href="$1"$0' },
+    { label: 'img',        detail: 'HTML Image',                 insertText: 'img src="$1" alt="$2"$0' },
+    { label: 'ul',         detail: 'HTML Unordered List',        insertText: 'ul' },
+    { label: 'ol',         detail: 'HTML Ordered List',          insertText: 'ol' },
+    { label: 'li',         detail: 'HTML List Item',             insertText: 'li' },
+    { label: 'table',      detail: 'HTML Table',                 insertText: 'table' },
+    { label: 'tr',         detail: 'HTML Table Row',             insertText: 'tr' },
+    { label: 'td',         detail: 'HTML Table Cell',            insertText: 'td' },
+    { label: 'th',         detail: 'HTML Table Header',          insertText: 'th' },
+    { label: 'thead',      detail: 'HTML Table Head',            insertText: 'thead' },
+    { label: 'tbody',      detail: 'HTML Table Body',            insertText: 'tbody' },
+    { label: 'form',       detail: 'HTML Form',                  insertText: 'form action="$1" method="$2"$0' },
+    { label: 'input',      detail: 'HTML Input',                 insertText: 'input type="$1"$0' },
+    { label: 'button',     detail: 'HTML Button',                insertText: 'button type="$1"$0' },
+    { label: 'label',      detail: 'HTML Label',                 insertText: 'label for="$1"$0' },
+    { label: 'select',     detail: 'HTML Select Dropdown',       insertText: 'select' },
+    { label: 'option',     detail: 'HTML Option',                insertText: 'option value="$1"$0' },
+    { label: 'textarea',   detail: 'HTML Textarea',              insertText: 'textarea' },
+    { label: 'h1',         detail: 'HTML Heading 1',             insertText: 'h1' },
+    { label: 'h2',         detail: 'HTML Heading 2',             insertText: 'h2' },
+    { label: 'h3',         detail: 'HTML Heading 3',             insertText: 'h3' },
+    { label: 'h4',         detail: 'HTML Heading 4',             insertText: 'h4' },
+    { label: 'h5',         detail: 'HTML Heading 5',             insertText: 'h5' },
+    { label: 'h6',         detail: 'HTML Heading 6',             insertText: 'h6' },
+    { label: 'section',    detail: 'HTML Section',               insertText: 'section' },
+    { label: 'article',    detail: 'HTML Article',               insertText: 'article' },
+    { label: 'nav',        detail: 'HTML Navigation',            insertText: 'nav' },
+    { label: 'header',     detail: 'HTML Header',                insertText: 'header' },
+    { label: 'footer',     detail: 'HTML Footer',                insertText: 'footer' },
+    { label: 'main',       detail: 'HTML Main Content',          insertText: 'main' },
+    { label: 'aside',      detail: 'HTML Aside',                 insertText: 'aside' },
+    { label: 'figure',     detail: 'HTML Figure',                insertText: 'figure' },
+    { label: 'figcaption', detail: 'HTML Figure Caption',        insertText: 'figcaption' },
+    { label: 'video',      detail: 'HTML Video',                 insertText: 'video src="$1"$0' },
+    { label: 'audio',      detail: 'HTML Audio',                 insertText: 'audio src="$1"$0' },
+    { label: 'canvas',     detail: 'HTML Canvas',                insertText: 'canvas' },
+    { label: 'script',     detail: 'HTML Script',                insertText: 'script' },
+    { label: 'style',      detail: 'HTML Style',                 insertText: 'style' },
+    { label: 'link',       detail: 'HTML Link (CSS, etc.)',      insertText: 'link rel="$1" href="$2"$0' },
+    { label: 'meta',       detail: 'HTML Meta',                  insertText: 'meta name="$1" content="$2"$0' },
+    { label: 'title',      detail: 'HTML Title',                 insertText: 'title' },
+    { label: 'br',         detail: 'HTML Line Break',            insertText: 'br' },
+    { label: 'hr',         detail: 'HTML Horizontal Rule',       insertText: 'hr' },
+    { label: 'strong',     detail: 'HTML Strong (bold)',         insertText: 'strong' },
+    { label: 'em',         detail: 'HTML Emphasis (italic)',     insertText: 'em' },
+    { label: 'code',       detail: 'HTML Code',                  insertText: 'code' },
+    { label: 'pre',        detail: 'HTML Preformatted Text',     insertText: 'pre' },
+    { label: 'blockquote', detail: 'HTML Blockquote',            insertText: 'blockquote' },
+    { label: 'details',    detail: 'HTML Details/Accordion',     insertText: 'details' },
+    { label: 'summary',    detail: 'HTML Summary (for details)',  insertText: 'summary' },
+] as const;
+
+const COMMON_ATTRS: readonly TagCompletion[] = [
+    { label: 'class',       detail: 'HTML Attribute', insertText: 'class="$1"$0' },
+    { label: 'id',          detail: 'HTML Attribute', insertText: 'id="$1"$0' },
+    { label: 'style',       detail: 'HTML Attribute', insertText: 'style="$1"$0' },
+    { label: 'title',       detail: 'HTML Attribute', insertText: 'title="$1"$0' },
+    { label: 'href',        detail: 'HTML Attribute', insertText: 'href="$1"$0' },
+    { label: 'src',         detail: 'HTML Attribute', insertText: 'src="$1"$0' },
+    { label: 'alt',         detail: 'HTML Attribute', insertText: 'alt="$1"$0' },
+    { label: 'type',        detail: 'HTML Attribute', insertText: 'type="$1"$0' },
+    { label: 'name',        detail: 'HTML Attribute', insertText: 'name="$1"$0' },
+    { label: 'value',       detail: 'HTML Attribute', insertText: 'value="$1"$0' },
+    { label: 'placeholder', detail: 'HTML Attribute', insertText: 'placeholder="$1"$0' },
+    { label: 'required',    detail: 'HTML Attribute', insertText: 'required' },
+    { label: 'disabled',    detail: 'HTML Attribute', insertText: 'disabled' },
+    { label: 'checked',     detail: 'HTML Attribute', insertText: 'checked' },
+    { label: 'selected',    detail: 'HTML Attribute', insertText: 'selected' },
+    { label: 'readonly',    detail: 'HTML Attribute', insertText: 'readonly' },
+    { label: 'target',      detail: 'HTML Attribute', insertText: 'target="$1"$0' },
+    { label: 'rel',         detail: 'HTML Attribute', insertText: 'rel="$1"$0' },
+    { label: 'data-',       detail: 'HTML Attribute', insertText: 'data-$1="$2"$0' },
+    { label: 'aria-',       detail: 'HTML Attribute', insertText: 'aria-$1="$2"$0' },
+] as const;
+
+const VOID_ELEMENTS: ReadonlySet<string> = new Set([
+    'br', 'hr', 'img', 'input', 'meta', 'link', 'area', 'base',
+    'col', 'embed', 'source', 'track', 'wbr',
+]);
+
+// ---- Pure helpers for completion ----
+
+const isInsideTwigTag = (beforeCursor: string): boolean =>
+    (beforeCursor.includes('{{') && !beforeCursor.includes('}}')) ||
+    (beforeCursor.includes('{%') && !beforeCursor.includes('%}'));
+
+const isInsideHtmlTag = (beforeCursor: string): boolean =>
+    /<\w+[\s>]/.test(beforeCursor) && !isInsideTwigTag(beforeCursor);
+
+const toCompletionItems = (
+    entries: readonly TagCompletion[],
+    kind: vscode.CompletionItemKind,
+): vscode.CompletionItem[] =>
+    entries.map(entry => {
+        const item = new vscode.CompletionItem(entry.label, kind);
+        item.detail = entry.detail;
+        item.insertText = new vscode.SnippetString(entry.insertText);
+        item.filterText = entry.label;
+        return item;
+    });
+
+// ---- Auto-close logic (pure) ----
+
+const tryExtractOpenTag = (beforeGt: string): string | undefined => {
+    const match = beforeGt.match(/<(\w+)[^>]*$/);
+    if (match === null) return undefined;
+    if (isInsideTwigTag(beforeGt)) return undefined;
+    return match[1];
+};
+
+const shouldAutoClose = (tagName: string): boolean =>
+    !VOID_ELEMENTS.has(tagName.toLowerCase());
+
+// ═══════════════════════════════════════════════════════════════════════
+// 8. Extension lifecycle (activation / deactivation)
+// ═══════════════════════════════════════════════════════════════════════
+
+const diagnosticCollection = vscode.languages.createDiagnosticCollection('twig-analyzer');
+
+export function activate(context: vscode.ExtensionContext): void {
+    console.log('Twig Static Analyzer is now active');
+
+    // Manual analysis command
+    context.subscriptions.push(
+        vscode.commands.registerCommand('twig-analyzer.analyze', () => {
+            const editor = vscode.window.activeTextEditor;
+            if (editor !== undefined && isTwigFile(editor.document)) {
+                analyzeDocument(editor.document);
+            }
+        }),
+    );
+
+    // Wire file events
+    wireEvents(context);
+
+    // Status bar
+    const statusBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+    statusBar.command = 'twig-analyzer.analyze';
+    statusBar.text = '$(check) Twig';
+    statusBar.tooltip = 'Twig Static Analyzer';
+    statusBar.show();
+    context.subscriptions.push(statusBar);
+
+    // Formatting provider (twig + html)
+    const formattingProvider = new TwigFormattingProvider();
+    context.subscriptions.push(
+        vscode.languages.registerDocumentFormattingEditProvider({ language: 'twig', scheme: 'file' }, formattingProvider),
+        vscode.languages.registerDocumentFormattingEditProvider({ language: 'html', scheme: 'file' }, formattingProvider),
+    );
+
+    // HTML tag completion
+    context.subscriptions.push(
+        vscode.languages.registerCompletionItemProvider(
+            { language: 'twig', scheme: 'file' },
+            {
+                provideCompletionItems(document, position) {
+                    const beforeCursor = document.lineAt(position).text.substring(0, position.character);
+                    if (isInsideTwigTag(beforeCursor)) return [];
+                    return toCompletionItems(HTML_TAGS, vscode.CompletionItemKind.Keyword);
+                },
+            },
+            '<',
+        ),
+    );
+
+    // HTML attribute completion
+    context.subscriptions.push(
+        vscode.languages.registerCompletionItemProvider(
+            { language: 'twig', scheme: 'file' },
+            {
+                provideCompletionItems(document, position) {
+                    const beforeCursor = document.lineAt(position).text.substring(0, position.character);
+                    if (!isInsideHtmlTag(beforeCursor)) return [];
+                    return toCompletionItems(COMMON_ATTRS, vscode.CompletionItemKind.Property);
+                },
+            },
+            ' ',
+        ),
+    );
+
+    // Auto-close HTML tags
+    context.subscriptions.push(
+        vscode.workspace.onDidChangeTextDocument(event => {
+            if (!isTwigFile(event.document)) return;
+            for (const change of event.contentChanges) {
+                if (change.text !== '>') continue;
+
+                const pos = change.range.start;
+                const beforeGt = event.document.lineAt(pos.line).text.substring(0, pos.character);
+                const tagName = tryExtractOpenTag(beforeGt);
+
+                if (tagName !== undefined && shouldAutoClose(tagName)) {
+                    const edit = new vscode.WorkspaceEdit();
+                    edit.insert(event.document.uri, new vscode.Position(pos.line, pos.character + 1), `</${tagName}>`);
+                    vscode.workspace.applyEdit(edit);
+                }
+            }
+        }),
+    );
+
+    // Emmet for Twig
+    vscode.workspace.getConfiguration('emmet').update(
+        'includeLanguages', { twig: 'html' }, vscode.ConfigurationTarget.Global,
+    ).then(() => {}, () => {});
+}
+
+export function deactivate(): void {
+    diagnosticCollection.clear();
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// 9. Formatting provider
+// ═══════════════════════════════════════════════════════════════════════
 
 class TwigFormattingProvider implements vscode.DocumentFormattingEditProvider {
     async provideDocumentFormattingEdits(
         document: vscode.TextDocument,
-        options: vscode.FormattingOptions,
-        token: vscode.CancellationToken
+        _options: vscode.FormattingOptions,
+        _token: vscode.CancellationToken,
     ): Promise<vscode.TextEdit[]> {
-        const { cmd, args, env } = getAnalyzerCommand();
+        const cmd = findAnalyzerCommand();
+        const formatted = await this.formatWithCli(cmd, document);
 
-        try {
-            const filePath = document.uri.fsPath;
-            const { stdout } = await execFileAsync(cmd, [...args, 'format', filePath, '--check'], {
-                timeout: 30000,
-                env: env,
-            });
+        if (formatted === undefined) return [];
 
-            // If the CLI says "Would reformat", we need to do the formatting ourselves
-            // Otherwise, call format without --check to get the actual formatted output
-            // Fallback: use built-in formatter directly
-            const formatted = await this.formatWithCli(cmd, args, env, document);
-            if (formatted === null) {
-                return [];
-            }
-
-            const fullRange = new vscode.Range(
-                document.positionAt(0),
-                document.positionAt(document.getText().length)
-            );
-
-            return [vscode.TextEdit.replace(fullRange, formatted)];
-
-        } catch (err: any) {
-            console.error('[twig-format] Error:', err.message || err);
-            return [];
-        }
+        const fullRange = new vscode.Range(
+            document.positionAt(0),
+            document.positionAt(document.getText().length),
+        );
+        return [vscode.TextEdit.replace(fullRange, formatted)];
     }
 
     private async formatWithCli(
-        cmd: string, args: string[], env: NodeJS.ProcessEnv, document: vscode.TextDocument
-    ): Promise<string | null> {
-        // Write temp file, format it, read it back
+        cmd: CliCommand,
+        document: vscode.TextDocument,
+    ): Promise<string | undefined> {
         const tmp = require('os').tmpdir();
         const tmpFile = require('path').join(tmp, `twig-fmt-${Date.now()}.twig`);
 
         try {
             require('fs').writeFileSync(tmpFile, document.getText(), 'utf-8');
-
-            await execFileAsync(cmd, [...args, 'format', tmpFile], {
+            await execFileAsync(cmd.cmd, [...cmd.args, 'format', tmpFile], {
                 timeout: 30000,
-                env: env,
+                env: cmd.env,
             });
-
-            return require('fs').readFileSync(tmpFile, 'utf-8');
+            return require('fs').readFileSync(tmpFile, 'utf-8') as string;
         } catch {
-            return null;
+            return undefined;
         } finally {
-            try { require('fs').unlinkSync(tmpFile); } catch {}
+            try { require('fs').unlinkSync(tmpFile); } catch { /* ignore */ }
         }
     }
 }

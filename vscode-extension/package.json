@@ -39,7 +39,10 @@
       {
         "language": "twig",
         "scopeName": "text.html.twig",
-        "path": "./twig.tmLanguage.json"
+        "path": "./twig.tmLanguage.json",
+        "embeddedLanguages": {
+          "text.html.twig": "html"
+        }
       }
     ],
     "commands": [

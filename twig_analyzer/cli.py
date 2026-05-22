@@ -130,7 +130,7 @@ def main():
         args = parser.parse_args(raw_args)
     else:
         # Default to analyze
-        args = ap.parse_args(raw_args)
+        args = parser.parse_args(["analyze"] + raw_args)
 
     if args.command == "format":
         cmd_format(args)

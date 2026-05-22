@@ -87,10 +87,11 @@ def check_extends_first(tree: TemplateNode, source: str) -> Tuple[Diagnostic, ..
             continue
         if isinstance(child, InlineTagNode) and child.name == "extends":
             if found_non_empty:
+                start_col = child.column + 1  # skip space after {%
                 diags.append(Diagnostic(
                     message="'extends' must be the first tag in the template.",
                     severity=Severity.ERROR,
-                    range=Range(child.line, child.column, child.line, child.column + 7),
+                    range=Range(child.line, start_col, child.line, start_col + 7),
                     rule_id="TWIG-EXTENDS-FIRST",
                 ))
             found_non_empty = True
@@ -103,10 +104,12 @@ def check_undefined_filters(tree: TemplateNode, source: str) -> Tuple[Diagnostic
     diags: list[Diagnostic] = []
     def visit(node: Node):
         if isinstance(node, FilterNode) and node.name and node.name not in BUILTIN_FILTERS:
+            # FilterNode.column points to '|', so +1 skips to the filter name
+            start_col = node.column + 1
             diags.append(Diagnostic(
                 message=f"Unknown filter '{node.name}'.",
                 severity=Severity.WARNING,
-                range=Range(node.line, node.column, node.line, node.column + len(node.name)),
+                range=Range(node.line, start_col, node.line, start_col + len(node.name)),
                 rule_id="TWIG-UNKNOWN-FILTER",
             ))
     walk(tree, visit)
@@ -155,10 +158,11 @@ def check_deprecated_features(tree: TemplateNode, source: str) -> Tuple[Diagnost
                 ))
         if isinstance(node, FilterNode) and node.name in DEPRECATED and DEPRECATED[node.name]["type"] == "filter":
             info = DEPRECATED[node.name]
+            start_col = node.column + 1  # skip '|'
             diags.append(Diagnostic(
                 message=f"Deprecated filter '{node.name}': {info['message']}",
                 severity=Severity.WARNING,
-                range=Range(node.line, node.column, node.line, node.column + len(node.name)),
+                range=Range(node.line, start_col, node.line, start_col + len(node.name)),
                 rule_id="TWIG-DEPRECATED-FILTER",
             ))
     walk(tree, visit)
@@ -169,10 +173,11 @@ def check_raw_filter_usage(tree: TemplateNode, source: str) -> Tuple[Diagnostic,
     diags: list[Diagnostic] = []
     def visit(node: Node):
         if isinstance(node, FilterNode) and node.name == "raw":
+            start_col = node.column + 1  # skip '|'
             diags.append(Diagnostic(
                 message="Using 'raw' filter disables auto-escaping. Ensure content is trusted.",
                 severity=Severity.WARNING,
-                range=Range(node.line, node.column, node.line, node.column + 3),
+                range=Range(node.line, start_col, node.line, start_col + 3),
                 rule_id="TWIG-RAW-FILTER",
             ))
     walk(tree, visit)

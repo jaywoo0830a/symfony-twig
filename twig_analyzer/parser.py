@@ -6,6 +6,7 @@ All parsing functions return AST nodes. Errors raise ParseError.
 
 from __future__ import annotations
 import re
+from dataclasses import replace
 from typing import List, Optional, Sequence, Tuple
 
 from .lexer import TokenType, Token, tokenize, ExpressionTokenizer
@@ -116,15 +117,59 @@ def _parse_template(stream: Stream) -> TemplateNode:
 
 def _parse_print(stream: Stream) -> Tuple[PrintNode, Stream]:
     tok = stream.current
-    inner = tok.value[2:-2].strip()  # Remove {{ and }}
+    raw_inner = tok.value[2:-2]  # Remove {{ and }} but keep whitespace
+    inner = raw_inner.strip()
     line, col = tok.line, tok.column + 2
 
     if not inner:
         return PrintNode(line=line, column=col), stream.advance()
 
+    # The expression tokenizer always starts at line=1, col=1.
+    # Offset positions by the actual print location minus the tokenizer origin.
+    # Account for leading whitespace removed by .strip()
+    leading_spaces = len(raw_inner) - len(raw_inner.lstrip())
+    col_offset = col + leading_spaces - 1
+    line_offset = line - 1
+
     expr_tokens = ExpressionTokenizer.tokenize(inner)
     expr_node, _ = _parse_expression(Stream(expr_tokens)) if expr_tokens else (None, None)
+    if expr_node is not None:
+        expr_node = _offset_node(expr_node, line_offset, col_offset)
     return PrintNode(expression=expr_node, line=line, column=col), stream.advance()
+
+
+def _offset_node(node: Node, dl: int, dc: int) -> Node:
+    """Offset all positions in a node tree by (dl lines, dc columns)."""
+    if node is None:
+        return None
+    node = replace(node, line=node.line + dl, column=node.column + dc)
+    # Recurse into children
+    if isinstance(node, PrintNode) and node.expression:
+        node = replace(node, expression=_offset_node(node.expression, dl, dc))
+    elif isinstance(node, FilterNode):
+        if node.target:
+            node = replace(node, target=_offset_node(node.target, dl, dc))
+        node = replace(node, args=tuple(_offset_node(a, dl, dc) for a in node.args))
+    elif isinstance(node, FunctionCallNode):
+        node = replace(node, args=tuple(_offset_node(a, dl, dc) for a in node.args))
+    elif isinstance(node, TestNode):
+        if node.target:
+            node = replace(node, target=_offset_node(node.target, dl, dc))
+        node = replace(node, args=tuple(_offset_node(a, dl, dc) for a in node.args))
+    elif isinstance(node, BinaryOpNode):
+        if node.left:
+            node = replace(node, left=_offset_node(node.left, dl, dc))
+        if node.right:
+            node = replace(node, right=_offset_node(node.right, dl, dc))
+    elif isinstance(node, UnaryOpNode) and node.operand:
+        node = replace(node, operand=_offset_node(node.operand, dl, dc))
+    elif isinstance(node, ArrayNode):
+        node = replace(node, items=tuple(_offset_node(i, dl, dc) for i in node.items))
+    elif isinstance(node, MappingNode):
+        node = replace(node, items={k: _offset_node(v, dl, dc) for k, v in node.items.items()})
+    elif isinstance(node, NamedArgNode) and node.value:
+        node = replace(node, value=_offset_node(node.value, dl, dc))
+    return node
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -217,13 +262,8 @@ def _parse_block_tag(stream: Stream, tag_name: str, args_str: str, line: int, co
                 continue
 
         if tok.type == TokenType.VAR_START:
-            inner = tok.value[2:-2].strip()
-            el, col2 = tok.line, tok.column + 2
-            if inner:
-                et = ExpressionTokenizer.tokenize(inner)
-                expr, _ = _parse_expression(Stream(et))
-                current_target.append(PrintNode(expression=expr, line=el, column=col2))
-            s = s.advance()
+            node, s = _parse_print(s)
+            current_target.append(node)
             continue
 
         if tok.type == TokenType.COMMENT_START:

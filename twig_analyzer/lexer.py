@@ -77,7 +77,7 @@ def _lex_imperative(source: str) -> List[Token]:
             col += 1
         return ch
 
-    def read_until(end: str) -> str:
+    def read_until(end: str) -> Tuple[str, int, int]:
         nonlocal pos, line, col
         start_pos = pos
         start_line = line
@@ -87,11 +87,11 @@ def _lex_imperative(source: str) -> List[Token]:
                 result = source[start_pos:pos+len(end)]
                 for _ in range(len(end)):
                     advance()
-                return result
+                return result, start_line, start_col
             advance()
         result = source[start_pos:]
         pos = n
-        return result
+        return result, start_line, start_col
 
     while pos < n:
         ch = source[pos]
@@ -100,18 +100,18 @@ def _lex_imperative(source: str) -> List[Token]:
             nxt = source[pos + 1]
             if nxt == '%':
                 flush()
-                val = read_until('%}')
-                tokens.append(Token(TokenType.BLOCK_START, val, line, col))
+                val, start_line, start_col = read_until('%}')
+                tokens.append(Token(TokenType.BLOCK_START, val, start_line, start_col))
                 continue
             elif nxt == '{':
                 flush()
-                val = read_until('}}')
-                tokens.append(Token(TokenType.VAR_START, val, line, col))
+                val, start_line, start_col = read_until('}}')
+                tokens.append(Token(TokenType.VAR_START, val, start_line, start_col))
                 continue
             elif nxt == '#':
                 flush()
-                val = read_until('#}')
-                tokens.append(Token(TokenType.COMMENT_START, val, line, col))
+                val, start_line, start_col = read_until('#}')
+                tokens.append(Token(TokenType.COMMENT_START, val, start_line, start_col))
                 continue
 
         buf.append(ch)

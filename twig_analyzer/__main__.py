@@ -1,5 +1,3 @@
-"""Allow running as: python -m twig_analyzer"""
-
+"""Allow `python -m twig_analyzer`."""
 from .cli import main
-
 main()

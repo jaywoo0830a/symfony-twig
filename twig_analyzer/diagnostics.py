@@ -1,39 +1,44 @@
-"""Diagnostic model – LSP-compatible diagnostic data types.
+"""Diagnostic model — immutable LSP-compatible types.
 
-Designed so that a VS Code Language Server can directly consume these objects.
+All types are frozen dataclasses. Conversions to LSP JSON are pure functions.
 """
 
-from dataclasses import dataclass, field
-from enum import Enum
-from typing import Optional
+from __future__ import annotations
+from dataclasses import dataclass, field, replace
+from enum import IntEnum
+from typing import Dict, List, Sequence, Tuple
 
 
-class Severity(int, Enum):
-    """LSP DiagnosticSeverity values."""
+class Severity(IntEnum):
+    """LSP DiagnosticSeverity — numeric for JSON serialization."""
     ERROR = 1
     WARNING = 2
     INFORMATION = 3
     HINT = 4
 
-    def __str__(self) -> str:
-        return self.name.lower()
 
-
-@dataclass
+@dataclass(frozen=True)
 class Range:
-    """LSP-compatible range in a file."""
-    start_line: int       # 1-indexed
-    start_column: int     # 1-indexed
-    end_line: int         # 1-indexed
-    end_column: int       # 1-indexed
+    """LSP-compatible range (1-indexed)."""
+    start_line: int
+    start_column: int
+    end_line: int
+    end_column: int
 
     def __repr__(self) -> str:
         return f"{self.start_line}:{self.start_column}-{self.end_line}:{self.end_column}"
 
+    def to_lsp(self) -> dict:
+        """Convert to LSP Range (0-indexed)."""
+        return {
+            "start": {"line": self.start_line - 1, "character": self.start_column - 1},
+            "end":   {"line": self.end_line - 1,   "character": self.end_column - 1},
+        }
 
-@dataclass
+
+@dataclass(frozen=True)
 class Diagnostic:
-    """Represents a single analysis finding. Compatible with LSP Diagnostic."""
+    """A single analysis finding. Immutable."""
     message: str
     severity: Severity
     range: Range
@@ -41,15 +46,18 @@ class Diagnostic:
     source: str = "twig-analyzer"
     file_path: str = ""
 
-    def to_dict(self) -> dict:
-        """Convert to LSP Diagnostic JSON format."""
+    def with_severity(self, sev: Severity) -> Diagnostic:
+        return replace(self, severity=sev)
+
+    def with_file(self, path: str) -> Diagnostic:
+        return replace(self, file_path=path)
+
+    def to_lsp(self) -> dict:
+        """Convert to LSP Diagnostic JSON."""
         return {
             "message": self.message,
-            "severity": self.severity.value,
-            "range": {
-                "start": {"line": self.range.start_line - 1, "character": self.range.start_column - 1},
-                "end": {"line": self.range.end_line - 1, "character": self.range.end_column - 1},
-            },
+            "severity": int(self.severity),
+            "range": self.range.to_lsp(),
             "code": self.rule_id,
             "source": self.source,
         }
@@ -59,29 +67,41 @@ class Diagnostic:
         return f"{loc}{self.range}: [{self.severity.name}] {self.message} ({self.rule_id})"
 
 
-@dataclass
+@dataclass(frozen=True)
 class AnalysisResult:
-    """Overall analysis result for a single file."""
-    file_path: str
-    diagnostics: list[Diagnostic] = field(default_factory=list)
+    """Analysis result for a single file. Immutable."""
+    file_path: str = ""
+    diagnostics: Tuple[Diagnostic, ...] = ()
     source: str = ""
 
-    def add(self, diagnostic: Diagnostic) -> None:
-        diagnostic.file_path = self.file_path
-        self.diagnostics.append(diagnostic)
+    def add(self, diag: Diagnostic) -> AnalysisResult:
+        """Return a new AnalysisResult with one diagnostic added."""
+        return replace(
+            self,
+            diagnostics=self.diagnostics + (diag.with_file(self.file_path),),
+        )
+
+    def extend(self, diags: Sequence[Diagnostic]) -> AnalysisResult:
+        """Return a new AnalysisResult with multiple diagnostics added."""
+        new_diags = tuple(d.with_file(self.file_path) for d in diags)
+        return replace(self, diagnostics=self.diagnostics + new_diags)
 
     @property
-    def errors(self) -> list[Diagnostic]:
-        return [d for d in self.diagnostics if d.severity == Severity.ERROR]
+    def errors(self) -> Tuple[Diagnostic, ...]:
+        return tuple(d for d in self.diagnostics if d.severity == Severity.ERROR)
 
     @property
-    def warnings(self) -> list[Diagnostic]:
-        return [d for d in self.diagnostics if d.severity == Severity.WARNING]
+    def warnings(self) -> Tuple[Diagnostic, ...]:
+        return tuple(d for d in self.diagnostics if d.severity == Severity.WARNING)
 
     @property
-    def info(self) -> list[Diagnostic]:
-        return [d for d in self.diagnostics if d.severity == Severity.INFORMATION]
+    def infos(self) -> Tuple[Diagnostic, ...]:
+        return tuple(d for d in self.diagnostics if d.severity == Severity.INFORMATION)
 
     @property
-    def hints(self) -> list[Diagnostic]:
-        return [d for d in self.diagnostics if d.severity == Severity.HINT]
+    def hints(self) -> Tuple[Diagnostic, ...]:
+        return tuple(d for d in self.diagnostics if d.severity == Severity.HINT)
+
+    @property
+    def has_errors(self) -> bool:
+        return any(d.severity == Severity.ERROR for d in self.diagnostics)

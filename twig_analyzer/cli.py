@@ -1,13 +1,15 @@
-"""CLI – twig-analyze [analyze|format] <paths>"""
+"""CLI entry point — pure argument parsing → function dispatch."""
 
+from __future__ import annotations
 import argparse
 import os
 import sys
-from typing import List
+from typing import List, Sequence
 
 
-def find_twig_files(paths: List[str]) -> List[str]:
-    extensions = {".twig", ".html.twig", ".html", ".xml", ".json.twig"}
+def find_twig_files(paths: Sequence[str]) -> List[str]:
+    """Find all Twig template files under given paths."""
+    extensions = frozenset({".twig", ".html.twig", ".html", ".xml", ".json.twig"})
     files: List[str] = []
     for path in paths:
         if os.path.isfile(path):
@@ -21,19 +23,19 @@ def find_twig_files(paths: List[str]) -> List[str]:
     return sorted(files)
 
 
-def cmd_analyze(args):
+def cmd_analyze(args: argparse.Namespace) -> None:
     from .analyzer import Analyzer
     from .diagnostics import Severity
     from .reporter import report_console, report_json, report_junit
 
-    rules_config = {}
+    rules_config: dict[str, bool] = {}
     if args.disable:
         for rid in args.disable.split(","):
             rid = rid.strip()
             if rid:
                 rules_config[rid] = False
 
-    sev_config = {}
+    sev_config: dict[str, str] = {}
     if args.severity:
         for item in args.severity:
             if "=" in item:
@@ -50,7 +52,7 @@ def cmd_analyze(args):
     results = [analyzer.analyze_file(f) for f in files]
 
     if args.quiet:
-        has_err = any(d.severity == Severity.ERROR for r in results for d in r.diagnostics)
+        has_err = any(r.has_errors for r in results)
         sys.exit(1 if has_err else 0)
 
     if args.format == "json":
@@ -58,14 +60,18 @@ def cmd_analyze(args):
     elif args.format == "junit":
         print(report_junit(results))
     else:
-        print(report_console(results, show_warnings=not args.only_errors,
-                             show_info=not args.only_errors, show_hints=not args.only_errors))
+        print(report_console(
+            results,
+            show_warnings=not args.only_errors,
+            show_info=not args.only_errors,
+            show_hints=not args.only_errors,
+        ))
 
-    has_err = any(d.severity == Severity.ERROR for r in results for d in r.diagnostics)
+    has_err = any(r.has_errors for r in results)
     sys.exit(1 if has_err else 0)
 
 
-def cmd_format(args):
+def cmd_format(args: argparse.Namespace) -> None:
     from .formatter import format_twig
 
     files = find_twig_files(args.paths)
@@ -105,12 +111,11 @@ def cmd_format(args):
         sys.exit(1 if changed else 0)
 
 
-def main():
-    parser = argparse.ArgumentParser(prog="twig-analyze",
-                                     description="Twig 3.x Static Analyzer & Formatter")
+def main() -> None:
+    parser = argparse.ArgumentParser(prog="twig-analyze", description="Twig 3.x Static Analyzer & Formatter")
     sub = parser.add_subparsers(dest="command")
 
-    ap = sub.add_parser("analyze", help="Analyze templates (default)")
+    ap = sub.add_parser("analyze", help="Analyze templates")
     ap.add_argument("paths", nargs="+")
     ap.add_argument("--format", "-f", choices=["console", "json", "junit"], default="console")
     ap.add_argument("--disable", "-d")
@@ -124,12 +129,10 @@ def main():
     fp.add_argument("--check", "-c", action="store_true")
     fp.add_argument("--diff", action="store_true")
 
-    # Detect command from first positional arg
     raw_args = sys.argv[1:]
     if raw_args and raw_args[0] in ("analyze", "format"):
         args = parser.parse_args(raw_args)
     else:
-        # Default to analyze
         args = parser.parse_args(["analyze"] + raw_args)
 
     if args.command == "format":

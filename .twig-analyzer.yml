@@ -1,0 +1,38 @@
+# .twig-analyzer.yml — Project-wide Twig declarations
+#
+# Place this in your project root (or any parent directory of your templates).
+# Declare custom filters, functions, tests, tags, and global variables here
+# instead of adding {# @var #} comments in every template.
+
+# ── Global variables (always available, e.g. from controllers) ──
+globals:
+  - app        # Symfony app global
+  - form       # Symfony form global
+  # Add your controller-passed variables here:
+  # - user
+  # - articles
+  # - categories
+
+# ── Custom filters ──
+filters:
+  # Add your custom/project-specific Twig filters:
+  # - markdown_to_html
+  # - custom_filter
+
+# ── Custom functions ──
+functions:
+  # Add your custom/project-specific Twig functions:
+  # - vich_uploader_asset
+  # - custom_function
+
+# ── Custom tests ──
+tests:
+  # Add your custom Twig tests:
+  # - is_valid
+  # - instanceof
+
+# ── Custom tags ──
+tags:
+  # Add your custom/project-specific Twig tags:
+  # - form_theme
+  # - custom_tag

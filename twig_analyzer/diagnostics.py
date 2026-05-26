@@ -52,6 +52,9 @@ class Diagnostic:
     def with_file(self, path: str) -> Diagnostic:
         return replace(self, file_path=path)
 
+    def with_range(self, r: Range) -> Diagnostic:
+        return replace(self, range=r)
+
     def to_lsp(self) -> dict:
         """Convert to LSP Diagnostic JSON."""
         return {

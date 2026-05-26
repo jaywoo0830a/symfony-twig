@@ -27,6 +27,7 @@ def cmd_analyze(args: argparse.Namespace) -> None:
     from .analyzer import Analyzer
     from .diagnostics import Severity
     from .reporter import report_console, report_json, report_junit
+    from .config import TwigAnalyzerConfig
 
     rules_config: dict[str, bool] = {}
     if args.disable:
@@ -42,12 +43,20 @@ def cmd_analyze(args: argparse.Namespace) -> None:
                 rid, sev = item.split("=", 1)
                 sev_config[rid.strip()] = sev.strip()
 
-    analyzer = Analyzer(rules=rules_config or None, severities=sev_config or None)
+    # Load config: explicit --config flag or auto-discover from first file
+    config = TwigAnalyzerConfig.empty()
     files = find_twig_files(args.paths)
-
     if not files:
         print("No Twig template files found.", file=sys.stderr)
         sys.exit(1)
+
+    if args.config:
+        config = TwigAnalyzerConfig._load_file(args.config)
+    else:
+        start_dir = os.path.dirname(os.path.abspath(files[0]))
+        config = TwigAnalyzerConfig.discover(start_dir)
+
+    analyzer = Analyzer(rules=rules_config or None, severities=sev_config or None, config=config)
 
     results = [analyzer.analyze_file(f) for f in files]
 
@@ -122,6 +131,7 @@ def main() -> None:
     ap.add_argument("--severity", "-s", action="append")
     ap.add_argument("--only-errors", action="store_true")
     ap.add_argument("--quiet", "-q", action="store_true")
+    ap.add_argument("--config", "-c", help="Path to .twig-analyzer.yml (auto-discovered if omitted)")
 
     fp = sub.add_parser("format", help="Format Twig templates")
     fp.add_argument("paths", nargs="+")

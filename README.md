@@ -1,49 +1,37 @@
 # Twig Static Analyzer
 
-Twig 3.x template static analyzer - detects syntax errors, undefined variables/filters/functions, deprecated features, and security issues.
+A comprehensive static analysis tool for Twig 3.x templates with VS Code IntelliSense integration.
 
-Designed to be extensible as a VS Code extension (LSP-compatible).
+Detects syntax errors, undefined variables/filters/functions/tests/tags, deprecated features, missing escaping, hardcoded strings, and more.
 
-## Install
+## Documentation
+
+**[📖 Full Documentation →](doc/INDEX.md)**
+
+| Section | Description |
+|---|---|
+| [Installation](doc/installation.md) | Python package & VS Code extension setup |
+| [Configuration](doc/configuration.md) | `.twig-analyzer.yml`, annotations, settings |
+| [Rules](doc/rules.md) | All 11 analysis rules with examples |
+| [VS Code Extension](doc/vscode-extension.md) | IntelliSense, hover, completion, go-to-definition |
+| [CLI Reference](doc/cli.md) | Command-line usage, JSON/JUnit, CI integration |
+
+## Quick Start
 
 ```bash
-cd symfony-twig
 pip install -e .
+twig-analyze templates/
 ```
 
-## Usage
+## Features
 
-```bash
-twig-analyze examples/
-twig-analyze --format json examples/
-twig-analyze --disable raw-filter examples/
-twig-analyze --severity raw-filter=error examples/
-twig-analyze --format junit examples/
-```
-
-## Rules
-
-| Rule ID | Description | Default Severity |
-|---------|-------------|-----------------|
-| extends-first | extends must be first tag | ERROR |
-| undefined-filters | Unknown filter usage | WARNING |
-| undefined-functions | Unknown function usage | WARNING |
-| undefined-tests | Unknown test usage | WARNING |
-| deprecated-features | Deprecated tag/filter usage | WARNING |
-| raw-filter | raw filter XSS risk | WARNING |
-| missing-escape | Possible missing escape | HINT |
-| hardcoded-text | Text needing i18n | HINT |
-| variable-usage | Potentially undefined variable | WARNING |
-| tag-balancing | Block tag balance check | ERROR |
-
-## VS Code Extension Integration
-
-```python
-from twig_analyzer import Analyzer
-analyzer = Analyzer()
-result = analyzer.analyze(source_code, file_path="template.twig")
-lsp_diagnostics = [d.to_dict() for d in result.diagnostics]
-```
+- **11 analysis rules** — extends placement, undefined names, deprecations, security, i18n
+- **Project config** — `.twig-analyzer.yml` with auto-discovery (ESLint-style)
+- **Per-file annotations** — `{# @var user Type #}`, `{# @filter name #}`, etc.
+- **VS Code IntelliSense** — diagnostics, hover, completion, go-to-definition, formatting, folding, signature help, rename, color preview
+- **JSON/JUnit output** — CI/CD integration ready
+- **Pure functional design** — frozen dataclasses, immutable AST, pure rule functions
+- **137 unit tests** — based on official Twig 3.x documentation
 
 ## Run Tests
 
@@ -52,8 +40,6 @@ pip install pytest
 pytest tests/ -v
 ```
 
-## References
+## License
 
-- [Twig 3.x Docs](https://twig.symfony.com/doc/3.x/)
-- [TwigStan](https://github.com/twigstan/twigstan)
-- [Twig Language Server](https://github.com/kaermorchen/twig-language-server)
+MIT

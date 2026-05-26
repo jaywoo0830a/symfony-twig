@@ -9,6 +9,13 @@ import { CliCommand } from './extension';
 import { findAnalyzerCommand } from './extension';
 import { isTwigFile, isInsideTwigTag, isInsideHtmlTag } from './extension';
 
+// ── Data loaded from YAML-generated JSON ──
+import hoverDataJson from './data/hover-data.json';
+import signaturesJson from './data/signatures.json';
+import completionNamesJson from './data/completion-names.json';
+import endTagMapJson from './data/end-tag-map.json';
+import htmlHoverJson from './data/html-hover.json';
+
 // 9. Formatting provider
 // ═══════════════════════════════════════════════════════════════════════
 
@@ -65,245 +72,11 @@ interface BuiltinEntry {
 
 export const TWIG_DOCS = 'https://twig.symfony.com/doc/3.x';
 
-export const BUILTIN_HOVER_DATA: Record<string, BuiltinEntry> = {
-    // Tags
-    apply:       { description: 'Applies a filter to a section of code',                               since: '1.0',  example: '{% apply upper %}Text{% endapply %}',                       link: `${TWIG_DOCS}/tags/apply.html` },
-    autoescape:  { description: 'Controls auto-escaping strategy for a block',                          since: '1.0',  example: "{% autoescape 'html' %}...{% endautoescape %}",             link: `${TWIG_DOCS}/tags/autoescape.html` },
-    block:       { description: 'Defines a block that child templates can override',                    since: '1.0',  example: '{% block title %}...{% endblock %}',                      link: `${TWIG_DOCS}/tags/block.html` },
-    cache:       { description: 'Caches a template fragment',                                          since: '3.2',  example: '{% cache %}...{% endcache %}',                             link: `${TWIG_DOCS}/tags/cache.html` },
-    deprecated:  { description: 'Marks a template section as deprecated',                              since: '1.36', example: "{% deprecated 'Use X instead' %}",                         link: `${TWIG_DOCS}/tags/deprecated.html` },
-    do:          { description: 'Executes an expression without output',                               since: '1.0',  example: "{% do var = 'value' %}",                                  link: `${TWIG_DOCS}/tags/do.html` },
-    embed:       { description: 'Embeds another template with block overrides',                        since: '1.8',  example: "{% embed 'template.twig' %}...{% endembed %}",             link: `${TWIG_DOCS}/tags/embed.html` },
-    extends:     { description: 'Extends a parent template (must be the first tag)',                   since: '1.0',  example: "{% extends 'base.html.twig' %}",                          link: `${TWIG_DOCS}/tags/extends.html` },
-    flush:       { description: 'Flushes the output buffer',                                           since: '1.5',  example: '{% flush %}',                                             link: `${TWIG_DOCS}/tags/flush.html` },
-    for:         { description: 'Iterates over a sequence',                                           since: '1.0',  example: '{% for item in items %}...{% endfor %}',                  link: `${TWIG_DOCS}/tags/for.html` },
-    from:        { description: 'Imports macro names from a template',                                since: '1.0',  example: "{% from 'macros.twig' import input %}",                   link: `${TWIG_DOCS}/tags/from.html` },
-    guard:       { description: 'Conditionally outputs content based on a tag',                       since: '3.13', example: "{% guard function('route') %}...{% endguard %}",          link: `${TWIG_DOCS}/tags/guard.html` },
-    if:          { description: 'Conditional block with elseif/else support',                         since: '1.0',  example: '{% if condition %}...{% endif %}',                       link: `${TWIG_DOCS}/tags/if.html` },
-    import:      { description: 'Imports all macros from a template',                                 since: '1.0',  example: "{% import 'macros.twig' as macros %}",                    link: `${TWIG_DOCS}/tags/import.html` },
-    include:     { description: 'Includes another template (use include() function instead)',          since: '1.0',  example: "{% include 'template.twig' %}",                          link: `${TWIG_DOCS}/tags/include.html` },
-    macro:       { description: 'Defines a reusable macro',                                           since: '1.0',  example: '{% macro input(name, value) %}...{% endmacro %}',         link: `${TWIG_DOCS}/tags/macro.html` },
-    sandbox:     { description: 'Enables sandbox mode for a block',                                   since: '1.0',  example: '{% sandbox %}...{% endsandbox %}',                        link: `${TWIG_DOCS}/tags/sandbox.html` },
-    set:         { description: 'Assigns values to variables',                                        since: '1.0',  example: "{% set name = 'Fabien' %}",                               link: `${TWIG_DOCS}/tags/set.html` },
-    use:         { description: 'Horizontal reuse — imports blocks from another template',            since: '1.0',  example: "{% use 'blocks.twig' %}",                                link: `${TWIG_DOCS}/tags/use.html` },
-    verbatim:    { description: 'Outputs raw text without parsing Twig syntax',                       since: '1.0',  example: '{% verbatim %}...{% endverbatim %}',                      link: `${TWIG_DOCS}/tags/verbatim.html` },
-    with:        { description: 'Creates a new inner scope with variables',                           since: '1.0',  example: "{% with {name: 'Fabien'} %}...{% endwith %}",              link: `${TWIG_DOCS}/tags/with.html` },
-    types:       { description: 'Declares variable types for static analysis',                        since: '3.15', example: "{% types {name: 'string'} %}",                            link: `${TWIG_DOCS}/tags/types.html` },
-    else:        { description: 'Default branch in if/for blocks',                                    since: '1.0',  example: '{% else %}',                                              link: `${TWIG_DOCS}/tags/if.html` },
-    elseif:      { description: 'Conditional branch in if blocks',                                    since: '1.0',  example: '{% elseif condition %}',                                   link: `${TWIG_DOCS}/tags/if.html` },
+// Loaded from YAML-generated JSON (see scripts/generate-vscode-data.py)
+export const BUILTIN_HOVER_DATA: Record<string, BuiltinEntry> = hoverDataJson as Record<string, BuiltinEntry>;
 
-    // Filters
-    abs:         { description: 'Absolute value of a number',                                         since: '1.0',  example: '{{ -1|abs }}',                                             link: `${TWIG_DOCS}/filters/abs.html` },
-    batch:       { description: 'Batches items into arrays of given size',                            since: '1.0',  example: '{{ items|batch(3) }}',                                      link: `${TWIG_DOCS}/filters/batch.html` },
-    capitalize:  { description: 'Capitalizes the first character',                                    since: '1.0',  example: "{{ 'hello'|capitalize }}",                                  link: `${TWIG_DOCS}/filters/capitalize.html` },
-    convert_encoding: { description: 'Converts string encoding',                                      since: '1.0',  example: "{{ data|convert_encoding('UTF-8', 'iso-2022-jp') }}",       link: `${TWIG_DOCS}/filters/convert_encoding.html` },
-    date:        { description: 'Formats a date',                                                     since: '1.0',  example: "{{ post.publishedAt|date('Y-m-d') }}",                      link: `${TWIG_DOCS}/filters/date.html` },
-    default:     { description: 'Returns default value if variable is empty/undefined',               since: '1.0',  example: "{{ var|default('fallback') }}",                             link: `${TWIG_DOCS}/filters/default.html` },
-    escape:      { description: 'Escapes a string for safe HTML output',                              since: '1.0',  example: '{{ user.username|e }}',                                     link: `${TWIG_DOCS}/filters/escape.html` },
-    e:           { description: 'Alias for escape — escapes for safe HTML output',                    since: '1.0',  example: '{{ user.username|e }}',                                     link: `${TWIG_DOCS}/filters/escape.html` },
-    first:       { description: 'Returns the first element of a sequence',                            since: '1.0',  example: '{{ items|first }}',                                         link: `${TWIG_DOCS}/filters/first.html` },
-    format:      { description: 'Formats a string by replacing placeholders',                         since: '1.0',  example: "{{ 'Hello %s!'|format(name) }}",                            link: `${TWIG_DOCS}/filters/format.html` },
-    join:        { description: 'Joins array elements into a string',                                 since: '1.0',  example: "{{ items|join(', ') }}",                                     link: `${TWIG_DOCS}/filters/join.html` },
-    json_encode: { description: 'Encodes value as JSON',                                              since: '1.0',  example: '{{ data|json_encode }}',                                     link: `${TWIG_DOCS}/filters/json_encode.html` },
-    keys:        { description: 'Returns the keys of a mapping',                                      since: '1.0',  example: '{{ map|keys }}',                                            link: `${TWIG_DOCS}/filters/keys.html` },
-    last:        { description: 'Returns the last element of a sequence',                             since: '1.0',  example: '{{ items|last }}',                                          link: `${TWIG_DOCS}/filters/last.html` },
-    length:      { description: 'Returns the count of items',                                         since: '1.0',  example: '{{ items|length }}',                                        link: `${TWIG_DOCS}/filters/length.html` },
-    lower:       { description: 'Converts a string to lowercase',                                     since: '1.0',  example: "{{ 'HELLO'|lower }}",                                       link: `${TWIG_DOCS}/filters/lower.html` },
-    merge:       { description: 'Merges a mapping/sequence with another',                             since: '1.0',  example: '{{ arr|merge([3, 4]) }}',                                   link: `${TWIG_DOCS}/filters/merge.html` },
-    nl2br:       { description: 'Inserts HTML line breaks before newlines',                           since: '1.0',  example: '{{ text|nl2br }}',                                          link: `${TWIG_DOCS}/filters/nl2br.html` },
-    number_format: { description: 'Formats a number with grouped thousands',                          since: '1.0',  example: '{{ price|number_format(2, ".", ",") }}',                     link: `${TWIG_DOCS}/filters/number_format.html` },
-    raw:         { description: 'Marks value as safe (disables auto-escaping) — use with caution',    since: '1.0',  example: '{{ html|raw }}',                                            link: `${TWIG_DOCS}/filters/raw.html` },
-    replace:     { description: 'Replaces placeholders in a string',                                  since: '1.0',  example: "{{ 'Hello %name%'|replace({'%name%': 'Fabien'}) }}",        link: `${TWIG_DOCS}/filters/replace.html` },
-    reverse:     { description: 'Reverses a sequence or string',                                      since: '1.0',  example: '{{ items|reverse }}',                                       link: `${TWIG_DOCS}/filters/reverse.html` },
-    round:       { description: 'Rounds a number',                                                    since: '1.0',  example: '{{ 3.14|round }}',                                          link: `${TWIG_DOCS}/filters/round.html` },
-    slice:       { description: 'Extracts a slice of a sequence',                                     since: '1.0',  example: '{{ items|slice(0, 10) }}',                                  link: `${TWIG_DOCS}/filters/slice.html` },
-    sort:        { description: 'Sorts a sequence',                                                   since: '1.0',  example: '{{ items|sort }}',                                          link: `${TWIG_DOCS}/filters/sort.html` },
-    spaceless:   { description: 'Removes whitespace between HTML tags (DEPRECATED in 3.x)',           since: '1.0',  example: '{{ html|spaceless }}',                                      link: `${TWIG_DOCS}/filters/spaceless.html` },
-    split:       { description: 'Splits a string by a delimiter',                                     since: '1.0',  example: "{{ 'a,b,c'|split(',') }}",                                 link: `${TWIG_DOCS}/filters/split.html` },
-    striptags:   { description: 'Strips HTML/XML tags from a string',                                 since: '1.0',  example: '{{ html|striptags }}',                                      link: `${TWIG_DOCS}/filters/striptags.html` },
-    title:       { description: 'Converts a string to title case',                                    since: '1.0',  example: "{{ 'hello world'|title }}",                                 link: `${TWIG_DOCS}/filters/title.html` },
-    trim:        { description: 'Trims whitespace from both ends of a string',                        since: '1.0',  example: "{{ '  hello  '|trim }}",                                   link: `${TWIG_DOCS}/filters/trim.html` },
-    upper:       { description: 'Converts a string to uppercase',                                     since: '1.0',  example: "{{ 'hello'|upper }}",                                      link: `${TWIG_DOCS}/filters/upper.html` },
-    url_encode:  { description: 'URL-encodes a string',                                               since: '1.0',  example: '{{ url|url_encode }}',                                      link: `${TWIG_DOCS}/filters/url_encode.html` },
-
-    // Functions (excluding names that conflict with tags)
-    attribute:   { description: 'Accesses a dynamic attribute/method of a variable',                  since: '1.0',  example: '{{ attribute(obj, method) }}',                              link: `${TWIG_DOCS}/functions/attribute.html` },
-    block_func:  { description: 'Renders a block by name (function form)',                            since: '1.0',  example: "{{ block('title') }}",                                      link: `${TWIG_DOCS}/functions/block.html` },
-    constant_func: { description: 'Returns the value of a PHP constant',                              since: '1.0',  example: "{{ constant('Post::PUBLISHED') }}",                          link: `${TWIG_DOCS}/functions/constant.html` },
-    cycle:       { description: 'Cycles through values',                                              since: '1.0',  example: "{{ cycle(['odd', 'even'], i) }}",                            link: `${TWIG_DOCS}/functions/cycle.html` },
-    date_func:   { description: 'Creates a date object (function form)',                              since: '1.0',  example: "{{ date('now') }}",                                         link: `${TWIG_DOCS}/functions/date.html` },
-    dump:        { description: 'Dumps variable information for debugging',                           since: '1.0',  example: '{{ dump(user) }}',                                          link: `${TWIG_DOCS}/functions/dump.html` },
-    include_func: { description: 'Includes and renders another template',                             since: '1.0',  example: "{{ include('sidebar.html.twig') }}",                         link: `${TWIG_DOCS}/functions/include.html` },
-    max:         { description: 'Returns the largest value',                                          since: '1.0',  example: '{{ max(1, 3, 2) }}',                                       link: `${TWIG_DOCS}/functions/max.html` },
-    min:         { description: 'Returns the smallest value',                                         since: '1.0',  example: '{{ min(1, 3, 2) }}',                                       link: `${TWIG_DOCS}/functions/min.html` },
-    parent:      { description: 'Renders the parent block content',                                   since: '1.0',  example: '{{ parent() }}',                                            link: `${TWIG_DOCS}/functions/parent.html` },
-    random:      { description: 'Returns a random value from a sequence',                             since: '1.0',  example: "{{ random(['a', 'b', 'c']) }}",                              link: `${TWIG_DOCS}/functions/random.html` },
-    range:       { description: 'Returns a sequence of numbers',                                      since: '1.0',  example: '{% for i in range(0, 3) %}{{ i }}{% endfor %}',             link: `${TWIG_DOCS}/functions/range.html` },
-    source:      { description: 'Returns the raw source of a template',                               since: '1.0',  example: "{{ source('template.twig') }}",                             link: `${TWIG_DOCS}/functions/source.html` },
-    template_from_string: { description: 'Creates a template from a string',                          since: '1.0',  example: "{{ include(template_from_string('Hello {{ name }}')) }}",    link: `${TWIG_DOCS}/functions/template_from_string.html` },
-    path:        { description: '[Symfony] Generates a relative URL path for a route',                since: '—',    example: "{{ path('route_name', {id: 1}) }}",                         link: 'https://symfony.com/doc/current/templates.html#linking-to-pages' },
-    url:         { description: '[Symfony] Generates an absolute URL for a route',                    since: '—',    example: "{{ url('route_name', {id: 1}) }}",                          link: 'https://symfony.com/doc/current/templates.html#linking-to-pages' },
-    asset:       { description: '[Symfony] Returns the public path of an asset',                      since: '—',    example: "{{ asset('images/logo.png') }}",                            link: 'https://symfony.com/doc/current/templates.html#linking-to-css-javascript-and-image-assets' },
-    render:      { description: '[Symfony] Renders a controller fragment inline',                     since: '—',    example: "{{ render(controller('App\\\\Controller\\\\FooController::recent')) }}", link: 'https://symfony.com/doc/current/templates.html#embedding-controllers' },
-    csrf_token:  { description: '[Symfony] Generates a CSRF token',                                   since: '—',    example: "{{ csrf_token('authenticate') }}",                          link: 'https://symfony.com/doc/current/security/csrf.html' },
-    is_granted:  { description: '[Symfony] Checks if the current user has a given role',              since: '—',    example: "{{ is_granted('ROLE_ADMIN') }}",                            link: 'https://symfony.com/doc/current/security.html' },
-
-    // Tests
-    constant:    { description: 'Checks if a variable has the same value as a PHP constant',          since: '1.0',  example: "{% if post.status is constant('Post::PUBLISHED') %}",       link: `${TWIG_DOCS}/tests/constant.html` },
-    defined:     { description: 'Checks if a variable is defined',                                    since: '1.0',  example: '{% if users is defined %}',                                 link: `${TWIG_DOCS}/tests/defined.html` },
-    divisibleby: { description: 'Checks if a value is divisible by another number',                   since: '1.0',  example: '{% if i is divisibleby(2) %}',                              link: `${TWIG_DOCS}/tests/divisibleby.html` },
-    empty:       { description: 'Checks if a sequence or mapping is empty',                           since: '1.0',  example: '{% if posts is empty %}',                                   link: `${TWIG_DOCS}/tests/empty.html` },
-    even:        { description: 'Checks if a number is even',                                         since: '1.0',  example: '{% if i is even %}',                                       link: `${TWIG_DOCS}/tests/even.html` },
-    iterable:    { description: 'Checks if a variable is iterable',                                   since: '1.0',  example: '{% if var is iterable %}',                                  link: `${TWIG_DOCS}/tests/iterable.html` },
-    mapping:     { description: 'Checks if a variable is a mapping (key-value)',                      since: '3.14', example: '{% if x is mapping %}',                                   link: `${TWIG_DOCS}/tests/mapping.html` },
-    null:        { description: 'Checks if a variable is null',                                       since: '1.0',  example: '{% if var is null %}',                                      link: `${TWIG_DOCS}/tests/null.html` },
-    odd:         { description: 'Checks if a number is odd',                                          since: '1.0',  example: '{% if i is odd %}',                                        link: `${TWIG_DOCS}/tests/odd.html` },
-    sameas:      { description: 'Checks if two values are strictly equal (===)',                      since: '1.0',  example: '{% if a is sameas(b) %}',                                   link: `${TWIG_DOCS}/tests/sameas.html` },
-    sequence:    { description: 'Checks if a variable is a sequence (list)',                          since: '3.14', example: '{% if x is sequence %}',                                  link: `${TWIG_DOCS}/tests/sequence.html` },
-
-    // Operators
-    'not in':    { description: 'Negated containment test — checks if left operand is NOT in right',  since: '1.0',  example: '{% if 1 not in [2, 3] %}',                                  link: `${TWIG_DOCS}/templates.html#containment-operators` },
-    'starts with': { description: 'Checks if a string starts with a given prefix',                    since: '1.0',  example: "{% if 'Fabien' starts with 'F' %}",                        link: `${TWIG_DOCS}/templates.html#containment-operators` },
-    'ends with': { description: 'Checks if a string ends with a given suffix',                        since: '1.0',  example: "{% if 'Fabien' ends with 'n' %}",                          link: `${TWIG_DOCS}/templates.html#containment-operators` },
-    matches:     { description: 'Checks if a string matches a regular expression',                    since: '1.0',  example: "{% if phone matches '/^[\\\\d.]+$/' %}",                    link: `${TWIG_DOCS}/templates.html#containment-operators` },
-    'has some':  { description: 'Checks if an iterable has at least one element satisfying a test',   since: '3.x',  example: '{% if sizes has some v => v > 38 %}',                       link: `${TWIG_DOCS}/templates.html#iterable-operators` },
-    'has every': { description: 'Checks if every element of an iterable satisfies a test',            since: '3.x',  example: '{% if sizes has every v => v > 38 %}',                      link: `${TWIG_DOCS}/templates.html#iterable-operators` },
-
-
-    // -- Additional filters --
-    column:      { description: 'Returns a column from a nested array/object',                     since: '2.8',  example: '{{ rows|column(0) }}',                                        link: `${TWIG_DOCS}/filters/column.html` },
-    country_name: { description: 'Returns the country name for a country code',                     since: '2.12', example: "{{ 'FR'|country_name }}",                                     link: `${TWIG_DOCS}/filters/country_name.html` },
-    currency_name: { description: 'Returns the currency name for a currency code',                  since: '2.12', example: "{{ 'EUR'|currency_name }}",                                   link: `${TWIG_DOCS}/filters/currency_name.html` },
-    currency_symbol: { description: 'Returns the currency symbol for a currency code',              since: '2.12', example: "{{ 'EUR'|currency_symbol }}",                                 link: `${TWIG_DOCS}/filters/currency_symbol.html` },
-    data_uri:    { description: 'Converts a file to a data URI',                                    since: '1.0',  example: '{{ image|data_uri }}',                                         link: `${TWIG_DOCS}/filters/data_uri.html` },
-    date_modify: { description: 'Modifies a date with a relative format string',                    since: '1.0',  example: "{{ date|date_modify('+1 day') }}",                              link: `${TWIG_DOCS}/filters/date_modify.html` },
-    filter:      { description: 'Applies a filter to each element of a sequence',                   since: '2.9',  example: '{{ items|filter(v => v.active) }}',                             link: `${TWIG_DOCS}/filters/filter.html` },
-    find:        { description: 'Finds the first element matching an arrow function',               since: '3.2',  example: '{{ items|find(v => v.active) }}',                               link: `${TWIG_DOCS}/filters/find.html` },
-    format_currency: { description: 'Formats a number as currency (Intl-based)',                    since: '2.12', example: "{{ price|format_currency('EUR') }}",                            link: `${TWIG_DOCS}/filters/format_currency.html` },
-    format_date: { description: 'Formats a date (Intl-based)',                                      since: '2.12', example: "{{ date|format_date('long') }}",                                link: `${TWIG_DOCS}/filters/format_date.html` },
-    format_datetime: { description: 'Formats a datetime (Intl-based)',                              since: '2.12', example: "{{ date|format_datetime('long', 'short') }}",                  link: `${TWIG_DOCS}/filters/format_datetime.html` },
-    format_number: { description: 'Formats a number (Intl-based)',                                  since: '2.12', example: '{{ price|format_number }}',                                     link: `${TWIG_DOCS}/filters/format_number.html` },
-    format_time: { description: 'Formats a time (Intl-based)',                                      since: '2.12', example: "{{ time|format_time('short') }}",                               link: `${TWIG_DOCS}/filters/format_time.html` },
-    html_attr_merge: { description: 'Merges HTML attribute-value pairs',                            since: '3.18', example: '{{ attrs|html_attr_merge }}',                                   link: `${TWIG_DOCS}/filters/html_attr_merge.html` },
-    html_attr_type: { description: 'Detects the type of an HTML attribute value',                   since: '3.18', example: "{{ 'text'|html_attr_type }}",                                   link: `${TWIG_DOCS}/filters/html_attr_type.html` },
-    html_to_markdown: { description: 'Converts HTML to Markdown',                                   since: '2.12', example: '{{ html|html_to_markdown }}',                                    link: `${TWIG_DOCS}/filters/html_to_markdown.html` },
-    inky_to_html: { description: 'Converts Inky (Foundation for Emails) to HTML',                   since: '2.12', example: '{{ email|inky_to_html }}',                                      link: `${TWIG_DOCS}/filters/inky_to_html.html` },
-    inline_css:  { description: 'Inlines CSS styles into HTML elements',                            since: '3.10', example: '{{ html|inline_css }}',                                          link: `${TWIG_DOCS}/filters/inline_css.html` },
-    invoke:      { description: 'Calls an arrow function with arguments',                           since: '3.19', example: '{{ fn|invoke(arg1, arg2) }}',                                   link: `${TWIG_DOCS}/filters/invoke.html` },
-    language_name: { description: 'Returns the language name for a locale code',                    since: '2.12', example: "{{ 'fr'|language_name }}",                                      link: `${TWIG_DOCS}/filters/language_name.html` },
-    locale_name: { description: 'Returns the locale name for a locale code',                        since: '2.12', example: "{{ 'fr_FR'|locale_name }}",                                     link: `${TWIG_DOCS}/filters/locale_name.html` },
-    map:         { description: 'Applies an arrow function to each element of a sequence',          since: '2.9',  example: '{{ people|map(p => p.first_name)|join(", ") }}',               link: `${TWIG_DOCS}/filters/map.html` },
-    markdown_to_html: { description: 'Converts Markdown to HTML',                                   since: '2.12', example: '{{ text|markdown_to_html }}',                                    link: `${TWIG_DOCS}/filters/markdown_to_html.html` },
-    plural:      { description: 'Converts a noun to its plural form',                               since: '3.16', example: "{{ 'person'|plural }}",                                         link: `${TWIG_DOCS}/filters/plural.html` },
-    reduce:      { description: 'Reduces a sequence to a single value via an arrow function',       since: '2.9',  example: '{{ items|reduce((carry, v) => carry + v) }}',                    link: `${TWIG_DOCS}/filters/reduce.html` },
-    shuffle:     { description: 'Randomly shuffles the elements of a sequence',                     since: '3.16', example: '{{ items|shuffle }}',                                           link: `${TWIG_DOCS}/filters/shuffle.html` },
-    singular:    { description: 'Converts a noun to its singular form',                             since: '3.16', example: "{{ 'people'|singular }}",                                       link: `${TWIG_DOCS}/filters/singular.html` },
-    slug:        { description: 'Converts a string to a URL-safe slug',                             since: '1.0',  example: "{{ 'Hello World'|slug }}",                                      link: `${TWIG_DOCS}/filters/slug.html` },
-    timezone_name: { description: 'Returns the timezone name for a timezone code',                  since: '2.12', example: "{{ 'Europe/Paris'|timezone_name }}",                            link: `${TWIG_DOCS}/filters/timezone_name.html` },
-    u:           { description: 'Shortcut for Unicode-aware string conversion',                     since: '2.12', example: "{{ 'Hello'|u }}",                                              link: `${TWIG_DOCS}/filters/u.html` },
-
-    // -- Additional functions --
-    country_names: { description: 'Returns all country names keyed by country code',                since: '3.12', example: '{{ country_names() }}',                                         link: `${TWIG_DOCS}/functions/country_names.html` },
-    country_timezones: { description: 'Returns all timezones for a given country code',             since: '3.12', example: "{{ country_timezones('FR') }}",                                 link: `${TWIG_DOCS}/functions/country_timezones.html` },
-    currency_names: { description: 'Returns all currency names keyed by currency code',             since: '3.12', example: '{{ currency_names() }}',                                        link: `${TWIG_DOCS}/functions/currency_names.html` },
-    enum:        { description: 'Creates an enum instance from a fully qualified class name',        since: '3.15', example: "{{ enum('App\\Enum\\Status') }}",                            link: `${TWIG_DOCS}/functions/enum.html` },
-    enum_cases:  { description: 'Returns all cases of an enum',                                     since: '3.17', example: "{{ enum_cases('App\\Enum\\Status') }}",                      link: `${TWIG_DOCS}/functions/enum_cases.html` },
-    html_attr:   { description: 'Generates HTML attribute-value pairs from a mapping',              since: '3.18', example: "{{ html_attr({class: 'btn', id: 'submit'}) }}",                  link: `${TWIG_DOCS}/functions/html_attr.html` },
-    html_classes: { description: 'Generates CSS class strings with conditional logic',              since: '3.17', example: "{{ html_classes('btn', {primary: isPrimary}) }}",                link: `${TWIG_DOCS}/functions/html_classes.html` },
-    html_cva:    { description: 'Class Variance Authority — generates class strings with variants', since: '3.17', example: "{{ html_cva({base: 'btn', variants: {size: {sm: 'btn-sm'}}}) }}", link: `${TWIG_DOCS}/functions/html_cva.html` },
-    language_names: { description: 'Returns all language names keyed by language code',             since: '3.12', example: '{{ language_names() }}',                                        link: `${TWIG_DOCS}/functions/language_names.html` },
-    locale_names: { description: 'Returns all locale names keyed by locale code',                   since: '3.12', example: '{{ locale_names() }}',                                          link: `${TWIG_DOCS}/functions/locale_names.html` },
-    script_names: { description: 'Returns all script names keyed by script code',                   since: '3.12', example: '{{ script_names() }}',                                          link: `${TWIG_DOCS}/functions/script_names.html` },
-    timezone_names: { description: 'Returns all timezone names keyed by timezone code',             since: '3.12', example: '{{ timezone_names() }}',                                        link: `${TWIG_DOCS}/functions/timezone_names.html` },
-
-    // -- Additional tests --
-    'divisible by': { description: 'Checks if a value is divisible by a number (multi-word)',       since: '1.0',  example: '{% if i is divisible by 2 %}',                                  link: `${TWIG_DOCS}/tests/divisibleby.html` },
-    'same as':    { description: 'Checks if two values are strictly equal (===) (multi-word)',      since: '1.0',  example: '{% if a is same as(b) %}',                                      link: `${TWIG_DOCS}/tests/sameas.html` },
-
-
-
-    // -- Symfony Tags --
-    form_theme:  { description: '[Symfony] Sets form theme resources for a form view',               since: '—',    example: '{% form_theme form "form/fields.html.twig" %}',              link: 'https://symfony.com/doc/current/form/form_customization.html' },
-    trans:       { description: '[Symfony] Renders translated content block',                        since: '—',    example: '{% trans %}Hello %name%{% endtrans %}',                      link: 'https://symfony.com/doc/current/translation.html' },
-    trans_default_domain: { description: '[Symfony] Sets the default translation domain for a template', since: '—', example: '{% trans_default_domain "app" %}',                             link: 'https://symfony.com/doc/current/translation.html' },
-    stopwatch:   { description: '[Symfony] Times a template block in the profiler',                  since: '—',    example: "{% stopwatch 'event_name' %}...{% endstopwatch %}",            link: 'https://symfony.com/doc/current/performance.html' },
-
-    // -- Symfony Filters --
-    humanize:    { description: '[Symfony] Transforms a string to human-readable form',              since: '—',    example: "{{ 'date_of_birth'|humanize }}",                               link: 'https://symfony.com/doc/current/reference/twig_reference.html' },
-    trans_filter: { description: '[Symfony] Translates text (filter form)',                           since: '—',    example: "{{ 'message'|trans }}",                                       link: 'https://symfony.com/doc/current/translation.html' },
-    sanitize_html: { description: '[Symfony] Sanitizes HTML content',                                since: '—',    example: '{{ body|sanitize_html }}',                                    link: 'https://symfony.com/doc/current/html_sanitizer.html' },
-    yaml_encode: { description: '[Symfony] Encodes value as YAML',                                   since: '—',    example: '{{ data|yaml_encode }}',                                      link: 'https://symfony.com/doc/current/reference/twig_reference.html' },
-    yaml_dump:   { description: '[Symfony] Dumps value as YAML with type info',                      since: '—',    example: '{{ data|yaml_dump }}',                                        link: 'https://symfony.com/doc/current/reference/twig_reference.html' },
-    abbr_class:  { description: '[Symfony] Generates <abbr> for a PHP class name',                   since: '—',    example: "{{ 'App\\Entity\\Product'|abbr_class }}",                  link: 'https://symfony.com/doc/current/reference/twig_reference.html' },
-    abbr_method: { description: '[Symfony] Generates <abbr> for a PHP method name',                  since: '—',    example: "{{ 'App\\Controller\\ProductController::list'|abbr_method }}", link: 'https://symfony.com/doc/current/reference/twig_reference.html' },
-    serialize:   { description: '[Symfony] Serializes data to a string (JSON, XML, etc.)',           since: '—',    example: "{{ object|serialize('json') }}",                               link: 'https://symfony.com/doc/current/reference/twig_reference.html' },
-    emojify:     { description: '[Symfony] Converts emoji codes to actual emoji',                    since: '—',    example: "{{ ':+1:'|emojify }}",                                         link: 'https://symfony.com/doc/current/reference/twig_reference.html' },
-    file_excerpt: { description: '[Symfony] Shows a code excerpt around a given line',               since: '—',    example: "{{ '/path/to/file'|file_excerpt(line=10) }}",                  link: 'https://symfony.com/doc/current/reference/twig_reference.html' },
-    format_file: { description: '[Symfony] Generates a file path link',                              since: '—',    example: "{{ file|format_file(line=1, text='Open') }}",                  link: 'https://symfony.com/doc/current/reference/twig_reference.html' },
-    file_link:   { description: '[Symfony] Generates a link to a file at a line',                    since: '—',    example: "{{ 'file.txt'|file_link(line=3) }}",                           link: 'https://symfony.com/doc/current/reference/twig_reference.html' },
-    file_relative: { description: '[Symfony] Converts absolute path to project-relative',            since: '—',    example: "{{ '/var/www/app/templates/index.html.twig'|file_relative }}", link: 'https://symfony.com/doc/current/reference/twig_reference.html' },
-
-    // -- Symfony Functions (extended) --
-    render_esi:  { description: '[Symfony] Renders with ESI caching strategy',                       since: '—',    example: "{{ render_esi(controller('App\\Controller\\FooController::recent')) }}", link: 'https://symfony.com/doc/current/reference/twig_reference.html' },
-    fragment_uri: { description: '[Symfony] Generates a fragment URI',                               since: '—',    example: '{{ fragment_uri(controller(...)) }}',                         link: 'https://symfony.com/doc/current/reference/twig_reference.html' },
-    controller:   { description: '[Symfony] Returns a ControllerReference for render()',             since: '—',    example: "{{ render(controller('App\\Controller\\BlogController::latest', {max: 3})) }}", link: 'https://symfony.com/doc/current/reference/twig_reference.html' },
-    asset_version: { description: '[Symfony] Returns the current version of an asset package',       since: '—',    example: "{{ asset_version('avatar.png', 'foo_package') }}",           link: 'https://symfony.com/doc/current/reference/twig_reference.html' },
-    absolute_url: { description: '[Symfony] Converts a relative path to absolute URL',               since: '—',    example: "{{ absolute_url(path('route')) }}",                           link: 'https://symfony.com/doc/current/reference/twig_reference.html' },
-    relative_path: { description: '[Symfony] Converts absolute URL to relative path',                since: '—',    example: "{{ relative_path('http://example.com/human.txt') }}",         link: 'https://symfony.com/doc/current/reference/twig_reference.html' },
-    expression:  { description: '[Symfony] Creates an Expression object',                            since: '—',    example: '{{ expression(1 + 2) }}',                                     link: 'https://symfony.com/doc/current/reference/twig_reference.html' },
-    impersonation_path: { description: '[Symfony] Generates URL to impersonate a user',              since: '—',    example: "{{ impersonation_path('user@example.com') }}",                link: 'https://symfony.com/doc/current/reference/twig_reference.html' },
-    impersonation_url: { description: '[Symfony] Generates absolute URL to impersonate a user',      since: '—',    example: "{{ impersonation_url('user@example.com') }}",                 link: 'https://symfony.com/doc/current/reference/twig_reference.html' },
-    impersonation_exit_path: { description: '[Symfony] Generates URL to exit impersonation',         since: '—',    example: "{{ impersonation_exit_path('/dashboard') }}",                 link: 'https://symfony.com/doc/current/reference/twig_reference.html' },
-    impersonation_exit_url: { description: '[Symfony] Generates absolute URL to exit impersonation', since: '—',    example: "{{ impersonation_exit_url('/dashboard') }}",                  link: 'https://symfony.com/doc/current/reference/twig_reference.html' },
-    logout_path: { description: '[Symfony] Generates relative logout URL',                           since: '—',    example: "{{ logout_path('main') }}",                                   link: 'https://symfony.com/doc/current/reference/twig_reference.html' },
-    logout_url:  { description: '[Symfony] Generates absolute logout URL',                           since: '—',    example: "{{ logout_url('main') }}",                                    link: 'https://symfony.com/doc/current/reference/twig_reference.html' },
-    is_granted_for_user: { description: '[Symfony] Checks authorization for a specific user',        since: '—',    example: "{{ is_granted_for_user(user, 'ROLE_ADMIN') }}",              link: 'https://symfony.com/doc/current/reference/twig_reference.html' },
-    t:           { description: '[Symfony] Creates a Translatable object for translation',           since: '—',    example: "{{ t('message', {'%name%': 'John'}, 'blog')|trans }}",       link: 'https://symfony.com/doc/current/reference/twig_reference.html' },
-    importmap:   { description: '[Symfony] Outputs the importmap (AssetMapper)',                     since: '—',    example: '{{ importmap() }}',                                           link: 'https://symfony.com/doc/current/frontend/asset_mapper.html' },
-
-    // -- Symfony Form Functions --
-    form:        { description: '[Symfony] Renders an entire form',                                  since: '—',    example: '{{ form(form) }}',                                            link: 'https://symfony.com/doc/current/form/form_customization.html' },
-    form_start:  { description: '[Symfony] Renders the start tag of a form',                         since: '—',    example: '{{ form_start(form) }}',                                      link: 'https://symfony.com/doc/current/form/form_customization.html' },
-    form_end:    { description: '[Symfony] Renders the end tag of a form',                           since: '—',    example: '{{ form_end(form) }}',                                        link: 'https://symfony.com/doc/current/form/form_customization.html' },
-    form_widget: { description: '[Symfony] Renders the HTML widget of a field',                      since: '—',    example: "{{ form_widget(form.name, {'attr': {'class': 'foo'}}) }}",    link: 'https://symfony.com/doc/current/form/form_customization.html' },
-    form_label:  { description: '[Symfony] Renders the label for a field',                           since: '—',    example: "{{ form_label(form.name, 'Your Name') }}",                    link: 'https://symfony.com/doc/current/form/form_customization.html' },
-    form_help:   { description: '[Symfony] Renders the help text for a field',                       since: '—',    example: '{{ form_help(form.name) }}',                                  link: 'https://symfony.com/doc/current/form/form_customization.html' },
-    form_errors: { description: '[Symfony] Renders validation errors for a field',                   since: '—',    example: '{{ form_errors(form.name) }}',                                link: 'https://symfony.com/doc/current/form/form_customization.html' },
-    form_row:    { description: '[Symfony] Renders the complete row of a field',                     since: '—',    example: "{{ form_row(form.name, {'label': 'foo'}) }}",                 link: 'https://symfony.com/doc/current/form/form_customization.html' },
-    form_rest:   { description: '[Symfony] Renders all unrendered fields',                           since: '—',    example: '{{ form_rest(form) }}',                                       link: 'https://symfony.com/doc/current/form/form_customization.html' },
-    form_parent: { description: '[Symfony] Returns the parent form view',                            since: '—',    example: '{{ form_parent(form) }}',                                     link: 'https://symfony.com/doc/current/form/form_customization.html' },
-    field_name:  { description: '[Symfony] Returns the name attribute of a form field',              since: '—',    example: '{{ field_name(form.username) }}',                             link: 'https://symfony.com/doc/current/form/form_customization.html' },
-    field_value: { description: '[Symfony] Returns the current value of a form field',               since: '—',    example: '{{ field_value(form.username) }}',                            link: 'https://symfony.com/doc/current/form/form_customization.html' },
-    field_label: { description: '[Symfony] Returns the label text of a form field',                  since: '—',    example: '{{ field_label(form.username) }}',                            link: 'https://symfony.com/doc/current/form/form_customization.html' },
-    field_help:  { description: '[Symfony] Returns the help text of a form field',                   since: '—',    example: '{{ field_help(form.username) }}',                             link: 'https://symfony.com/doc/current/form/form_customization.html' },
-    field_errors: { description: '[Symfony] Returns errors for a form field',                        since: '—',    example: '{{ field_errors(form.username) }}',                           link: 'https://symfony.com/doc/current/form/form_customization.html' },
-    field_id:    { description: '[Symfony] Returns the id attribute of a form field',                since: '—',    example: '{{ field_id(form.username) }}',                               link: 'https://symfony.com/doc/current/form/form_customization.html' },
-    field_choices: { description: '[Symfony] Returns choices iterator for a choice field',           since: '—',    example: '{% for label, value in field_choices(form.country) %}',       link: 'https://symfony.com/doc/current/form/form_customization.html' },
-
-    // -- Symfony Tests --
-    selectedchoice: { description: '[Symfony] Checks if a choice is selected',                       since: '—',    example: '{% if choice is selectedchoice(value) %}selected{% endif %}', link: 'https://symfony.com/doc/current/form/form_customization.html' },
-    rootform:    { description: '[Symfony] Checks if a form is the root form',                       since: '—',    example: '{% if form is rootform %}',                                   link: 'https://symfony.com/doc/current/form/form_customization.html' },
-
-
-};
-
-export const END_TAG_MAP: Record<string, string> = {
-    apply: 'endapply', autoescape: 'endautoescape', block: 'endblock',
-    cache: 'endcache', deprecated: 'enddeprecated', embed: 'endembed',
-    for: 'endfor', guard: 'endguard', if: 'endif', macro: 'endmacro',
-    sandbox: 'endsandbox', set: 'endset', types: 'endtypes',
-    verbatim: 'endverbatim', with: 'endwith',
-};
-
-// Add end tag entries
-for (const [start, end] of Object.entries(END_TAG_MAP)) {
-    BUILTIN_HOVER_DATA[end] = {
-        description: `Closes a \`{% ${start} %}\` block`,
-        since: '—',
-        example: `{% ${end} %}`,
-        link: BUILTIN_HOVER_DATA[start]?.link ?? `${TWIG_DOCS}/tags/${start}.html`,
-    };
-}
+// End-tag map is auto-derived from block tags in the YAML
+export const END_TAG_MAP: Record<string, string> = (endTagMapJson as any).endTagMap as Record<string, string>;
 
 export class TwigHoverProvider implements vscode.HoverProvider {
     provideHover(
@@ -339,6 +112,63 @@ export class TwigHoverProvider implements vscode.HoverProvider {
         content.isTrusted = true;
 
         return new vscode.Hover(content, range);
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// 10b. HTML Hover provider — MDN documentation for HTML5 elements/attributes
+// ═══════════════════════════════════════════════════════════════════════
+
+interface HtmlHoverEntry {
+    readonly description: string;
+    readonly category?: string;
+    readonly link: string;
+}
+
+const HTML_ELEMENTS: Record<string, HtmlHoverEntry> = (htmlHoverJson as any).elements;
+const HTML_ATTRS: Record<string, HtmlHoverEntry> = (htmlHoverJson as any).attributes;
+
+export class HtmlHoverProvider implements vscode.HoverProvider {
+    provideHover(
+        document: vscode.TextDocument,
+        position: vscode.Position,
+    ): vscode.ProviderResult<vscode.Hover> {
+        // Check if we're inside an HTML tag (not inside {{ }} or {% %})
+        const linePrefix = document.lineAt(position).text.substring(0, position.character);
+        if (isInsideTwigTag(linePrefix)) return null;
+
+        // Try to match an HTML tag name at cursor
+        const tagRange = document.getWordRangeAtPosition(position, /<\w+|[a-zA-Z][\w-]*/);
+        if (!tagRange) return null;
+
+        const word = document.getText(tagRange);
+        // Strip leading < if present
+        const name = word.startsWith('<') ? word.slice(1).toLowerCase() : word.toLowerCase();
+
+        // Check elements
+        const elementEntry = HTML_ELEMENTS[name];
+        if (elementEntry) {
+            const category = elementEntry.category ? `\n\n*Category:* ${elementEntry.category}` : '';
+            const content = new vscode.MarkdownString(
+                `### <${name}>\n\n${elementEntry.description}${category}\n\n[📖 MDN Docs](${elementEntry.link})`,
+            );
+            content.isTrusted = true;
+            return new vscode.Hover(content, tagRange);
+        }
+
+        // Check attributes (after space inside an HTML tag)
+        if (isInsideHtmlTag(linePrefix)) {
+            const attrEntry = HTML_ATTRS[name] || HTML_ATTRS[word.replace(/^data-.*/, 'data-*')] || HTML_ATTRS[word.replace(/^aria-.*/, 'aria-*')];
+            if (attrEntry) {
+                const content = new vscode.MarkdownString(
+                    `### ${word}\n\n${attrEntry.description}\n\n[📖 MDN Docs](${attrEntry.link})`,
+                );
+                content.isTrusted = true;
+                return new vscode.Hover(content, tagRange);
+            }
+        }
+
+        return null;
     }
 }
 

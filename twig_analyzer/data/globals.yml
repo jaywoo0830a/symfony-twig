@@ -1,0 +1,43 @@
+# Twig Analyzer — Global declarations
+#
+# Schema:
+#   global_variables: [name, ...]     # always-available variables
+#   deprecated:                        # deprecated features
+#     name:
+#       type: tag|filter
+#       since: "3.7"
+#       message: "Use X instead"
+#       removed_in: "4.0"            # optional
+#   conditional_tags: [if, for]       # tags supporting else/elseif
+
+global_variables:
+  - _self
+  - _context
+  - _charset
+  - loop
+
+conditional_tags:
+  - if
+  - for
+
+deprecated:
+  spaceless:
+    type: filter
+    since: "3.7"
+    message: "Use the 'spaceless' tag instead, or apply 'spaceless' filter via 'apply' tag"
+    removed_in: "4.0"
+  include:
+    type: tag
+    since: "3.12"
+    message: "Use the 'include()' function instead of the '{% include %}' tag"
+    removed_in: "4.0"
+  flush:
+    type: tag
+    since: "3.4"
+    message: "The 'flush' tag is deprecated and may be removed"
+    removed_in: "4.0"
+  if/endif:
+    type: syntax
+    since: "3.0"
+    message: "Nested 'if' conditions used with '{% if a and b %}' instead of '{% if a %}{% if b %}'"
+

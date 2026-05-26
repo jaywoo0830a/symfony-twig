@@ -1,0 +1,75 @@
+# Function signatures for VS Code Signature Help
+# https://twig.symfony.com/doc/3.x/
+#
+# Schema:
+#   function_name:
+#     label: "name(param1, param2?)"     # display label
+#     params:                            # parameter descriptions
+#       - [name, description]
+
+range:
+  label: "range(low, high, step?)"
+  params:
+    - [low, Start]
+    - [high, End]
+    - [step, Increment]
+
+path:
+  label: "path(route, params?)"
+  params:
+    - [route, "Route name"]
+    - [params, Parameters]
+
+url:
+  label: "url(route, params?)"
+  params:
+    - [route, "Route name"]
+    - [params, Parameters]
+
+dump:
+  label: "dump(...variables)"
+  params:
+    - [variables, "Variables to dump"]
+
+include:
+  label: "include(template, vars?)"
+  params:
+    - [template, "Template path"]
+    - [vars, Variables]
+
+block:
+  label: "block(name)"
+  params:
+    - [name, "Block name"]
+
+constant:
+  label: "constant(name)"
+  params:
+    - [name, "PHP constant"]
+
+is_granted:
+  label: "is_granted(role, object?)"
+  params:
+    - [role, Role]
+    - [object, Subject]
+
+render:
+  label: "render(controller, options?)"
+  params:
+    - [controller, Controller]
+    - [options, Options]
+
+csrf_token:
+  label: "csrf_token(intention)"
+  params:
+    - [intention, Intention]
+
+max:
+  label: "max(...values)"
+  params:
+    - [values, Values]
+
+min:
+  label: "min(...values)"
+  params:
+    - [values, Values]

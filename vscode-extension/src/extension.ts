@@ -4,7 +4,10 @@ import * as fs from 'fs';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
 
-import { TwigFormattingProvider, TwigHoverProvider, TwigDefinitionProvider, TwigCompletionProvider, TwigSymbolProvider, TwigFoldingProvider, TwigSignatureHelpProvider, TwigCodeActionProvider, TwigHighlightProvider, TwigRenameProvider, TwigColorProvider } from './providers';
+import { TwigFormattingProvider, TwigHoverProvider, TwigDefinitionProvider, TwigCompletionProvider, TwigSymbolProvider, TwigFoldingProvider, TwigSignatureHelpProvider, TwigCodeActionProvider, TwigHighlightProvider, TwigRenameProvider, TwigColorProvider, HtmlHoverProvider } from './providers';
+
+// ── Data loaded from JSON ──
+import htmlCompletions from './data/html-completions.json';
 
 // ═══════════════════════════════════════════════════════════════════════
 // 1. Types — algebraic, immutable data descriptions
@@ -414,89 +417,11 @@ interface TagCompletion {
     readonly insertText: string;
 }
 
-const HTML_TAGS: readonly TagCompletion[] = [
-    { label: 'div',        detail: 'HTML Block Container',       insertText: 'div' },
-    { label: 'span',       detail: 'HTML Inline Container',      insertText: 'span' },
-    { label: 'p',          detail: 'HTML Paragraph',             insertText: 'p' },
-    { label: 'a',          detail: 'HTML Anchor/Link',           insertText: 'a href="$1"$0' },
-    { label: 'img',        detail: 'HTML Image',                 insertText: 'img src="$1" alt="$2"$0' },
-    { label: 'ul',         detail: 'HTML Unordered List',        insertText: 'ul' },
-    { label: 'ol',         detail: 'HTML Ordered List',          insertText: 'ol' },
-    { label: 'li',         detail: 'HTML List Item',             insertText: 'li' },
-    { label: 'table',      detail: 'HTML Table',                 insertText: 'table' },
-    { label: 'tr',         detail: 'HTML Table Row',             insertText: 'tr' },
-    { label: 'td',         detail: 'HTML Table Cell',            insertText: 'td' },
-    { label: 'th',         detail: 'HTML Table Header',          insertText: 'th' },
-    { label: 'thead',      detail: 'HTML Table Head',            insertText: 'thead' },
-    { label: 'tbody',      detail: 'HTML Table Body',            insertText: 'tbody' },
-    { label: 'form',       detail: 'HTML Form',                  insertText: 'form action="$1" method="$2"$0' },
-    { label: 'input',      detail: 'HTML Input',                 insertText: 'input type="$1"$0' },
-    { label: 'button',     detail: 'HTML Button',                insertText: 'button type="$1"$0' },
-    { label: 'label',      detail: 'HTML Label',                 insertText: 'label for="$1"$0' },
-    { label: 'select',     detail: 'HTML Select Dropdown',       insertText: 'select' },
-    { label: 'option',     detail: 'HTML Option',                insertText: 'option value="$1"$0' },
-    { label: 'textarea',   detail: 'HTML Textarea',              insertText: 'textarea' },
-    { label: 'h1',         detail: 'HTML Heading 1',             insertText: 'h1' },
-    { label: 'h2',         detail: 'HTML Heading 2',             insertText: 'h2' },
-    { label: 'h3',         detail: 'HTML Heading 3',             insertText: 'h3' },
-    { label: 'h4',         detail: 'HTML Heading 4',             insertText: 'h4' },
-    { label: 'h5',         detail: 'HTML Heading 5',             insertText: 'h5' },
-    { label: 'h6',         detail: 'HTML Heading 6',             insertText: 'h6' },
-    { label: 'section',    detail: 'HTML Section',               insertText: 'section' },
-    { label: 'article',    detail: 'HTML Article',               insertText: 'article' },
-    { label: 'nav',        detail: 'HTML Navigation',            insertText: 'nav' },
-    { label: 'header',     detail: 'HTML Header',                insertText: 'header' },
-    { label: 'footer',     detail: 'HTML Footer',                insertText: 'footer' },
-    { label: 'main',       detail: 'HTML Main Content',          insertText: 'main' },
-    { label: 'aside',      detail: 'HTML Aside',                 insertText: 'aside' },
-    { label: 'figure',     detail: 'HTML Figure',                insertText: 'figure' },
-    { label: 'figcaption', detail: 'HTML Figure Caption',        insertText: 'figcaption' },
-    { label: 'video',      detail: 'HTML Video',                 insertText: 'video src="$1"$0' },
-    { label: 'audio',      detail: 'HTML Audio',                 insertText: 'audio src="$1"$0' },
-    { label: 'canvas',     detail: 'HTML Canvas',                insertText: 'canvas' },
-    { label: 'script',     detail: 'HTML Script',                insertText: 'script' },
-    { label: 'style',      detail: 'HTML Style',                 insertText: 'style' },
-    { label: 'link',       detail: 'HTML Link (CSS, etc.)',      insertText: 'link rel="$1" href="$2"$0' },
-    { label: 'meta',       detail: 'HTML Meta',                  insertText: 'meta name="$1" content="$2"$0' },
-    { label: 'title',      detail: 'HTML Title',                 insertText: 'title' },
-    { label: 'br',         detail: 'HTML Line Break',            insertText: 'br' },
-    { label: 'hr',         detail: 'HTML Horizontal Rule',       insertText: 'hr' },
-    { label: 'strong',     detail: 'HTML Strong (bold)',         insertText: 'strong' },
-    { label: 'em',         detail: 'HTML Emphasis (italic)',     insertText: 'em' },
-    { label: 'code',       detail: 'HTML Code',                  insertText: 'code' },
-    { label: 'pre',        detail: 'HTML Preformatted Text',     insertText: 'pre' },
-    { label: 'blockquote', detail: 'HTML Blockquote',            insertText: 'blockquote' },
-    { label: 'details',    detail: 'HTML Details/Accordion',     insertText: 'details' },
-    { label: 'summary',    detail: 'HTML Summary (for details)',  insertText: 'summary' },
-] as const;
+const HTML_TAGS: readonly TagCompletion[] = htmlCompletions.tags as readonly TagCompletion[];
 
-const COMMON_ATTRS: readonly TagCompletion[] = [
-    { label: 'class',       detail: 'HTML Attribute', insertText: 'class="$1"$0' },
-    { label: 'id',          detail: 'HTML Attribute', insertText: 'id="$1"$0' },
-    { label: 'style',       detail: 'HTML Attribute', insertText: 'style="$1"$0' },
-    { label: 'title',       detail: 'HTML Attribute', insertText: 'title="$1"$0' },
-    { label: 'href',        detail: 'HTML Attribute', insertText: 'href="$1"$0' },
-    { label: 'src',         detail: 'HTML Attribute', insertText: 'src="$1"$0' },
-    { label: 'alt',         detail: 'HTML Attribute', insertText: 'alt="$1"$0' },
-    { label: 'type',        detail: 'HTML Attribute', insertText: 'type="$1"$0' },
-    { label: 'name',        detail: 'HTML Attribute', insertText: 'name="$1"$0' },
-    { label: 'value',       detail: 'HTML Attribute', insertText: 'value="$1"$0' },
-    { label: 'placeholder', detail: 'HTML Attribute', insertText: 'placeholder="$1"$0' },
-    { label: 'required',    detail: 'HTML Attribute', insertText: 'required' },
-    { label: 'disabled',    detail: 'HTML Attribute', insertText: 'disabled' },
-    { label: 'checked',     detail: 'HTML Attribute', insertText: 'checked' },
-    { label: 'selected',    detail: 'HTML Attribute', insertText: 'selected' },
-    { label: 'readonly',    detail: 'HTML Attribute', insertText: 'readonly' },
-    { label: 'target',      detail: 'HTML Attribute', insertText: 'target="$1"$0' },
-    { label: 'rel',         detail: 'HTML Attribute', insertText: 'rel="$1"$0' },
-    { label: 'data-',       detail: 'HTML Attribute', insertText: 'data-$1="$2"$0' },
-    { label: 'aria-',       detail: 'HTML Attribute', insertText: 'aria-$1="$2"$0' },
-] as const;
+const COMMON_ATTRS: readonly TagCompletion[] = htmlCompletions.attributes as readonly TagCompletion[];
 
-const VOID_ELEMENTS: ReadonlySet<string> = new Set([
-    'br', 'hr', 'img', 'input', 'meta', 'link', 'area', 'base',
-    'col', 'embed', 'source', 'track', 'wbr',
-]);
+const VOID_ELEMENTS: ReadonlySet<string> = new Set(htmlCompletions.voidElements);
 
 // ---- Pure helpers for completion ----
 
@@ -628,6 +553,14 @@ export function activate(context: vscode.ExtensionContext): void {
         vscode.languages.registerHoverProvider(
             { language: 'twig', scheme: 'file' },
             new TwigHoverProvider(),
+        ),
+    );
+
+    // ---- Hover: HTML5 MDN documentation ----
+    context.subscriptions.push(
+        vscode.languages.registerHoverProvider(
+            { language: 'twig', scheme: 'file' },
+            new HtmlHoverProvider(),
         ),
     );
 

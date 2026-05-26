@@ -1,0 +1,72 @@
+# Twig 3.x Built-in Filters
+# https://twig.symfony.com/doc/3.x/filters/
+#
+# Schema:
+#   filter_name:
+#     args: 0|-1|N       # number of arguments (-1 = variadic)
+#     since: "1.0"
+#     alias_of: "other"  # optional
+
+# ── Core Twig Filters ──
+abs:          { args: 0, since: "1.0" }
+batch:        { args: 2, since: "1.0" }
+capitalize:   { args: 0, since: "1.0" }
+column:       { args: 1, since: "2.8" }
+convert_encoding: { args: 2, since: "1.0" }
+country_name: { args: 1, since: "2.12" }
+currency_name: { args: 1, since: "2.12" }
+currency_symbol: { args: 1, since: "2.12" }
+data_uri:     { args: 1, since: "1.0" }
+date:         { args: 2, since: "1.0" }
+date_modify:  { args: 1, since: "1.0" }
+default:      { args: 1, since: "1.0" }
+escape:       { args: 1, since: "1.0" }
+e:            { args: 1, since: "1.0", alias_of: escape }
+filter:       { args: 1, since: "2.9" }
+find:         { args: 1, since: "3.2" }
+first:        { args: 0, since: "1.0" }
+format:       { args: -1, since: "1.0" }
+format_currency: { args: 2, since: "2.12" }
+format_date:  { args: 2, since: "2.12" }
+format_datetime: { args: 2, since: "2.12" }
+format_number: { args: 1, since: "2.12" }
+format_time:  { args: 2, since: "2.12" }
+html_attr_merge: { args: 1, since: "3.18" }
+html_attr_type: { args: 1, since: "3.18" }
+html_to_markdown: { args: 0, since: "2.12" }
+inline_css:   { args: 0, since: "3.10" }
+inky_to_html: { args: 0, since: "2.12" }
+invoke:       { args: -1, since: "3.19" }
+join:         { args: 1, since: "1.0" }
+json_encode:  { args: 1, since: "1.0" }
+keys:         { args: 0, since: "1.0" }
+language_name: { args: 1, since: "2.12" }
+last:         { args: 0, since: "1.0" }
+length:       { args: 0, since: "1.0" }
+locale_name:  { args: 1, since: "2.12" }
+lower:        { args: 0, since: "1.0" }
+map:          { args: 1, since: "2.9" }
+markdown_to_html: { args: 0, since: "2.12" }
+merge:        { args: 1, since: "1.0" }
+nl2br:        { args: 0, since: "1.0" }
+number_format: { args: 3, since: "1.0" }
+plural:       { args: 2, since: "3.16" }
+raw:          { args: 0, since: "1.0" }
+reduce:       { args: 2, since: "2.9" }
+replace:      { args: 1, since: "1.0" }
+reverse:      { args: 0, since: "1.0" }
+round:        { args: 2, since: "1.0" }
+shuffle:      { args: 0, since: "3.16" }
+singular:     { args: 1, since: "3.16" }
+slice:        { args: 3, since: "1.0" }
+slug:         { args: 1, since: "1.0" }
+sort:         { args: 1, since: "1.0" }
+spaceless:    { args: 0, since: "1.0" }
+split:        { args: 2, since: "1.0" }
+striptags:    { args: 0, since: "1.0" }
+timezone_name: { args: 1, since: "2.12" }
+title:        { args: 0, since: "1.0" }
+trim:         { args: 0, since: "1.0" }
+u:            { args: 0, since: "2.12" }
+upper:        { args: 0, since: "1.0" }
+url_encode:   { args: 0, since: "1.0" }

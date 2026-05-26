@@ -1,0 +1,21 @@
+{
+  "endTagMap": {
+    "apply": "endapply",
+    "autoescape": "endautoescape",
+    "block": "endblock",
+    "cache": "endcache",
+    "deprecated": "enddeprecated",
+    "embed": "endembed",
+    "for": "endfor",
+    "guard": "endguard",
+    "if": "endif",
+    "macro": "endmacro",
+    "sandbox": "endsandbox",
+    "set": "endset",
+    "types": "endtypes",
+    "verbatim": "endverbatim",
+    "with": "endwith",
+    "trans": "endtrans",
+    "stopwatch": "endstopwatch"
+  }
+}

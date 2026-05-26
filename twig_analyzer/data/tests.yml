@@ -1,0 +1,22 @@
+# Twig 3.x Built-in Tests
+# https://twig.symfony.com/doc/3.x/tests/
+#
+# Schema:
+#   test_name:
+#     args: 0|1
+#     since: "1.0"
+#     alias_of: "other"  # optional
+
+constant:     { args: 1, since: "1.0" }
+defined:      { args: 0, since: "1.0" }
+divisible by: { args: 1, since: "1.0" }
+divisibleby:  { args: 1, since: "1.0", alias_of: "divisible by" }
+empty:        { args: 0, since: "1.0" }
+even:         { args: 0, since: "1.0" }
+iterable:     { args: 0, since: "1.0" }
+mapping:      { args: 0, since: "3.14" }
+"null":        { args: 0, since: "1.0" }
+odd:          { args: 0, since: "1.0" }
+same as:      { args: 1, since: "1.0" }
+sameas:       { args: 1, since: "1.0", alias_of: "same as" }
+sequence:     { args: 0, since: "3.14" }

@@ -1,0 +1,168 @@
+# Twig 3.x Built-in Tags
+# https://twig.symfony.com/doc/3.x/
+#
+# Schema:
+#   tag_name:
+#     block: true|false      # true = requires {% endtag %}
+#     description: "..."
+#     since: "1.0"
+#     example: "{% tag %}..."
+#     end_tag: "endtagname"  # derived automatically if block:true
+
+# ── Core Twig ──
+apply:
+  block: true
+  description: Applies a filter to a section of code
+  since: "1.0"
+  example: "{% apply upper %}Text{% endapply %}"
+
+autoescape:
+  block: true
+  description: Controls auto-escaping strategy for a block
+  since: "1.0"
+  example: "{% autoescape 'html' %}...{% endautoescape %}"
+
+block:
+  block: true
+  description: Defines a block that child templates can override
+  since: "1.0"
+  example: "{% block title %}...{% endblock %}"
+
+cache:
+  block: true
+  description: Caches a template fragment
+  since: "3.2"
+  example: "{% cache %}...{% endcache %}"
+
+deprecated:
+  block: true
+  description: Marks a template section as deprecated
+  since: "1.36"
+  example: "{% deprecated 'Use X instead' %}...{% enddeprecated %}"
+
+do:
+  block: false
+  description: Executes an expression without output
+  since: "1.0"
+  example: "{% do variable = 'value' %}"
+
+embed:
+  block: true
+  description: Embeds another template with block overrides
+  since: "1.8"
+  example: "{% embed 'template.twig' %}...{% endembed %}"
+
+extends:
+  block: false
+  description: Extends a parent template (must be the first tag)
+  since: "1.0"
+  example: "{% extends 'base.html.twig' %}"
+
+flush:
+  block: false
+  description: Flushes the output buffer
+  since: "1.5"
+  example: "{% flush %}"
+
+for:
+  block: true
+  description: Iterates over a sequence
+  since: "1.0"
+  example: "{% for item in items %}...{% endfor %}"
+
+from:
+  block: false
+  description: Imports macro names from a template
+  since: "1.0"
+  example: "{% from 'macros.twig' import input %}"
+
+guard:
+  block: true
+  description: Conditionally outputs content based on a tag
+  since: "3.13"
+  example: "{% guard function('route') %}...{% endguard %}"
+
+if:
+  block: true
+  description: Conditional block with elseif/else support
+  since: "1.0"
+  example: "{% if condition %}...{% endif %}"
+
+import:
+  block: false
+  description: Imports a template's macros
+  since: "1.0"
+  example: "{% import 'macros.twig' as macros %}"
+
+include:
+  block: false
+  description: Includes another template (tag form — use include() function instead)
+  since: "1.0"
+  example: "{% include 'template.twig' %}"
+
+macro:
+  block: true
+  description: Defines a reusable macro
+  since: "1.0"
+  example: "{% macro input(name, value) %}...{% endmacro %}"
+
+sandbox:
+  block: true
+  description: Enables sandbox mode for a block
+  since: "1.0"
+  example: "{% sandbox %}...{% endsandbox %}"
+
+set:
+  block: true
+  description: Assigns values to variables
+  since: "1.0"
+  example: "{% set name = 'Fabien' %}"
+
+types:
+  block: true
+  description: Declares variable types for static analysis
+  since: "3.15"
+  example: "{% types {name: 'string', age: 'int'} %}"
+
+use:
+  block: false
+  description: Imports blocks from another template (horizontal reuse)
+  since: "1.0"
+  example: "{% use 'blocks.twig' %}"
+
+verbatim:
+  block: true
+  description: Outputs raw text without parsing Twig syntax
+  since: "1.0"
+  example: "{% verbatim %}...{% endverbatim %}"
+
+with:
+  block: true
+  description: Creates a new inner scope with variables
+  since: "1.0"
+  example: "{% with {name: 'Fabien'} %}...{% endwith %}"
+
+# ── Symfony Custom Tags ──
+form_theme:
+  block: false
+  description: "[Symfony] Sets form theme resources for a form view"
+  since: "—"
+  example: '{% form_theme form "form/fields.html.twig" %}'
+
+trans:
+  block: true
+  description: "[Symfony] Renders translated content block"
+  since: "—"
+  example: "{% trans %}Hello %name%{% endtrans %}"
+
+trans_default_domain:
+  block: false
+  description: "[Symfony] Sets the default translation domain for a template"
+  since: "—"
+  example: '{% trans_default_domain "app" %}'
+
+stopwatch:
+  block: true
+  description: "[Symfony] Times a template block in the profiler"
+  since: "—"
+  example: "{% stopwatch 'event_name' %}...{% endstopwatch %}"

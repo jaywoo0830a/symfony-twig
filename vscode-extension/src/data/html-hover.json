@@ -1,0 +1,747 @@
+{
+  "_source": "MDN Web Docs — https://developer.mozilla.org/en-US/docs/Web/HTML/Element",
+  "elements": {
+    "a": {
+      "description": "The **Anchor** element creates a hyperlink to web pages, files, email addresses, locations, or anything else a URL can address.",
+      "category": "Inline | Flow | Phrasing",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a"
+    },
+    "abbr": {
+      "description": "The **Abbreviation** element represents an abbreviation or acronym. The optional `title` attribute provides the full description.",
+      "category": "Inline | Flow | Phrasing",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/abbr"
+    },
+    "address": {
+      "description": "The **Address** element indicates contact information for a person, group, or organization.",
+      "category": "Block | Flow",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/address"
+    },
+    "article": {
+      "description": "The **Article** element represents a self-contained composition in a document, page, or site, intended to be independently distributable or reusable.",
+      "category": "Block | Flow | Sectioning",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/article"
+    },
+    "aside": {
+      "description": "The **Aside** element represents content indirectly related to the main content, like sidebars or call-out boxes.",
+      "category": "Block | Flow | Sectioning",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/aside"
+    },
+    "audio": {
+      "description": "The **Audio** element embeds sound content in documents. It may contain one or more `<source>` elements.",
+      "category": "Inline | Flow | Embedded",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/audio"
+    },
+    "b": {
+      "description": "The **Bring Attention To** element draws attention to text without conveying extra importance. Use `<strong>` for importance.",
+      "category": "Inline | Flow | Phrasing",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/b"
+    },
+    "blockquote": {
+      "description": "The **Block Quotation** element indicates that the enclosed text is an extended quotation. Use the `cite` attribute for the source URL.",
+      "category": "Block | Flow | Sectioning",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/blockquote"
+    },
+    "body": {
+      "description": "The **Body** element represents the content of an HTML document. There can be only one `<body>` per document.",
+      "category": "Root",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/body"
+    },
+    "br": {
+      "description": "The **Line Break** element produces a line break in text. Useful for poems or addresses. **Void element** — no closing tag.",
+      "category": "Inline | Flow | Phrasing | Void",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/br"
+    },
+    "button": {
+      "description": "The **Button** element represents a clickable button. Use `type=\"submit\"`, `type=\"reset\"`, or `type=\"button\"`.",
+      "category": "Inline | Flow | Interactive",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button"
+    },
+    "canvas": {
+      "description": "The **Canvas** element provides a resolution-dependent bitmap area for rendering graphics via JavaScript (2D/WebGL).",
+      "category": "Inline | Flow | Embedded",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/canvas"
+    },
+    "caption": {
+      "description": "The **Table Caption** element specifies the caption (title) of a table. Must be the first child of `<table>`.",
+      "category": "Table",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/caption"
+    },
+    "cite": {
+      "description": "The **Citation** element references the title of a creative work (book, paper, poem, film, etc.).",
+      "category": "Inline | Flow | Phrasing",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/cite"
+    },
+    "code": {
+      "description": "The **Code** element displays its contents styled as a fragment of computer code. Use with `<pre>` for multi-line code blocks.",
+      "category": "Inline | Flow | Phrasing",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/code"
+    },
+    "col": {
+      "description": "The **Table Column** element defines a column within a table. **Void element** — used within `<colgroup>`.",
+      "category": "Table | Void",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/col"
+    },
+    "colgroup": {
+      "description": "The **Table Column Group** element defines a group of columns within a table.",
+      "category": "Table",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/colgroup"
+    },
+    "data": {
+      "description": "The **Data** element links content with a machine-readable translation via the `value` attribute.",
+      "category": "Inline | Flow | Phrasing",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/data"
+    },
+    "datalist": {
+      "description": "The **Data List** element contains `<option>` elements representing recommended values for an `<input>` with `list` attribute.",
+      "category": "Inline | Flow | Phrasing",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/datalist"
+    },
+    "dd": {
+      "description": "The **Description Details** element provides the description or value of a term (`<dt>`) in a description list (`<dl>`).",
+      "category": "Block | Flow",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dd"
+    },
+    "del": {
+      "description": "The **Deleted Text** element represents text that has been deleted from a document. Use `<ins>` for inserted text.",
+      "category": "Inline | Flow | Phrasing",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/del"
+    },
+    "details": {
+      "description": "The **Details** disclosure widget creates an expandable/collapsible section. `<summary>` provides the visible heading.",
+      "category": "Block | Flow | Interactive",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/details"
+    },
+    "dfn": {
+      "description": "The **Definition** element indicates the defining instance of a term within its nearest ancestor content.",
+      "category": "Inline | Flow | Phrasing",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dfn"
+    },
+    "dialog": {
+      "description": "The **Dialog** element represents a dialog box or subwindow. Use `.showModal()` for modal behavior.",
+      "category": "Block | Flow",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dialog"
+    },
+    "div": {
+      "description": "The **Content Division** element is a generic block container. Use when no other semantic element is appropriate.",
+      "category": "Block | Flow",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/div"
+    },
+    "dl": {
+      "description": "The **Description List** element represents a list of term-description groups (`<dt>`/`<dd>` pairs).",
+      "category": "Block | Flow",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dl"
+    },
+    "dt": {
+      "description": "The **Description Term** element specifies a term in a description list (`<dl>`).",
+      "category": "Block | Flow",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dt"
+    },
+    "em": {
+      "description": "The **Emphasis** element marks text with stress emphasis. Typically rendered in italic. Nest for stronger emphasis.",
+      "category": "Inline | Flow | Phrasing",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/em"
+    },
+    "embed": {
+      "description": "The **Embed** element embeds external content at the specified point. **Void element** — no closing tag.",
+      "category": "Inline | Flow | Embedded | Void",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/embed"
+    },
+    "fieldset": {
+      "description": "The **Field Set** element groups related form controls and labels. Use `<legend>` to provide a caption.",
+      "category": "Block | Flow",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/fieldset"
+    },
+    "figcaption": {
+      "description": "The **Figure Caption** element provides a caption or legend for its parent `<figure>` element.",
+      "category": "Block | Flow",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/figcaption"
+    },
+    "figure": {
+      "description": "The **Figure** element represents self-contained content (images, diagrams, code), optionally with a `<figcaption>`.",
+      "category": "Block | Flow | Sectioning",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/figure"
+    },
+    "footer": {
+      "description": "The **Footer** element represents a footer for its nearest sectioning content. Typically contains author, copyright, or nav links.",
+      "category": "Block | Flow",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/footer"
+    },
+    "form": {
+      "description": "The **Form** element represents a document section containing interactive controls for submitting information. Use `action` and `method` attributes.",
+      "category": "Block | Flow",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/form"
+    },
+    "h1": {
+      "description": "**Heading level 1** — the highest section level heading. Use only one `<h1>` per page for accessibility.",
+      "category": "Block | Flow | Heading",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/Heading_Elements"
+    },
+    "h2": {
+      "description": "**Heading level 2** — second-level section heading. Organize content hierarchically: h1 > h2 > h3.",
+      "category": "Block | Flow | Heading",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/Heading_Elements"
+    },
+    "h3": {
+      "description": "**Heading level 3** — third-level section heading for subsections within an h2.",
+      "category": "Block | Flow | Heading",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/Heading_Elements"
+    },
+    "h4": {
+      "description": "**Heading level 4** — fourth-level section heading.",
+      "category": "Block | Flow | Heading",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/Heading_Elements"
+    },
+    "h5": {
+      "description": "**Heading level 5** — fifth-level section heading.",
+      "category": "Block | Flow | Heading",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/Heading_Elements"
+    },
+    "h6": {
+      "description": "**Heading level 6** — the lowest section heading level.",
+      "category": "Block | Flow | Heading",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/Heading_Elements"
+    },
+    "head": {
+      "description": "The **Head** element contains machine-readable metadata about the document: title, scripts, stylesheets, meta tags.",
+      "category": "Root",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/head"
+    },
+    "header": {
+      "description": "The **Header** element represents introductory content or navigation for its nearest sectioning element.",
+      "category": "Block | Flow",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/header"
+    },
+    "hr": {
+      "description": "The **Horizontal Rule** element represents a thematic break between paragraph-level elements. **Void element**.",
+      "category": "Block | Flow | Void",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/hr"
+    },
+    "html": {
+      "description": "The **HTML** root element represents the top-level of an HTML document. All other elements must be descendants.",
+      "category": "Root",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/html"
+    },
+    "i": {
+      "description": "The **Idiomatic Text** element represents text set apart for idiomatic, technical, or taxonomic reasons (not just italic).",
+      "category": "Inline | Flow | Phrasing",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/i"
+    },
+    "iframe": {
+      "description": "The **Inline Frame** element embeds another HTML page into the current document. Use `sandbox` for security.",
+      "category": "Inline | Flow | Embedded",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe"
+    },
+    "img": {
+      "description": "The **Image** element embeds an image. Always include `alt` for accessibility. **Void element** — no closing tag.",
+      "category": "Inline | Flow | Embedded | Void",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img"
+    },
+    "input": {
+      "description": "The **Input** element creates interactive form controls. Supports many `type` values: text, password, email, number, checkbox, radio, file, etc. **Void element**.",
+      "category": "Inline | Flow | Interactive | Void",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input"
+    },
+    "ins": {
+      "description": "The **Inserted Text** element represents text that has been inserted into a document. Use `<del>` for deleted text.",
+      "category": "Inline | Flow | Phrasing",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ins"
+    },
+    "kbd": {
+      "description": "The **Keyboard Input** element represents user input from a keyboard, voice, or other input device.",
+      "category": "Inline | Flow | Phrasing",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/kbd"
+    },
+    "label": {
+      "description": "The **Label** element provides a caption for a form control. Use `for` attribute to associate with the control's `id`.",
+      "category": "Inline | Flow | Interactive",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/label"
+    },
+    "legend": {
+      "description": "The **Legend** element represents a caption for its parent `<fieldset>`. Must be the first child.",
+      "category": "Block | Flow",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/legend"
+    },
+    "li": {
+      "description": "The **List Item** element represents an item in a list (`<ul>`, `<ol>`, or `<menu>`).",
+      "category": "Block | Flow",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/li"
+    },
+    "link": {
+      "description": "The **External Resource Link** element links the document to external resources (CSS, icons, etc.). **Void element** — used in `<head>`.",
+      "category": "Metadata | Void",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/link"
+    },
+    "main": {
+      "description": "The **Main** element represents the dominant content of the `<body>`. Only one per document, and not inside other landmark elements.",
+      "category": "Block | Flow | Landmark",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/main"
+    },
+    "map": {
+      "description": "The **Image Map** element defines clickable areas on an image, used with `<area>` elements and the `usemap` attribute on `<img>`.",
+      "category": "Inline | Flow | Phrasing",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/map"
+    },
+    "mark": {
+      "description": "The **Mark** element highlights text for reference or notation purposes (like search results).",
+      "category": "Inline | Flow | Phrasing",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/mark"
+    },
+    "meta": {
+      "description": "The **Metadata** element represents metadata that cannot be expressed by other meta-related elements. **Void element**.",
+      "category": "Metadata | Void",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta"
+    },
+    "meter": {
+      "description": "The **Meter** element represents a scalar measurement within a known range (disk usage, ratings, scores).",
+      "category": "Inline | Flow | Phrasing",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meter"
+    },
+    "nav": {
+      "description": "The **Navigation** element represents a section with navigation links. Use for major navigation blocks, not every link.",
+      "category": "Block | Flow | Sectioning | Landmark",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/nav"
+    },
+    "noscript": {
+      "description": "The **No Script** element provides fallback content when JavaScript is disabled or not supported.",
+      "category": "Block | Flow",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/noscript"
+    },
+    "object": {
+      "description": "The **Object** element represents an external resource (image, nested browsing context, plugin). Use `<img>` or `<iframe>` when possible.",
+      "category": "Inline | Flow | Embedded",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/object"
+    },
+    "ol": {
+      "description": "The **Ordered List** element represents a numbered list. Use `type` for numbering style, `start` for starting number, `reversed` for descending.",
+      "category": "Block | Flow",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ol"
+    },
+    "optgroup": {
+      "description": "The **Option Group** element groups `<option>` elements within a `<select>`. Use `label` attribute for the group name.",
+      "category": "Form",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/optgroup"
+    },
+    "option": {
+      "description": "The **Option** element defines an item in a `<select>`, `<optgroup>`, or `<datalist>`. Use `value` for the submitted value.",
+      "category": "Form",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/option"
+    },
+    "output": {
+      "description": "The **Output** element displays the result of a calculation or user action. Use `for` to associate with inputs.",
+      "category": "Inline | Flow | Phrasing",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/output"
+    },
+    "p": {
+      "description": "The **Paragraph** element represents a paragraph of text. Block-level, automatically closes when another block element starts.",
+      "category": "Block | Flow",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/p"
+    },
+    "picture": {
+      "description": "The **Picture** element provides art-direction and responsive images. Contains `<source>` elements and one fallback `<img>`.",
+      "category": "Inline | Flow | Embedded",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/picture"
+    },
+    "pre": {
+      "description": "The **Preformatted Text** element displays text exactly as written, preserving whitespace and line breaks. Use `<code>` inside for code.",
+      "category": "Block | Flow",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/pre"
+    },
+    "progress": {
+      "description": "The **Progress** element displays an indicator showing the completion progress of a task. Use `value` and `max` attributes.",
+      "category": "Inline | Flow | Phrasing",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/progress"
+    },
+    "q": {
+      "description": "The **Inline Quotation** element represents a short inline quotation. Browsers automatically add quotation marks.",
+      "category": "Inline | Flow | Phrasing",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/q"
+    },
+    "s": {
+      "description": "The **Strikethrough** element renders text with a strikethrough. Use `<del>` for deleted text, `<s>` for no-longer-relevant text.",
+      "category": "Inline | Flow | Phrasing",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/s"
+    },
+    "samp": {
+      "description": "The **Sample Output** element represents sample output from a computer program.",
+      "category": "Inline | Flow | Phrasing",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/samp"
+    },
+    "script": {
+      "description": "The **Script** element embeds executable code (JavaScript) or links to an external script via `src`. Use `defer` or `async` for performance.",
+      "category": "Metadata | Flow | Phrasing",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script"
+    },
+    "section": {
+      "description": "The **Section** element represents a generic standalone section of a document. Use when no more specific semantic element applies.",
+      "category": "Block | Flow | Sectioning",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/section"
+    },
+    "select": {
+      "description": "The **Select** element provides a dropdown menu of `<option>` elements. Use `multiple` for multi-select, `size` for visible rows.",
+      "category": "Inline | Flow | Interactive",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/select"
+    },
+    "small": {
+      "description": "The **Small** element represents side-comments and small print (copyright, legal text). Not for making text visually smaller.",
+      "category": "Inline | Flow | Phrasing",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/small"
+    },
+    "source": {
+      "description": "The **Source** element specifies media resources for `<picture>`, `<audio>`, or `<video>`. **Void element**.",
+      "category": "Embedded | Void",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/source"
+    },
+    "span": {
+      "description": "The **Span** element is a generic inline container. Use when no other semantic element is appropriate.",
+      "category": "Inline | Flow | Phrasing",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/span"
+    },
+    "strong": {
+      "description": "The **Strong Importance** element indicates that its contents have strong importance, seriousness, or urgency. Typically bold.",
+      "category": "Inline | Flow | Phrasing",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/strong"
+    },
+    "style": {
+      "description": "The **Style** element contains CSS styling for the document. Typically placed in `<head>`, but can appear anywhere.",
+      "category": "Metadata",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/style"
+    },
+    "sub": {
+      "description": "The **Subscript** element displays text lowered below the baseline (chemical formulas, math).",
+      "category": "Inline | Flow | Phrasing",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/sub"
+    },
+    "summary": {
+      "description": "The **Summary** element provides a heading for a `<details>` element. Click to toggle the details visible/hidden.",
+      "category": "Block | Flow | Interactive",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/summary"
+    },
+    "sup": {
+      "description": "The **Superscript** element displays text raised above the baseline (exponents, footnotes).",
+      "category": "Inline | Flow | Phrasing",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/sup"
+    },
+    "table": {
+      "description": "The **Table** element represents tabular data in rows and columns. Use `<thead>`, `<tbody>`, `<tr>`, `<th>`, `<td>` for structure.",
+      "category": "Block | Flow",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/table"
+    },
+    "tbody": {
+      "description": "The **Table Body** element groups the body rows in a table. Browsers auto-insert `<tbody>` if omitted.",
+      "category": "Table",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/tbody"
+    },
+    "td": {
+      "description": "The **Table Data Cell** element defines a data cell in a table. Use `colspan` and `rowspan` to span columns/rows.",
+      "category": "Table",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/td"
+    },
+    "template": {
+      "description": "The **Template** element holds HTML fragments not rendered on page load, instantiated via JavaScript at runtime.",
+      "category": "Metadata | Flow | Phrasing",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template"
+    },
+    "textarea": {
+      "description": "The **Textarea** element represents a multi-line plain-text editing control. Use `rows` and `cols` for size, CSS for better control.",
+      "category": "Inline | Flow | Interactive",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/textarea"
+    },
+    "tfoot": {
+      "description": "The **Table Foot** element groups the footer rows in a table. Must appear after `<thead>` and before `<tbody>`.",
+      "category": "Table",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/tfoot"
+    },
+    "th": {
+      "description": "The **Table Header Cell** element defines a header cell in a table. Use `scope` attribute for accessibility (`col`/`row`).",
+      "category": "Table",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/th"
+    },
+    "thead": {
+      "description": "The **Table Head** element groups the header rows in a table. Appears at the top of `<table>`.",
+      "category": "Table",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/thead"
+    },
+    "time": {
+      "description": "The **Time** element represents a specific period in time. Use `datetime` attribute for machine-readable format.",
+      "category": "Inline | Flow | Phrasing",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/time"
+    },
+    "title": {
+      "description": "The **Title** element defines the document's title shown in the browser tab. **Required** in every HTML document.",
+      "category": "Metadata",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/title"
+    },
+    "tr": {
+      "description": "The **Table Row** element defines a row of cells in a table. Contains `<th>` and `<td>` elements.",
+      "category": "Table",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/tr"
+    },
+    "u": {
+      "description": "The **Unarticulated Annotation** element represents text with a non-textual annotation (like misspelled words, Chinese proper names).",
+      "category": "Inline | Flow | Phrasing",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/u"
+    },
+    "ul": {
+      "description": "The **Unordered List** element represents a bulleted list of items. Use CSS `list-style-type` to change bullet style.",
+      "category": "Block | Flow",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ul"
+    },
+    "var": {
+      "description": "The **Variable** element represents a variable in a mathematical expression or programming context. Typically italic.",
+      "category": "Inline | Flow | Phrasing",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/var"
+    },
+    "video": {
+      "description": "The **Video** element embeds a media player for video playback. Use `<source>` for multiple formats. Add `controls` for UI.",
+      "category": "Inline | Flow | Embedded",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/video"
+    },
+    "wbr": {
+      "description": "The **Word Break Opportunity** element specifies where a line break would be acceptable. **Void element**.",
+      "category": "Inline | Flow | Phrasing | Void",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/wbr"
+    }
+  },
+  "attributes": {
+    "class": {
+      "description": "**Global attribute.** A space-separated list of CSS class names for the element. Use for styling (CSS) and selection (JS).",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/class"
+    },
+    "id": {
+      "description": "**Global attribute.** A unique identifier for the element. Must be unique across the entire document. Used for CSS, JS, and anchors.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/id"
+    },
+    "style": {
+      "description": "**Global attribute.** Inline CSS styles applied to the element. Prefer external stylesheets for maintainability.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/style"
+    },
+    "title": {
+      "description": "**Global attribute.** Tooltip text shown on mouse hover. Also important for accessibility with `<iframe>` and `<abbr>`.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/title"
+    },
+    "href": {
+      "description": "The URL the hyperlink points to. Used with `<a>`, `<link>`, `<area>`, `<base>`. Can be absolute, relative, or fragment (`#id`).",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a#href"
+    },
+    "src": {
+      "description": "The URL of the embeddable content. Used with `<img>`, `<script>`, `<iframe>`, `<video>`, `<audio>`, `<source>`, `<embed>`, `<input type=\"image\">`.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#src"
+    },
+    "alt": {
+      "description": "**Required on `<img>`.** Alternative text when the image cannot be displayed. Critical for accessibility and SEO.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#alt"
+    },
+    "type": {
+      "description": "Defines the type of the element. For `<input>`: text, password, email, number, checkbox, radio, file, submit, etc. For `<button>`: submit, reset, button. For `<script>`: MIME type or `module`.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#type"
+    },
+    "name": {
+      "description": "The name of the form control. Submitted as the key in form data. Also used for radio button grouping and `<meta>`, `<iframe>`, `<object>`, `<param>`.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#name"
+    },
+    "value": {
+      "description": "The initial value of a form control. For `<input>`: default value. For `<button>`, `<option>`, `<param>`: the submitted value.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#value"
+    },
+    "placeholder": {
+      "description": "Hint text shown in an empty `<input>` or `<textarea>`. Disappears on focus. Not a substitute for `<label>`.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#placeholder"
+    },
+    "required": {
+      "description": "**Boolean attribute.** Indicates the form control must have a value before submission. Use with `<input>`, `<select>`, `<textarea>`.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/required"
+    },
+    "disabled": {
+      "description": "**Boolean attribute.** Makes the form control non-interactive and non-submittable. Use with `<input>`, `<button>`, `<select>`, `<textarea>`, `<fieldset>`, `<optgroup>`, `<option>`.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/disabled"
+    },
+    "checked": {
+      "description": "**Boolean attribute.** Pre-selects a checkbox or radio button on page load. Only for `<input type=\"checkbox\">` and `<input type=\"radio\">`.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/checkbox#checked"
+    },
+    "selected": {
+      "description": "**Boolean attribute.** Pre-selects an `<option>` on page load. If unset, the first `<option>` is selected by default.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/option#selected"
+    },
+    "readonly": {
+      "description": "**Boolean attribute.** Makes the form control read-only (value can be selected but not changed). Unlike `disabled`, the value is still submitted.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/readonly"
+    },
+    "target": {
+      "description": "Where to open the linked URL. `_self` (default), `_blank` (new tab), `_parent`, `_top`, or a frame name. Use `rel=\"noopener\"` with `_blank` for security.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a#target"
+    },
+    "rel": {
+      "description": "The relationship of the linked URL. Common values: `stylesheet`, `icon`, `noopener`, `noreferrer`, `nofollow`, `preload`, `prefetch`, `alternate`, `canonical`.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/rel"
+    },
+    "data-*": {
+      "description": "**Global attribute.** Custom data attributes for storing extra information. Access via `element.dataset` in JavaScript. The `*` can be any valid name.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/data-*"
+    },
+    "aria-*": {
+      "description": "**WAI-ARIA attribute.** Accessibility attributes for assistive technologies. Common: `aria-label`, `aria-hidden`, `aria-expanded`, `aria-describedby`, `role`.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA"
+    },
+    "action": {
+      "description": "The URL that processes the form submission. Can be relative or absolute. Defaults to the current page if omitted.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/form#action"
+    },
+    "method": {
+      "description": "The HTTP method for form submission. `GET` (appends to URL) or `POST` (in request body). Use `POST` for sensitive or large data.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/form#method"
+    },
+    "for": {
+      "description": "Associates a `<label>` with a form control by matching the control's `id`. Also used with `<output>` to list associated element IDs.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/label#for"
+    },
+    "lang": {
+      "description": "**Global attribute.** The language of the element's content (e.g., `en`, `ko`, `fr`). Important for accessibility and SEO.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/lang"
+    },
+    "tabindex": {
+      "description": "**Global attribute.** Controls tab order. `0` = normal order, `-1` = not reachable by tab (but focusable via JS), positive = custom order (avoid).",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/tabindex"
+    },
+    "hidden": {
+      "description": "**Global boolean attribute.** Hides the element from display. Unlike `display:none`, this is a semantic signal. Don't use for critical content.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/hidden"
+    },
+    "content": {
+      "description": "The value for `<meta>` elements. For `name=\"description\"`: page summary. For `name=\"viewport\"`: `width=device-width, initial-scale=1`.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta#content"
+    },
+    "charset": {
+      "description": "Character encoding for the document. Almost always `UTF-8`. Used on `<meta charset=\"UTF-8\">` and `<script charset=\"...\">`.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta#charset"
+    },
+    "defer": {
+      "description": "**Boolean attribute.** On `<script>`, downloads the script in parallel and executes after the document is parsed. Use instead of placing scripts at end of body.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script#defer"
+    },
+    "async": {
+      "description": "**Boolean attribute.** On `<script>`, downloads the script in parallel and executes as soon as available. Don't use with `defer`.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script#async"
+    },
+    "srcset": {
+      "description": "On `<img>` and `<source>`, provides a set of image URLs for different resolutions/sizes. Browser picks the best match. Format: `url 1x, url2x 2x` or `url 600w, url2 1200w`.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#srcset"
+    },
+    "sizes": {
+      "description": "On `<img>`, `<source>`, `<link>`, specifies the intended display size or media condition. Used with `srcset` for responsive images.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#sizes"
+    },
+    "loading": {
+      "description": "On `<img>` and `<iframe>`, controls lazy loading. `lazy` = defer until near viewport, `eager` = load immediately (default). Improves performance.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#loading"
+    },
+    "autocomplete": {
+      "description": "On form controls, enables or disables browser autofill. `on` or `off`, or specific tokens like `email`, `tel`, `new-password`, `street-address`.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/autocomplete"
+    },
+    "multiple": {
+      "description": "**Boolean attribute.** On `<input type=\"file\">` and `<input type=\"email\">`, allows multiple values. On `<select>`, allows multi-select.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/multiple"
+    },
+    "maxlength": {
+      "description": "The maximum number of characters allowed in `<input>` or `<textarea>`. Client-side only — always validate server-side.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/maxlength"
+    },
+    "minlength": {
+      "description": "The minimum number of characters required in `<input>` or `<textarea>`. Client-side validation only.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/minlength"
+    },
+    "min": {
+      "description": "The minimum allowed value for numeric `<input>` types (number, range, date, etc.). Used with `max` for range validation.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/min"
+    },
+    "max": {
+      "description": "The maximum allowed value for numeric `<input>` types. Also used on `<progress>` and `<meter>` to set the upper bound.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/max"
+    },
+    "step": {
+      "description": "The increment step for numeric `<input>` types. Default: 1. Use `step=\"any\"` for any value. Affects validation arrows.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/step"
+    },
+    "pattern": {
+      "description": "A JavaScript regular expression the `<input>` value must match. Use `title` to describe the pattern to users.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/pattern"
+    },
+    "accept": {
+      "description": "On `<input type=\"file\">`, restricts accepted file types. Values: file extensions (`.jpg,.png`), MIME types (`image/*`), or `audio/*`, `video/*`.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/accept"
+    },
+    "cols": {
+      "description": "The visible width (in average character widths) of a `<textarea>`. Use CSS `width` instead for better control.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/textarea#cols"
+    },
+    "rows": {
+      "description": "The visible number of text lines in a `<textarea>`. Use CSS `height` instead for better control.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/textarea#rows"
+    },
+    "controls": {
+      "description": "**Boolean attribute.** On `<video>` and `<audio>`, displays browser's built-in playback controls (play, pause, volume, etc.).",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/video#controls"
+    },
+    "autoplay": {
+      "description": "**Boolean attribute.** On `<video>` and `<audio>`, automatically starts playback. Browsers often block unmuted autoplay. Use `muted` together.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/video#autoplay"
+    },
+    "loop": {
+      "description": "**Boolean attribute.** On `<video>` and `<audio>`, automatically loops playback. Use sparingly for user experience.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/video#loop"
+    },
+    "muted": {
+      "description": "**Boolean attribute.** On `<video>` and `<audio>`, mutes the audio by default. Often needed for `autoplay` to work.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/video#muted"
+    },
+    "poster": {
+      "description": "On `<video>`, a URL for an image shown while the video is downloading or before playback starts.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/video#poster"
+    },
+    "cite": {
+      "description": "On `<blockquote>`, `<del>`, `<ins>`, `<q>`, specifies a URL pointing to the source of the quote or change.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/blockquote#cite"
+    },
+    "datetime": {
+      "description": "On `<time>`, a machine-readable date/time. On `<del>` and `<ins>`, the date/time the change was made. Format: `YYYY-MM-DD` or ISO 8601.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/time#datetime"
+    },
+    "colspan": {
+      "description": "On `<td>` and `<th>`, the number of columns the cell should span. Value must be a positive integer.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/td#colspan"
+    },
+    "rowspan": {
+      "description": "On `<td>` and `<th>`, the number of rows the cell should span. Value must be a positive integer.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/td#rowspan"
+    },
+    "scope": {
+      "description": "On `<th>`, specifies which cells the header relates to. `col` = column, `row` = row, `colgroup`, `rowgroup`. Important for accessibility.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/th#scope"
+    },
+    "download": {
+      "description": "On `<a>`, prompts the browser to download the linked resource instead of navigating. Optionally specify a filename.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a#download"
+    },
+    "media": {
+      "description": "On `<source>`, `<link>`, `<style>`, `<a>`, a media query specifying which media the resource applies to (e.g., `screen and (max-width: 600px)`).",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/link#media"
+    },
+    "sandbox": {
+      "description": "On `<iframe>`, applies security restrictions. Values: `allow-scripts`, `allow-same-origin`, `allow-forms`, `allow-popups`. Empty = maximum restriction.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#sandbox"
+    },
+    "enctype": {
+      "description": "On `<form>`, the MIME type of the form data. `application/x-www-form-urlencoded` (default), `multipart/form-data` (for file uploads), `text/plain`.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/form#enctype"
+    },
+    "novalidate": {
+      "description": "**Boolean attribute.** On `<form>`, disables browser's built-in form validation. Use when providing custom validation.",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/form#novalidate"
+    },
+    "role": {
+      "description": "**ARIA attribute.** Defines the purpose of an element for assistive technology (e.g., `navigation`, `banner`, `button`, `alert`, `dialog`).",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles"
+    }
+  }
+}

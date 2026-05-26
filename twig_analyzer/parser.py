@@ -180,10 +180,14 @@ _BLOCK_TAGS = frozenset({
     "apply", "autoescape", "block", "cache", "deprecated",
     "embed", "for", "guard", "if", "macro", "sandbox",
     "verbatim", "with",
+    # Symfony block tags
+    "trans", "stopwatch",
 })
 
 _INLINE_TAGS = frozenset({
     "do", "extends", "flush", "from", "import", "include", "use",
+    # Symfony inline tags
+    "form_theme", "trans_default_domain",
 })
 
 # Tags that can be either block or inline depending on content

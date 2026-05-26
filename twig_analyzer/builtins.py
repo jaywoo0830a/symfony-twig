@@ -142,6 +142,32 @@ BUILTIN_TAGS: Dict[str, dict] = {
         "since": "1.0",
         "example": "{% with {name: 'Fabien'} %}...{% endwith %}",
     },
+
+    # -- Symfony custom tags --
+    "form_theme": {
+        "block": False,
+        "description": "[Symfony] Sets form theme resources for a form view",
+        "since": "—",
+        "example": "{% form_theme form \"form/fields.html.twig\" %}",
+    },
+    "trans": {
+        "block": True,
+        "description": "[Symfony] Renders translated content block",
+        "since": "—",
+        "example": "{% trans %}Hello %name%{% endtrans %}",
+    },
+    "trans_default_domain": {
+        "block": False,
+        "description": "[Symfony] Sets the default translation domain for a template",
+        "since": "—",
+        "example": "{% trans_default_domain \"app\" %}",
+    },
+    "stopwatch": {
+        "block": True,
+        "description": "[Symfony] Times a template block in the profiler",
+        "since": "—",
+        "example": "{% stopwatch 'event_name' %}...{% endstopwatch %}",
+    },
 }
 
 # Tags that require matching end tags
@@ -164,6 +190,8 @@ END_TAG_MAP: Dict[str, str] = {
     "types": "endtypes",
     "verbatim": "endverbatim",
     "with": "endwith",
+    "trans": "endtrans",
+    "stopwatch": "endstopwatch",
 }
 
 # Tags that can have elseif/else between

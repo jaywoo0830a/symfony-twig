@@ -23,6 +23,27 @@ RuleFunc = Callable[[TemplateNode, str], Tuple[Diagnostic, ...]]
 
 
 # ═══════════════════════════════════════════════════════════════════════
+# 0. Annotation helpers — extract declarations from {# @kind name #} comments
+# ═══════════════════════════════════════════════════════════════════════
+
+def _collect_annotations(source: str, kind: str) -> FrozenSet[str]:
+    """Extract names from {# @kind name Type? #} annotations.
+
+    Supports:
+      {# @filter my_filter #}
+      {# @function my_func #}
+      {# @test my_test #}
+      {# @tag my_tag #}
+      {# @var my_var Type #}
+      {# @param my_param Type #}
+    """
+    return frozenset(
+        m.group(1)
+        for m in re.finditer(r'\{\#\s*@' + kind + r'\s+(\w+)', source)
+    )
+
+
+# ═══════════════════════════════════════════════════════════════════════
 # 1. AST walker (pure: (Node, Callable) → None, but collects via side-list)
 # ═══════════════════════════════════════════════════════════════════════
 
@@ -137,13 +158,16 @@ def check_extends_content_outside_blocks(tree: TemplateNode, source: str) -> Tup
 
 
 def check_undefined_filters(tree: TemplateNode, source: str) -> Tuple[Diagnostic, ...]:
+    """Check for unknown filters. Custom filters declared via {# @filter name #} are allowed."""
+    known = frozenset(BUILTIN_FILTERS.keys()) | _collect_annotations(source, 'filter')
     diags: list[Diagnostic] = []
     def visit(node: Node):
-        if isinstance(node, FilterNode) and node.name and node.name not in BUILTIN_FILTERS:
+        if isinstance(node, FilterNode) and node.name and node.name not in known:
             # FilterNode.column points to '|', so +1 skips to the filter name
             start_col = node.column + 1
             diags.append(Diagnostic(
-                message=f"Unknown filter '{node.name}'.",
+                message=f"Unknown filter '{node.name}'. "
+                        f"Declare it with {{# @filter {node.name} #}} if it's a custom filter.",
                 severity=Severity.WARNING,
                 range=Range(node.line, start_col, node.line, start_col + len(node.name)),
                 rule_id="TWIG-UNKNOWN-FILTER",
@@ -153,11 +177,14 @@ def check_undefined_filters(tree: TemplateNode, source: str) -> Tuple[Diagnostic
 
 
 def check_undefined_functions(tree: TemplateNode, source: str) -> Tuple[Diagnostic, ...]:
+    """Check for unknown functions. Custom functions declared via {# @function name #} are allowed."""
+    known = frozenset(BUILTIN_FUNCTIONS.keys()) | _collect_annotations(source, 'function')
     diags: list[Diagnostic] = []
     def visit(node: Node):
-        if isinstance(node, FunctionCallNode) and node.name and node.name not in BUILTIN_FUNCTIONS:
+        if isinstance(node, FunctionCallNode) and node.name and node.name not in known:
             diags.append(Diagnostic(
-                message=f"Unknown function '{node.name}()'.",
+                message=f"Unknown function '{node.name}()'. "
+                        f"Declare it with {{# @function {node.name} #}} if it's a custom function.",
                 severity=Severity.WARNING,
                 range=Range(node.line, node.column, node.line, node.column + len(node.name)),
                 rule_id="TWIG-UNKNOWN-FUNCTION",
@@ -167,14 +194,39 @@ def check_undefined_functions(tree: TemplateNode, source: str) -> Tuple[Diagnost
 
 
 def check_undefined_tests(tree: TemplateNode, source: str) -> Tuple[Diagnostic, ...]:
+    """Check for unknown tests. Custom tests declared via {# @test name #} are allowed."""
+    known = frozenset(BUILTIN_TESTS.keys()) | _collect_annotations(source, 'test')
     diags: list[Diagnostic] = []
     def visit(node: Node):
-        if isinstance(node, TestNode) and node.name and node.name not in BUILTIN_TESTS:
+        if isinstance(node, TestNode) and node.name and node.name not in known:
             diags.append(Diagnostic(
-                message=f"Unknown test '{node.name}'.",
+                message=f"Unknown test '{node.name}'. "
+                        f"Declare it with {{# @test {node.name} #}} if it's a custom test.",
                 severity=Severity.WARNING,
                 range=Range(node.line, node.column, node.line, node.column + len(node.name)),
                 rule_id="TWIG-UNKNOWN-TEST",
+            ))
+    walk(tree, visit)
+    return tuple(diags)
+
+
+def check_undefined_tags(tree: TemplateNode, source: str) -> Tuple[Diagnostic, ...]:
+    """Check for unknown tags. Custom tags declared via {# @tag name #} are allowed."""
+    known = frozenset(BUILTIN_TAGS.keys()) | _collect_annotations(source, 'tag')
+    diags: list[Diagnostic] = []
+    def visit(node: Node):
+        if isinstance(node, (BlockTagNode, InlineTagNode)) and node.name and node.name not in known:
+            # Skip end tags (endif, endblock etc.) — they derive from known tags
+            if node.name.startswith('end'):
+                base = node.name[3:]  # remove 'end' prefix
+                if base in known:
+                    return
+            diags.append(Diagnostic(
+                message=f"Unknown tag '{{% {node.name} %}}'. "
+                        f"Declare it with {{# @tag {node.name} #}} if it's a custom tag.",
+                severity=Severity.WARNING,
+                range=Range(node.line, node.column, node.line, node.column + len(node.name)),
+                rule_id="TWIG-UNKNOWN-TAG",
             ))
     walk(tree, visit)
     return tuple(diags)
@@ -321,6 +373,7 @@ ALL_RULES: Dict[str, RuleFunc] = {
     "undefined-filters": check_undefined_filters,
     "undefined-functions": check_undefined_functions,
     "undefined-tests": check_undefined_tests,
+    "undefined-tags": check_undefined_tags,
     "deprecated-features": check_deprecated_features,
     "raw-filter": check_raw_filter_usage,
     "missing-escape": check_missing_escape,
@@ -334,6 +387,7 @@ DEFAULT_SEVERITIES: Dict[str, Severity] = {
     "undefined-filters": Severity.WARNING,
     "undefined-functions": Severity.WARNING,
     "undefined-tests": Severity.WARNING,
+    "undefined-tags": Severity.WARNING,
     "deprecated-features": Severity.WARNING,
     "raw-filter": Severity.WARNING,
     "missing-escape": Severity.HINT,

@@ -150,10 +150,11 @@ def check_deprecated_features(tree: TemplateNode, source: str) -> Tuple[Diagnost
         if isinstance(node, (BlockTagNode, InlineTagNode)):
             if node.name in DEPRECATED and DEPRECATED[node.name]["type"] == "tag":
                 info = DEPRECATED[node.name]
+                start_col = node.column + 1  # skip space after {%
                 diags.append(Diagnostic(
                     message=f"Deprecated tag '{node.name}': {info['message']}",
                     severity=Severity.WARNING,
-                    range=Range(node.line, node.column, node.line, node.column + len(node.name)),
+                    range=Range(node.line, start_col, node.line, start_col + len(node.name)),
                     rule_id="TWIG-DEPRECATED-TAG",
                 ))
         if isinstance(node, FilterNode) and node.name in DEPRECATED and DEPRECATED[node.name]["type"] == "filter":
@@ -205,36 +206,44 @@ def check_hardcoded_strings(tree: TemplateNode, source: str) -> Tuple[Diagnostic
 def check_variable_usage(tree: TemplateNode, source: str) -> Tuple[Diagnostic, ...]:
     diags: list[Diagnostic] = []
     defined: set[str] = set(GLOBAL_VARIABLES)
-    used_before_defined: list[tuple[str, int, int]] = []
+    defined.update({'app', 'form'})  # Symfony global variables
 
-    def collect_sets(node: Node):
+    def collect_definitions(node: Node):
+        """Collect variable names from set tags and for-loop iterators."""
         if isinstance(node, InlineTagNode) and node.name == "set":
-            # Extract set variable names (works for both single and multiple assignment)
             for arg in node.args:
                 if isinstance(arg, LiteralNode) and isinstance(arg.value, str):
                     defined.add(arg.value)
                 elif isinstance(arg, VariableNode):
                     defined.add(arg.name)
 
-    def check_uses(node: Node):
-        if isinstance(node, VariableNode):
-            if node.name not in defined and not node.attributes:
-                used_before_defined.append((node.name, node.line, node.column))
-        elif isinstance(node, PrintNode) and node.expression:
-            pass  # Expression walk handles this
+        # {% for item, key in items %} — 'item' and 'key' are defined
+        if isinstance(node, BlockTagNode) and node.name == "for" and node.args:
+            for arg in node.args:
+                if isinstance(arg, VariableNode):
+                    defined.add(arg.name)
+                    # Also add sub-attributes? No, just the top-level name
 
-    walk(tree, collect_sets)
+    walk(tree, collect_definitions)
 
     def check_var(node: Node):
         if isinstance(node, VariableNode):
             parts = [node.name] + list(node.attributes)
-            if parts[0] not in defined and parts[0] not in ('loop',):
-                diags.append(Diagnostic(
-                    message=f"Variable '{parts[0]}' may not be defined.",
-                    severity=Severity.WARNING,
-                    range=Range(node.line, node.column, node.line, node.column + len(parts[0])),
-                    rule_id="TWIG-UNDEFINED-VAR",
-                ))
+            name = parts[0]
+            # Skip if defined, loop variable, or looks like a common external variable
+            if name in defined or name == 'loop':
+                return
+            # Skip common patterns passed from controllers (heuristic: camelCase/snake_case)
+            # These are almost always controller-passed variables
+            if name.startswith('_') or name.startswith('app.'):
+                return
+
+            diags.append(Diagnostic(
+                message=f"Variable '{name}' may not be defined.",
+                severity=Severity.HINT,  # HINT instead of WARNING — less intrusive
+                range=Range(node.line, node.column, node.line, node.column + len(name)),
+                rule_id="TWIG-UNDEFINED-VAR",
+            ))
 
     walk(tree, check_var)
     return tuple(diags)
@@ -265,5 +274,5 @@ DEFAULT_SEVERITIES: Dict[str, Severity] = {
     "raw-filter": Severity.WARNING,
     "missing-escape": Severity.HINT,
     "hardcoded-text": Severity.HINT,
-    "variable-usage": Severity.WARNING,
+    "variable-usage": Severity.HINT,   # HINT: controller vars are external
 }

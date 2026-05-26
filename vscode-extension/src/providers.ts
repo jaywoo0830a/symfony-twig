@@ -639,3 +639,247 @@ export class TwigSignatureHelpProvider implements vscode.SignatureHelpProvider {
         return h;
     }
 }
+
+// ═══════════════════════════════════════════════════════════════════════
+// 15. Code Actions (Quick Fix)
+// ═══════════════════════════════════════════════════════════════════════
+
+export class TwigCodeActionProvider implements vscode.CodeActionProvider {
+    provideCodeActions(
+        document: vscode.TextDocument,
+        range: vscode.Range | vscode.Selection,
+        context: vscode.CodeActionContext,
+    ): vscode.ProviderResult<(vscode.CodeAction | vscode.Command)[]> {
+        const actions: vscode.CodeAction[] = [];
+
+        for (const diag of context.diagnostics) {
+            if (diag.source !== 'twig-analyzer') continue;
+
+            const code = typeof diag.code === 'string' ? diag.code : '';
+
+            // Quick fix: add |e escape filter
+            if (code === 'TWIG-RAW-FILTER' || code === 'TWIG-MISSING-ESCAPE') {
+                const fix = new vscode.CodeAction('Add |e escape filter', vscode.CodeActionKind.QuickFix);
+                fix.diagnostics = [diag];
+                fix.edit = new vscode.WorkspaceEdit();
+                const line = document.lineAt(diag.range.end.line);
+                const afterEnd = line.text.substring(diag.range.end.character);
+                // Find }} to insert before
+                const endPos = line.text.indexOf('}}', diag.range.end.character);
+                if (endPos >= 0) {
+                    fix.edit.insert(document.uri, new vscode.Position(diag.range.end.line, endPos), '|e');
+                }
+                actions.push(fix);
+            }
+
+            // Quick fix: wrap in {% if defined %}
+            if (code === 'TWIG-UNDEFINED-VAR') {
+                const fix = new vscode.CodeAction('Wrap in {% if defined %}', vscode.CodeActionKind.QuickFix);
+                fix.diagnostics = [diag];
+                fix.edit = new vscode.WorkspaceEdit();
+                const line = document.lineAt(diag.range.start.line);
+                fix.edit.insert(document.uri, new vscode.Position(diag.range.start.line, 0),
+                    `{% if ${document.getText(diag.range)} is defined %}\n`);
+                fix.edit.insert(document.uri, new vscode.Position(diag.range.end.line, line.text.length),
+                    `\n{% endif %}`);
+                actions.push(fix);
+            }
+
+            // Quick fix: disable rule
+            if (code !== 'TWIG-PARSE-ERROR' && code !== 'TWIG-INTERNAL-ERROR') {
+                const disable = new vscode.CodeAction(`Disable rule '${code}'`, vscode.CodeActionKind.QuickFix);
+                disable.command = {
+                    command: 'workbench.action.openSettings',
+                    title: 'Disable Rule',
+                    arguments: ['twigAnalyzer.disabledRules'],
+                };
+                disable.diagnostics = [diag];
+                actions.push(disable);
+            }
+        }
+
+        return actions;
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// 16. Document Highlight — matching {% if %} ↔ {% endif %}
+// ═══════════════════════════════════════════════════════════════════════
+
+const HIGHLIGHT_PAIRS: Record<string, string> = {
+    block: 'endblock', endblock: 'block',
+    'for': 'endfor', endfor: 'for',
+    'if': 'endif', endif: 'if',
+    macro: 'endmacro', endmacro: 'macro',
+    apply: 'endapply', endapply: 'apply',
+    autoescape: 'endautoescape', endautoescape: 'autoescape',
+    embed: 'endembed', endembed: 'embed',
+    cache: 'endcache', endcache: 'cache',
+    deprecated: 'enddeprecated', enddeprecated: 'deprecated',
+    guard: 'endguard', endguard: 'guard',
+    sandbox: 'endsandbox', endsandbox: 'sandbox',
+    set: 'endset', endset: 'set',
+    verbatim: 'endverbatim', endverbatim: 'verbatim',
+    with: 'endwith', endwith: 'with',
+};
+
+export class TwigHighlightProvider implements vscode.DocumentHighlightProvider {
+    provideDocumentHighlights(
+        document: vscode.TextDocument,
+        position: vscode.Position,
+    ): vscode.ProviderResult<vscode.DocumentHighlight[]> {
+        const wordRange = document.getWordRangeAtPosition(position, /\w+/);
+        if (!wordRange) return [];
+        const word = document.getText(wordRange);
+        const pair = HIGHLIGHT_PAIRS[word];
+        if (!pair) return [];
+
+        const highlights: vscode.DocumentHighlight[] = [];
+        highlights.push(new vscode.DocumentHighlight(wordRange, vscode.DocumentHighlightKind.Read));
+
+        // Find matching pair
+        const pattern = new RegExp(`\\{%-?\\s*${pair}\\b`, 'g');
+        for (let i = 0; i < document.lineCount; i++) {
+            const line = document.lineAt(i).text;
+            let match: RegExpExecArray | null;
+            while ((match = pattern.exec(line)) !== null) {
+                const start = match.index + match[0].indexOf(pair);
+                const r = new vscode.Range(i, start, i, start + pair.length);
+                highlights.push(new vscode.DocumentHighlight(r, vscode.DocumentHighlightKind.Text));
+            }
+        }
+
+        return highlights;
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// 17. Rename Provider — rename blocks/macros (F2)
+// ═══════════════════════════════════════════════════════════════════════
+
+export class TwigRenameProvider implements vscode.RenameProvider {
+    provideRenameEdits(
+        document: vscode.TextDocument,
+        position: vscode.Position,
+        newName: string,
+    ): vscode.ProviderResult<vscode.WorkspaceEdit> {
+        const wordRange = document.getWordRangeAtPosition(position, /\w+/);
+        if (!wordRange) return null;
+        const word = document.getText(wordRange);
+
+        // Check context: is this in {% block NAME %} or {% endblock NAME %}?
+        const line = document.lineAt(position).text;
+        const isBlockName = /\{%-?\s*(?:block|endblock)\s+\w*$/.test(line.substring(0, position.character)) ||
+                            /\{%-?\s*(?:macro|endmacro)\s+\w*$/.test(line.substring(0, position.character));
+
+        if (!isBlockName) return null;
+
+        const edit = new vscode.WorkspaceEdit();
+        const pattern = new RegExp(`(\\{%-?\\s*(?:block|endblock)\\s+)${word}\\b`, 'g');
+
+        for (let i = 0; i < document.lineCount; i++) {
+            const lineText = document.lineAt(i).text;
+            let match: RegExpExecArray | null;
+            while ((match = pattern.exec(lineText)) !== null) {
+                const start = match.index + match[1].length;
+                const r = new vscode.Range(i, start, i, start + word.length);
+                edit.replace(document.uri, r, newName);
+            }
+        }
+
+        return edit;
+    }
+
+    prepareRename?(
+        document: vscode.TextDocument,
+        position: vscode.Position,
+    ): vscode.ProviderResult<vscode.Range | { range: vscode.Range; placeholder: string }> {
+        const wordRange = document.getWordRangeAtPosition(position, /\w+/);
+        if (!wordRange) throw new Error('Cannot rename');
+        const word = document.getText(wordRange);
+        const line = document.lineAt(position).text;
+        if (/\{%-?\s*(?:block|endblock|macro|endmacro)\s+\w*$/.test(line.substring(0, position.character))) {
+            return wordRange;
+        }
+        throw new Error('Cannot rename');
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// 18. Color Provider — CSS color previews in Twig
+// ═══════════════════════════════════════════════════════════════════════
+
+export class TwigColorProvider implements vscode.DocumentColorProvider {
+    provideDocumentColors(document: vscode.TextDocument): vscode.ProviderResult<vscode.ColorInformation[]> {
+        const colors: vscode.ColorInformation[] = [];
+        const hexRe = /#[0-9a-fA-F]{3,8}\b/g;
+        const rgbRe = /rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/g;
+        const rgbaRe = /rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*([\d.]+)\s*\)/g;
+
+        for (let i = 0; i < document.lineCount; i++) {
+            const line = document.lineAt(i).text;
+            
+            for (const re of [hexRe, rgbRe]) {
+                let match: RegExpExecArray | null;
+                while ((match = re.exec(line)) !== null) {
+                    const color = this.parseColor(match[0]);
+                    if (color) {
+                        const start = match.index;
+                        const end = start + match[0].length;
+                        colors.push(new vscode.ColorInformation(
+                            new vscode.Range(i, start, i, end), color,
+                        ));
+                    }
+                }
+            }
+        }
+        return colors;
+    }
+
+    provideColorPresentations(
+        color: vscode.Color,
+    ): vscode.ProviderResult<vscode.ColorPresentation[]> {
+        const r = Math.round(color.red * 255);
+        const g = Math.round(color.green * 255);
+        const b = Math.round(color.blue * 255);
+        return [{ label: `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}` }];
+    }
+
+    private parseColor(text: string): vscode.Color | undefined {
+        if (text.startsWith('#')) {
+            const h = text.substring(1);
+            if (h.length === 3) {
+                return new vscode.Color(
+                    parseInt(h[0]+h[0], 16) / 255,
+                    parseInt(h[1]+h[1], 16) / 255,
+                    parseInt(h[2]+h[2], 16) / 255, 1,
+                );
+            }
+            if (h.length === 6) {
+                return new vscode.Color(
+                    parseInt(h.substring(0,2), 16) / 255,
+                    parseInt(h.substring(2,4), 16) / 255,
+                    parseInt(h.substring(4,6), 16) / 255, 1,
+                );
+            }
+            if (h.length === 8) {
+                return new vscode.Color(
+                    parseInt(h.substring(0,2), 16) / 255,
+                    parseInt(h.substring(2,4), 16) / 255,
+                    parseInt(h.substring(4,6), 16) / 255,
+                    parseInt(h.substring(6,8), 16) / 255,
+                );
+            }
+        }
+        if (text.startsWith('rgb')) {
+            const m = text.match(/[\d.]+/g);
+            if (m && m.length >= 3) {
+                return new vscode.Color(
+                    parseInt(m[0]) / 255, parseInt(m[1]) / 255, parseInt(m[2]) / 255,
+                    m.length >= 4 ? parseFloat(m[3]) : 1,
+                );
+            }
+        }
+        return undefined;
+    }
+}

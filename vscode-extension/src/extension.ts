@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
 
-import { TwigFormattingProvider, TwigHoverProvider, TwigDefinitionProvider, TwigCompletionProvider, TwigSymbolProvider, TwigFoldingProvider, TwigSignatureHelpProvider } from './providers';
+import { TwigFormattingProvider, TwigHoverProvider, TwigDefinitionProvider, TwigCompletionProvider, TwigSymbolProvider, TwigFoldingProvider, TwigSignatureHelpProvider, TwigCodeActionProvider, TwigHighlightProvider, TwigRenameProvider, TwigColorProvider } from './providers';
 
 // ═══════════════════════════════════════════════════════════════════════
 // 1. Types — algebraic, immutable data descriptions
@@ -636,6 +636,74 @@ export function activate(context: vscode.ExtensionContext): void {
         vscode.languages.registerDefinitionProvider(
             { language: 'twig', scheme: 'file' },
             new TwigDefinitionProvider(),
+        ),
+    );
+
+    // ---- Completion: Twig keywords (tags, filters, functions) ----
+    context.subscriptions.push(
+        vscode.languages.registerCompletionItemProvider(
+            { language: 'twig', scheme: 'file' },
+            new TwigCompletionProvider(),
+            ' ', '|', '.', '(',
+        ),
+    );
+
+    // ---- Symbol provider: Outline / Breadcrumbs ----
+    context.subscriptions.push(
+        vscode.languages.registerDocumentSymbolProvider(
+            { language: 'twig', scheme: 'file' },
+            new TwigSymbolProvider(),
+            { label: 'Twig Blocks' },
+        ),
+    );
+
+    // ---- Folding: collapse block/if/for regions ----
+    context.subscriptions.push(
+        vscode.languages.registerFoldingRangeProvider(
+            { language: 'twig', scheme: 'file' },
+            new TwigFoldingProvider(),
+        ),
+    );
+
+    // ---- Signature help: function/filter parameters ----
+    context.subscriptions.push(
+        vscode.languages.registerSignatureHelpProvider(
+            { language: 'twig', scheme: 'file' },
+            new TwigSignatureHelpProvider(),
+            '(',
+        ),
+    );
+
+    // ---- Code Actions: Quick Fix ----
+    context.subscriptions.push(
+        vscode.languages.registerCodeActionsProvider(
+            { language: 'twig', scheme: 'file' },
+            new TwigCodeActionProvider(),
+            { providedCodeActionKinds: [vscode.CodeActionKind.QuickFix] },
+        ),
+    );
+
+    // ---- Document Highlight: matching {% if %} ↔ {% endif %} ----
+    context.subscriptions.push(
+        vscode.languages.registerDocumentHighlightProvider(
+            { language: 'twig', scheme: 'file' },
+            new TwigHighlightProvider(),
+        ),
+    );
+
+    // ---- Rename: F2 on block/macro names ----
+    context.subscriptions.push(
+        vscode.languages.registerRenameProvider(
+            { language: 'twig', scheme: 'file' },
+            new TwigRenameProvider(),
+        ),
+    );
+
+    // ---- Color Provider: CSS color previews ----
+    context.subscriptions.push(
+        vscode.languages.registerColorProvider(
+            { language: 'twig', scheme: 'file' },
+            new TwigColorProvider(),
         ),
     );
 }

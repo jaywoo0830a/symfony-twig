@@ -310,14 +310,21 @@ export class TwigHoverProvider implements vscode.HoverProvider {
         document: vscode.TextDocument,
         position: vscode.Position,
     ): vscode.ProviderResult<vscode.Hover> {
-        const range = document.getWordRangeAtPosition(position, /[\w.]+/);
+        // Try exact word at cursor first, then broaden to dot-paths
+        let range = document.getWordRangeAtPosition(position, /\w+/);
+        if (range === undefined) {
+            // fallback: dot-separated paths like node.author.credentials
+            range = document.getWordRangeAtPosition(position, /[\w.]+/);
+        }
         if (range === undefined) return null;
 
         const word = document.getText(range);
 
-        // Check for filter: word after |
-        const linePrefix = document.lineAt(position).text.substring(0, position.character);
-        const filterMatch = linePrefix.match(/\|\s*([\w.]+)$/);
+        // Use end of the word range (not cursor) so hover over "da" finds "date"
+        const lineUpToWord = document.lineAt(range.end.line).text.substring(0, range.end.character);
+
+        // Check for filter: word after | with optional whitespace
+        const filterMatch = lineUpToWord.match(/\|\s*([\w.]+)$/);
         const lookup = filterMatch !== null ? filterMatch[1] : word;
 
         const entry = BUILTIN_HOVER_DATA[lookup];
@@ -327,7 +334,7 @@ export class TwigHoverProvider implements vscode.HoverProvider {
             `### \`${lookup}\`\n\n${entry.description}\n\n` +
             `> Since Twig ${entry.since}  \n` +
             `> Example: \`${entry.example}\`  \n\n` +
-            `[Twig Docs](${entry.link})`,
+            `[📖 Twig Docs](${entry.link})`,
         );
         content.isTrusted = true;
 
@@ -525,40 +532,164 @@ export class TwigDefinitionProvider implements vscode.DefinitionProvider {
 // 12. Completion provider — Twig keywords
 // ═══════════════════════════════════════════════════════════════════════
 
-export const TWIG_COMPLETIONS: readonly vscode.CompletionItem[] = [
-    ...['apply','autoescape','block','cache','deprecated','embed','for','guard','if','macro','sandbox','set','verbatim','with'].map(tag => {
-        const item = new vscode.CompletionItem(tag, vscode.CompletionItemKind.Keyword);
-        item.detail = 'Twig Block Tag';
-        item.insertText = new vscode.SnippetString(`${tag} $1 %}\n$0\n{% end${tag} %}`);
-        return item;
-    }),
-    ...['do','extends','flush','from','import','include','use'].map(tag => {
-        const item = new vscode.CompletionItem(tag, vscode.CompletionItemKind.Keyword);
-        item.detail = 'Twig Tag';
-        item.insertText = new vscode.SnippetString(`${tag} $1 %}`);
-        return item;
-    }),
-    ...['e','upper','lower','title','trim','date','default','escape','first','last','length','keys','join','json_encode','raw','replace','reverse','round','slice','sort','split','striptags','url_encode','abs','batch','capitalize','merge','nl2br','number_format','format'].map(f => {
-        const item = new vscode.CompletionItem(f, vscode.CompletionItemKind.Function);
-        item.detail = 'Twig Filter';
-        item.insertText = new vscode.SnippetString(f);
-        return item;
-    }),
-    ...['range','cycle','date','dump','include','max','min','parent','random','source','attribute','block','constant','path','url','asset','render','csrf_token','is_granted'].map(fn => {
-        const item = new vscode.CompletionItem(fn, vscode.CompletionItemKind.Function);
-        item.detail = 'Twig Function';
-        item.insertText = new vscode.SnippetString(`${fn}($1)`);
-        return item;
-    }),
+// ── context scanner: walks backward from cursor to find which Twig scope we're in ──
+type TwigContext = 'tag' | 'expression' | 'filter' | 'html';
+
+function getTwigContext(document: vscode.TextDocument, position: vscode.Position): TwigContext {
+    const text = document.getText();
+    const offset = document.offsetAt(position);
+
+    // scan backward to find the nearest unclosed {{, {%, or | pipe
+    let depth = 0;
+    let tagStart = -1;
+    let pipePos = -1;
+
+    for (let i = offset - 1; i >= 0; i--) {
+        const ch = text[i];
+        if (ch === '}' && i > 0 && text[i - 1] === '}') {
+            // }} closes expression — skip past it
+            depth++;
+            i--; // skip second }
+            continue;
+        }
+        if (ch === '%' && i > 0 && text[i - 1] === '%') {
+            // %} closes tag — skip
+            depth++;
+            i--;
+            continue;
+        }
+        if (ch === '{' && i > 0 && text[i - 1] === '{') {
+            // {{ opens expression
+            if (depth > 0) { depth--; i--; continue; }
+            tagStart = i - 1; // position of first {
+            break;
+        }
+        if (ch === '%' && i > 0 && text[i - 1] === '{') {
+            // {% opens tag
+            if (depth > 0) { depth--; i--; continue; }
+            tagStart = i - 1;
+            break;
+        }
+        if (ch === '|' && pipePos < 0) {
+            pipePos = i;
+        }
+    }
+
+    // Determine context
+    if (tagStart >= 0 && text[tagStart + 1] === '%') {
+        return 'tag';           // inside {% ... %}
+    }
+    if (tagStart >= 0 && text[tagStart + 1] === '{') {
+        if (pipePos >= 0 && pipePos > tagStart) return 'filter'; // after | inside {{
+        return 'expression';    // inside {{ ... }}
+    }
+    return 'html';              // outside any twig tag
+}
+
+// ── completion item builders (with hover-doc integration) ──
+
+function makeTagItem(name: string, block: boolean): vscode.CompletionItem {
+    const item = new vscode.CompletionItem(name, vscode.CompletionItemKind.Keyword);
+    item.detail = block ? 'Twig Block Tag' : 'Twig Tag';
+    item.filterText = name;
+    item.sortText = '0_' + name;
+    if (block) {
+        item.insertText = new vscode.SnippetString(`${name} $1 %}\n$0\n{% end${name} %}`);
+    } else {
+        item.insertText = new vscode.SnippetString(`${name} $1 %}`);
+    }
+    const doc = BUILTIN_HOVER_DATA[name];
+    if (doc) item.documentation = new vscode.MarkdownString(`**${doc.description}**\n\n${doc.example}\n\nSince: ${doc.since}\n\n[📖 Docs](${doc.link})`);
+    return item;
+}
+
+function makeFilterItem(name: string): vscode.CompletionItem {
+    const item = new vscode.CompletionItem(name, vscode.CompletionItemKind.Method);
+    item.detail = 'Twig Filter';
+    item.filterText = name;
+    item.sortText = '1_' + name;
+    item.insertText = name;
+    const doc = BUILTIN_HOVER_DATA[name];
+    if (doc) item.documentation = new vscode.MarkdownString(`**${doc.description}**\n\n${doc.example}\n\nSince: ${doc.since}\n\n[📖 Docs](${doc.link})`);
+    return item;
+}
+
+function makeFunctionItem(name: string): vscode.CompletionItem {
+    const item = new vscode.CompletionItem(name, vscode.CompletionItemKind.Function);
+    item.detail = 'Twig Function';
+    item.filterText = name;
+    item.sortText = '2_' + name;
+    item.insertText = new vscode.SnippetString(`${name}($1)`);
+    const doc = BUILTIN_HOVER_DATA[name];
+    if (doc) item.documentation = new vscode.MarkdownString(`**${doc.description}**\n\n${doc.example}\n\nSince: ${doc.since}\n\n[📖 Docs](${doc.link})`);
+    return item;
+}
+
+// ── static completion lists (built once) ──
+
+const BLOCK_TAGS  = ['apply','autoescape','block','cache','deprecated','embed','for','guard','if','macro','sandbox','set','verbatim','with'];
+const INLINE_TAGS = ['do','extends','flush','from','import','include','use','types'];
+const TAG_COMPLETIONS: vscode.CompletionItem[] = [
+    ...BLOCK_TAGS.map(t => makeTagItem(t, true)),
+    ...INLINE_TAGS.map(t => makeTagItem(t, false)),
 ];
 
+const FILTER_NAMES = [
+    'abs','batch','capitalize','convert_encoding','country_name','currency_name',
+    'date','date_modify','default','e','escape','first','format','format_currency',
+    'format_date','format_datetime','format_file_size','format_number','format_time',
+    'join','json_encode','keys','language_name','last','length','locale_name',
+    'lower','map','merge','nl2br','number_format','raw','reduce','replace',
+    'reverse','round','slice','sort','split','striptags','timezone_name','title',
+    'trim','u','upper','url_encode','column','filter','find'
+];
+const FILTER_COMPLETIONS: vscode.CompletionItem[] = FILTER_NAMES.map(makeFilterItem);
+
+const FUNCTION_NAMES = [
+    'range','cycle','date','dump','include','max','min','parent','random',
+    'source','attribute','block','constant','path','url','asset','render',
+    'csrf_token','is_granted','absolute_url','asset_version','callable_string',
+    'class_name','country_timezones','currency_symbol','enum','expression',
+    'form','form_widget','form_row','form_label','form_errors','form_rest',
+    'form_start','form_end','html_classes','impersonation_exit','impersonation_path',
+    'logout_path','logout_url','relative_path','vich_uploader_asset'
+];
+const FUNCTION_COMPLETIONS: vscode.CompletionItem[] = FUNCTION_NAMES.map(makeFunctionItem);
+
+// ── provider ──
+
 export class TwigCompletionProvider implements vscode.CompletionItemProvider {
-    provideCompletionItems(document: vscode.TextDocument, position: vscode.Position): vscode.ProviderResult<vscode.CompletionItem[]> {
-        const linePrefix = document.lineAt(position).text.substring(0, position.character);
-        if (linePrefix.match(/\{%\s*\w*$/)) return TWIG_COMPLETIONS.filter(c => c.kind === vscode.CompletionItemKind.Keyword);
-        if (linePrefix.match(/\|\s*\w*$/)) return TWIG_COMPLETIONS.filter(c => c.detail === 'Twig Filter');
-        if (linePrefix.includes('{{') && !linePrefix.includes('}}')) return TWIG_COMPLETIONS.filter(c => c.detail === 'Twig Function' || c.detail === 'Twig Filter');
-        return [];
+    provideCompletionItems(
+        document: vscode.TextDocument,
+        position: vscode.Position,
+        _token: vscode.CancellationToken,
+    ): vscode.ProviderResult<vscode.CompletionItem[]> {
+        const ctx = getTwigContext(document, position);
+
+        switch (ctx) {
+            case 'tag':
+                // inside {% %} — suggest tags, with "end*" variants
+                return [
+                    ...TAG_COMPLETIONS,
+                    ...BLOCK_TAGS.map(t => {
+                        const item = new vscode.CompletionItem(`end${t}`, vscode.CompletionItemKind.Keyword);
+                        item.detail = 'Twig End Tag';
+                        item.filterText = `end${t}`;
+                        item.sortText = '9_' + t;
+                        item.insertText = new vscode.SnippetString(`end${t} %}`);
+                        return item;
+                    }),
+                ];
+            case 'filter':
+                // after | pipe — suggest filters only
+                return FILTER_COMPLETIONS;
+            case 'expression':
+                // inside {{ }} but not after | — suggest functions + filters
+                return [...FUNCTION_COMPLETIONS, ...FILTER_COMPLETIONS];
+            default:
+                // outside twig tags (HTML) — suggest tags
+                return TAG_COMPLETIONS;
+        }
     }
 }
 

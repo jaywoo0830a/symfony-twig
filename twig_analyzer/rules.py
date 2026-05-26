@@ -4,6 +4,7 @@ Each rule: (TemplateNode, str) → Tuple[Diagnostic, ...]
 """
 
 from __future__ import annotations
+import re
 from typing import Callable, Dict, FrozenSet, Tuple, Sequence
 
 from .ast import (
@@ -239,12 +240,44 @@ def check_hardcoded_strings(tree: TemplateNode, source: str) -> Tuple[Diagnostic
 
 
 def check_variable_usage(tree: TemplateNode, source: str) -> Tuple[Diagnostic, ...]:
+    """Check for variables that may not be defined.
+
+    Variables are considered defined when declared via:
+      1. {% set name = value %}            — explicit assignment
+      2. {% for item in items %}           — loop variable
+      3. {% types {name: 'type', ...} %}   — Twig 3.15+ type declaration
+      4. {# @var name Type #}              — PHP-Doc-style annotation
+      5. {# @param name Type #}             — PHPDoc param annotation
+      6. Built-in globals (_self, _context, _charset, loop)
+      7. Symfony globals (app, form)
+    """
     diags: list[Diagnostic] = []
     defined: set[str] = set(GLOBAL_VARIABLES)
     defined.update({'app', 'form'})  # Symfony global variables
 
+    # ── 1. {% types {varName: 'type', ...} %} — Twig 3.15+ official syntax ──
+    for m in re.finditer(r'\{%-?\s*types\s+\{([^}]+)\}\s*-?%\}', source):
+        mapping_str = m.group(1)
+        for vm in re.finditer(r'(\w+)\s*:', mapping_str):
+            defined.add(vm.group(1))
+
+    # ── 2. {# @var name Type #} / {# @param name Type #} — PHPDoc style ──
+    for m in re.finditer(r'\{\#\s*@(?:var|param)\s+(\w+)', source):
+        defined.add(m.group(1))
+
+    # ── 3. {% for item in items %} / {% for key, item in items %} — loop vars ──
+    for m in re.finditer(r'\{%-?\s*for\s+(\w+(?:\s*,\s*\w+)*)\s+in\b', source):
+        vars_str = m.group(1)
+        for v in re.finditer(r'(\w+)', vars_str):
+            defined.add(v.group(1))
+
+    # ── 4. {% set name = value %} — explicit assignment ──
+    for m in re.finditer(r'\{%-?\s*set\s+(\w+)\s*=', source):
+        defined.add(m.group(1))
+
+    # ── 5. Collect definitions from AST (InlineTagNode set tags) ──
     def collect_definitions(node: Node):
-        """Collect variable names from set tags and for-loop iterators."""
+        """Collect variable names from inline set tags (args already parsed)."""
         if isinstance(node, InlineTagNode) and node.name == "set":
             for arg in node.args:
                 if isinstance(arg, LiteralNode) and isinstance(arg.value, str):
@@ -252,15 +285,9 @@ def check_variable_usage(tree: TemplateNode, source: str) -> Tuple[Diagnostic, .
                 elif isinstance(arg, VariableNode):
                     defined.add(arg.name)
 
-        # {% for item, key in items %} — 'item' and 'key' are defined
-        if isinstance(node, BlockTagNode) and node.name == "for" and node.args:
-            for arg in node.args:
-                if isinstance(arg, VariableNode):
-                    defined.add(arg.name)
-                    # Also add sub-attributes? No, just the top-level name
-
     walk(tree, collect_definitions)
 
+    # ── 4. Check variable usage ──
     def check_var(node: Node):
         if isinstance(node, VariableNode):
             parts = [node.name] + list(node.attributes)
@@ -268,13 +295,13 @@ def check_variable_usage(tree: TemplateNode, source: str) -> Tuple[Diagnostic, .
             # Skip if defined, loop variable, or looks like a common external variable
             if name in defined or name == 'loop':
                 return
-            # Skip common patterns passed from controllers (heuristic: camelCase/snake_case)
-            # These are almost always controller-passed variables
-            if name.startswith('_') or name.startswith('app.'):
+            # Skip variables starting with _ (private/internal convention)
+            if name.startswith('_'):
                 return
 
             diags.append(Diagnostic(
-                message=f"Variable '{name}' may not be defined.",
+                message=f"Variable '{name}' may not be defined. "
+                        f"Use {{% types {{{name}: 'type'}} %}} or {{# @var {name} Type #}} to declare it.",
                 severity=Severity.HINT,  # HINT instead of WARNING — less intrusive
                 range=Range(node.line, node.column, node.line, node.column + len(name)),
                 rule_id="TWIG-UNDEFINED-VAR",

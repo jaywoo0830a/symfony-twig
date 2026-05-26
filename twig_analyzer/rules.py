@@ -100,6 +100,41 @@ def check_extends_first(tree: TemplateNode, source: str) -> Tuple[Diagnostic, ..
     return tuple(diags)
 
 
+def check_extends_content_outside_blocks(tree: TemplateNode, source: str) -> Tuple[Diagnostic, ...]:
+    """When using {% extends %}, all content must be inside {% block %} tags."""
+    diags: list[Diagnostic] = []
+    has_extends = any(
+        isinstance(child, InlineTagNode) and child.name == "extends"
+        for child in tree.body
+    )
+    if not has_extends:
+        return ()
+
+    for child in tree.body:
+        if isinstance(child, TextNode) and child.value.strip():
+            diags.append(Diagnostic(
+                message="Content outside blocks is ignored when extending a parent template.",
+                severity=Severity.WARNING,
+                range=Range(child.line, child.column, child.line, child.column + len(child.value)),
+                rule_id="TWIG-EXTENDS-CONTENT-OUTSIDE-BLOCK",
+            ))
+        elif isinstance(child, PrintNode):
+            diags.append(Diagnostic(
+                message="Expressions outside blocks are ignored when using {% extends %}.",
+                severity=Severity.WARNING,
+                range=Range(child.line, child.column, child.line, child.column),
+                rule_id="TWIG-EXTENDS-CONTENT-OUTSIDE-BLOCK",
+            ))
+        elif isinstance(child, InlineTagNode) and child.name not in ("extends", "use", "import", "from", "set"):
+            diags.append(Diagnostic(
+                message=f"Tag '{{% {child.name} %}}' outside blocks is ignored when extending.",
+                severity=Severity.WARNING,
+                range=Range(child.line, child.column, child.line, child.column + len(child.name)),
+                rule_id="TWIG-EXTENDS-CONTENT-OUTSIDE-BLOCK",
+            ))
+    return tuple(diags)
+
+
 def check_undefined_filters(tree: TemplateNode, source: str) -> Tuple[Diagnostic, ...]:
     diags: list[Diagnostic] = []
     def visit(node: Node):
@@ -255,6 +290,7 @@ def check_variable_usage(tree: TemplateNode, source: str) -> Tuple[Diagnostic, .
 
 ALL_RULES: Dict[str, RuleFunc] = {
     "extends-first": check_extends_first,
+    "extends-content-outside-block": check_extends_content_outside_blocks,
     "undefined-filters": check_undefined_filters,
     "undefined-functions": check_undefined_functions,
     "undefined-tests": check_undefined_tests,
@@ -267,6 +303,7 @@ ALL_RULES: Dict[str, RuleFunc] = {
 
 DEFAULT_SEVERITIES: Dict[str, Severity] = {
     "extends-first": Severity.ERROR,
+    "extends-content-outside-block": Severity.WARNING,
     "undefined-filters": Severity.WARNING,
     "undefined-functions": Severity.WARNING,
     "undefined-tests": Severity.WARNING,

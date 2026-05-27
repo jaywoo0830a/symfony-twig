@@ -7,11 +7,14 @@
 #   runtime  → production LSP server  (minimal, ~120 MB)
 #   dev      → development with hot-reload, test tools
 #   test     → CI runner: pytest, coverage
+#   data     → generates JSON from YAML (hover, completions, signatures)
+#   compile  → TypeScript compilation + JSON data
 #
 # Build targets:
 #   docker build --target runtime -t twig-analyzer-lsp .
 #   docker build --target dev     -t twig-analyzer-dev .
 #   docker build --target test    -t twig-analyzer-test .
+#   docker build --target compile -t twig-analyzer-compile .
 #
 # Override entrypoint for CLI usage:
 #   docker run --rm twig-analyzer-lsp twig-analyze templates/
@@ -89,13 +92,27 @@ ENTRYPOINT ["python", "-m", "pytest"]
 CMD ["tests/", "-v", "--tb=short"]
 
 # ═══════════════════════════════════════════
-# Stage 4: TypeScript Compiler
+# Stage 4: JSON Data Generator
+# ═══════════════════════════════════════════
+FROM builder AS data
+
+# Replicate project layout for the script
+WORKDIR /project
+COPY scripts/generate-vscode-data.py ./scripts/
+COPY twig_analyzer/data/ ./twig_analyzer/data/
+RUN mkdir -p vscode-extension/data && python3 scripts/generate-vscode-data.py
+
+# ═══════════════════════════════════════════
+# Stage 5: TypeScript Compiler
 # ═══════════════════════════════════════════
 FROM node:22-slim AS compile
 
 WORKDIR /build
 COPY vscode-extension/package.json vscode-extension/package-lock.json* ./
 RUN npm install --silent 2>/dev/null || npm install
+
+# Copy generated JSON data from data stage
+COPY --from=data /project/vscode-extension/data/ ./src/data/
 
 COPY vscode-extension/tsconfig.json .
 COPY vscode-extension/src/ ./src/

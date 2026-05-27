@@ -457,35 +457,19 @@ function makeFunctionItem(name: string): vscode.CompletionItem {
     return item;
 }
 
-// ── static completion lists (built once) ──
+// ── static completion lists (from YAML-generated JSON) ──
 
-const BLOCK_TAGS  = ['apply','autoescape','block','cache','deprecated','embed','for','guard','if','macro','sandbox','set','verbatim','with'];
-const INLINE_TAGS = ['do','extends','flush','from','import','include','use','types'];
+const BLOCK_TAGS: readonly string[] = (completionNamesJson as any).blockTags;
+const INLINE_TAGS: readonly string[] = (completionNamesJson as any).inlineTags;
 const TAG_COMPLETIONS: vscode.CompletionItem[] = [
     ...BLOCK_TAGS.map(t => makeTagItem(t, true)),
     ...INLINE_TAGS.map(t => makeTagItem(t, false)),
 ];
 
-const FILTER_NAMES = [
-    'abs','batch','capitalize','convert_encoding','country_name','currency_name',
-    'date','date_modify','default','e','escape','first','format','format_currency',
-    'format_date','format_datetime','format_file_size','format_number','format_time',
-    'join','json_encode','keys','language_name','last','length','locale_name',
-    'lower','map','merge','nl2br','number_format','raw','reduce','replace',
-    'reverse','round','slice','sort','split','striptags','timezone_name','title',
-    'trim','u','upper','url_encode','column','filter','find'
-];
+const FILTER_NAMES: readonly string[] = (completionNamesJson as any).filterNames;
 const FILTER_COMPLETIONS: vscode.CompletionItem[] = FILTER_NAMES.map(makeFilterItem);
 
-const FUNCTION_NAMES = [
-    'range','cycle','date','dump','include','max','min','parent','random',
-    'source','attribute','block','constant','path','url','asset','render',
-    'csrf_token','is_granted','absolute_url','asset_version','callable_string',
-    'class_name','country_timezones','currency_symbol','enum','expression',
-    'form','form_widget','form_row','form_label','form_errors','form_rest',
-    'form_start','form_end','html_classes','impersonation_exit','impersonation_path',
-    'logout_path','logout_url','relative_path','vich_uploader_asset'
-];
+const FUNCTION_NAMES: readonly string[] = (completionNamesJson as any).functionNames;
 const FUNCTION_COMPLETIONS: vscode.CompletionItem[] = FUNCTION_NAMES.map(makeFunctionItem);
 
 // ── provider ──
@@ -572,20 +556,16 @@ export class TwigFoldingProvider implements vscode.FoldingRangeProvider {
 // 14. Signature help
 // ═══════════════════════════════════════════════════════════════════════
 
-const TWIG_SIGNATURES: Record<string, { label: string; params: vscode.ParameterInformation[] }> = {
-    range:      { label: 'range(low, high, step?)',          params: [new vscode.ParameterInformation('low', 'Start'), new vscode.ParameterInformation('high', 'End'), new vscode.ParameterInformation('step', 'Increment')] },
-    path:       { label: 'path(route, params?)',              params: [new vscode.ParameterInformation('route', 'Route name'), new vscode.ParameterInformation('params', 'Parameters')] },
-    url:        { label: 'url(route, params?)',               params: [new vscode.ParameterInformation('route', 'Route name'), new vscode.ParameterInformation('params', 'Parameters')] },
-    dump:       { label: 'dump(...variables)',                params: [new vscode.ParameterInformation('variables', 'Variables to dump')] },
-    include:    { label: 'include(template, vars?)',          params: [new vscode.ParameterInformation('template', 'Template path'), new vscode.ParameterInformation('vars', 'Variables')] },
-    block:      { label: 'block(name)',                       params: [new vscode.ParameterInformation('name', 'Block name')] },
-    constant:   { label: 'constant(name)',                    params: [new vscode.ParameterInformation('name', 'PHP constant')] },
-    is_granted: { label: 'is_granted(role, object?)',         params: [new vscode.ParameterInformation('role', 'Role'), new vscode.ParameterInformation('object', 'Subject')] },
-    render:     { label: 'render(controller, options?)',      params: [new vscode.ParameterInformation('controller', 'Controller'), new vscode.ParameterInformation('options', 'Options')] },
-    csrf_token: { label: 'csrf_token(intention)',             params: [new vscode.ParameterInformation('intention', 'Intention')] },
-    max:        { label: 'max(...values)',                    params: [new vscode.ParameterInformation('values', 'Values')] },
-    min:        { label: 'min(...values)',                    params: [new vscode.ParameterInformation('values', 'Values')] },
-};
+// ── Signatures loaded from YAML-generated JSON ──
+const _sigData: Record<string, { label: string; params: { name: string; description: string }[] }> = signaturesJson as any;
+
+const TWIG_SIGNATURES: Record<string, { label: string; params: vscode.ParameterInformation[] }> = {};
+for (const [name, info] of Object.entries(_sigData)) {
+    TWIG_SIGNATURES[name] = {
+        label: info.label,
+        params: (info.params || []).map((p: any) => new vscode.ParameterInformation(p.name, p.description)),
+    };
+}
 
 export class TwigSignatureHelpProvider implements vscode.SignatureHelpProvider {
     provideSignatureHelp(document: vscode.TextDocument, position: vscode.Position): vscode.ProviderResult<vscode.SignatureHelp> {
@@ -669,22 +649,13 @@ export class TwigCodeActionProvider implements vscode.CodeActionProvider {
 // 16. Document Highlight — matching {% if %} ↔ {% endif %}
 // ═══════════════════════════════════════════════════════════════════════
 
-const HIGHLIGHT_PAIRS: Record<string, string> = {
-    block: 'endblock', endblock: 'block',
-    'for': 'endfor', endfor: 'for',
-    'if': 'endif', endif: 'if',
-    macro: 'endmacro', endmacro: 'macro',
-    apply: 'endapply', endapply: 'apply',
-    autoescape: 'endautoescape', endautoescape: 'autoescape',
-    embed: 'endembed', endembed: 'embed',
-    cache: 'endcache', endcache: 'cache',
-    deprecated: 'enddeprecated', enddeprecated: 'deprecated',
-    guard: 'endguard', endguard: 'guard',
-    sandbox: 'endsandbox', endsandbox: 'sandbox',
-    set: 'endset', endset: 'set',
-    verbatim: 'endverbatim', endverbatim: 'verbatim',
-    with: 'endwith', endwith: 'with',
-};
+// ── Highlight pairs derived from end-tag-map ──
+const HIGHLIGHT_PAIRS: Record<string, string> = {};
+const _etm: Record<string, string> = (endTagMapJson as any).endTagMap || {};
+for (const [start, end] of Object.entries(_etm)) {
+    HIGHLIGHT_PAIRS[start] = end;
+    HIGHLIGHT_PAIRS[end] = start;
+}
 
 export class TwigHighlightProvider implements vscode.DocumentHighlightProvider {
     provideDocumentHighlights(

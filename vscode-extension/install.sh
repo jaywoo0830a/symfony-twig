@@ -80,20 +80,22 @@ compile_typescript() {
         err "TypeScript compilation failed"
         return 1
     }
-    ok "TypeScript compiled"
+    ok "TypeScript compiled + JSON generated"
 
     local cid
     cid=$(docker create "$COMPILE_IMAGE" 2>/dev/null)
     [ -z "$cid" ] && { err "Failed to create container"; return 1; }
 
-    rm -rf "${SCRIPT_DIR}/out" 2>/dev/null || true
+    rm -rf "${SCRIPT_DIR}/out" "${SCRIPT_DIR}/src/data" 2>/dev/null || true
     docker cp "$cid:/build/out" "${SCRIPT_DIR}/out" >/dev/null 2>&1 || {
         docker rm "$cid" >/dev/null 2>&1
         err "Failed to extract compiled output"
         return 1
     }
+    mkdir -p "${SCRIPT_DIR}/src/data"
+    docker cp "$cid:/build/src/data/." "${SCRIPT_DIR}/src/data/" >/dev/null 2>&1 || true
     docker rm "$cid" >/dev/null 2>&1
-    ok "Output extracted to out/"
+    ok "Output extracted (out/ + src/data/)"
 }
 
 install_files() {

@@ -71,14 +71,6 @@ type CliError =
     | { readonly type: 'no_output'; readonly message: string }
     | { readonly type: 'exit_code'; readonly code: number };
 
-const cliErrorLabel: Record<CliError['type'], string> = {
-    ENOENT: 'Python not found or twig_analyzer not installed',
-    timeout: 'Analysis timed out',
-    module_not_found: 'twig_analyzer module not found',
-    no_output: 'CLI produced no output',
-    exit_code: 'CLI exited with non-zero code',
-};
-
 // ---- Diagnostic partition (pure) ----
 
 interface DiagnosticPartition {
@@ -187,37 +179,44 @@ const basename = (filePath: string): string =>
     filePath.split('/').pop() ?? filePath;
 
 // ═══════════════════════════════════════════════════════════════════════
-// 3. Docker command — all analysis runs in a container
+// 3. Docker paths — host ↔ container mapping
 // ═══════════════════════════════════════════════════════════════════════
 
 const DOCKER_IMAGE = 'twig-analyzer-lsp:latest';
 const CONTAINER_WORKSPACE = '/workspace';
 
-export const findAnalyzerCommand = (): CliCommand => {
-    const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? process.cwd();
+/** Resolve the host workspace root once. Falls back to cwd if no workspace open. */
+const getWorkspaceRoot = (): string =>
+    vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? process.cwd();
 
+/**
+ * Convert a host path → container path.
+ * /home/user/project/templates/file.twig → /workspace/templates/file.twig
+ *
+ * If the file is outside the workspace root, the path is used as-is with
+ * a warning logged (the Docker volume mount won't include it).
+ */
+const toContainerPath = (hostPath: string): string => {
+    const root = getWorkspaceRoot();
+    if (root && hostPath.startsWith(root)) {
+        return CONTAINER_WORKSPACE + hostPath.slice(root.length);
+    }
+    outputChannel.appendLine(`[warn] File outside workspace: ${hostPath} (root: ${root})`);
+    return hostPath;
+};
+
+export const findAnalyzerCommand = (): CliCommand => {
+    const root = getWorkspaceRoot();
     return {
         cmd: 'docker',
         args: [
             'run', '--rm',
-            '-v', `${workspaceRoot}:${CONTAINER_WORKSPACE}:ro`,
+            '-v', `${root}:${CONTAINER_WORKSPACE}:ro`,
             '--entrypoint', 'twig-analyze',
             DOCKER_IMAGE,
         ],
         env: { ...process.env },
     };
-};
-
-/**
- * Convert a host file path to a Docker container path.
- * /home/user/project/templates/base.html.twig → /workspace/templates/base.html.twig
- */
-const toContainerPath = (hostPath: string): string => {
-    const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? '';
-    if (workspaceRoot && hostPath.startsWith(workspaceRoot)) {
-        return CONTAINER_WORKSPACE + hostPath.slice(workspaceRoot.length);
-    }
-    return hostPath;
 };
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -231,9 +230,8 @@ interface CliResult {
     readonly stderr: string;
 }
 
-const runAnalyzerCli = async (cmd: CliCommand, filePath: string): Promise<Result<CliResult, CliError>> => {
+const runAnalyzerCli = async (cmd: CliCommand, containerPath: string): Promise<Result<CliResult, CliError>> => {
     const analyzerArgs = buildAnalyzerArgs();
-    const containerPath = toContainerPath(filePath);
     const allArgs = [...cmd.args, 'analyze', ...analyzerArgs, '--format', 'json', containerPath];
 
     try {
@@ -273,24 +271,31 @@ const showStatusMessage = (fileName: string, partition: DiagnosticPartition): vo
 };
 
 const reportCliError = (error: CliError): void => {
-    const homeDir = process.env.HOME ?? '~';
-    const installCmd = `bash ${homeDir}/symfony-twig/vscode-extension/install.sh`;
+    const extDir = path.resolve(__dirname, '..');
+    const installCmd = `bash ${extDir}/install.sh`;
 
     switch (error.type) {
         case 'ENOENT':
-            vscode.window.showErrorMessage(`Twig Analyzer: ${cliErrorLabel.ENOENT}\nRun: ${installCmd}`);
+            outputChannel.appendLine(`[error] Docker not found at: ${error.path}`);
+            vscode.window.showErrorMessage(
+                `Twig Analyzer: Docker not available. Is Docker Desktop running?\nReinstall: ${installCmd}`
+            );
             break;
         case 'timeout':
-            console.warn('[twig-analyzer] Timed out');
+            outputChannel.appendLine('[error] Docker timed out after 30s');
+            vscode.window.showWarningMessage('Twig Analyzer: Analysis timed out. Is Docker responsive?');
             break;
         case 'module_not_found':
-            vscode.window.showErrorMessage(`Twig Analyzer: ${cliErrorLabel.module_not_found}\nRun: ${installCmd}`);
+            outputChannel.appendLine(`[error] ${error.stderr}`);
+            vscode.window.showErrorMessage(
+                `Twig Analyzer: twig_analyzer module not found in container.\nRebuild: docker build -t twig-analyzer-lsp .`
+            );
             break;
         case 'no_output':
-            console.error('[twig-analyzer] CLI failed with no output:', error.message);
+            outputChannel.appendLine(`[error] No output: ${error.message}`);
             break;
         case 'exit_code':
-            console.log(`[twig-analyzer] CLI exited with code ${error.code}`);
+            outputChannel.appendLine(`[warn] CLI exit code ${error.code} — processing stdout anyway`);
             break;
     }
 };
@@ -306,24 +311,29 @@ const analyzeDocument = async (document: vscode.TextDocument): Promise<void> => 
         return;
     }
 
+    outputChannel.appendLine(`[analyze] ${document.fileName}`);
     const filePath = document.uri.fsPath;
+    const containerPath = toContainerPath(filePath);
     const cmd = findAnalyzerCommand();
-    const cliResult = await runAnalyzerCli(cmd, filePath);
+    outputChannel.appendLine(`[analyze] cmd: ${cmd.cmd} ${cmd.args.join(' ')}`);
+    const cliResult = await runAnalyzerCli(cmd, containerPath);
 
     if (cliResult.ok === false) {
+        outputChannel.appendLine(`[analyze] ERROR: ${cliResult.error.type}`);
         reportCliError(cliResult.error);
         return;
     }
 
     const parseResult = parseAnalyzerOutput(cliResult.value.stdout);
     if (parseResult.ok === false) {
-        console.error('[twig-analyzer]', parseResult.error);
+        outputChannel.appendLine(`[analyze] PARSE ERROR: ${parseResult.error}`);
         return;
     }
 
-    const lspDiags = findFileDiagnostics(parseResult.value, filePath);
+    const lspDiags = findFileDiagnostics(parseResult.value, containerPath);
     const vsDiags = lspDiags.map(lspDiagToVsCodeDiag);
     const partition = partitionDiagnostics(vsDiags);
+    outputChannel.appendLine(`[analyze] ${partition.total} diagnostics (${partition.errors.length}E ${partition.warnings.length}W ${partition.infos.length}I ${partition.hints.length}H)`);
 
     setDiagnostics(document.uri, vsDiags);
     showStatusMessage(basename(document.fileName), partition);
@@ -444,8 +454,13 @@ const shouldAutoClose = (tagName: string): boolean =>
 
 const diagnosticCollection = vscode.languages.createDiagnosticCollection('twig-analyzer');
 
+// Output channel for debugging
+const outputChannel = vscode.window.createOutputChannel('Twig Analyzer');
+
 export function activate(context: vscode.ExtensionContext): void {
-    console.log('Twig Static Analyzer is now active');
+    outputChannel.appendLine('Twig Static Analyzer activating...');
+    outputChannel.appendLine(`Docker: ${findAnalyzerCommand().cmd}`);
+    outputChannel.appendLine(`Workspace: ${vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? 'none'}`);
 
     // Manual analysis command
     context.subscriptions.push(

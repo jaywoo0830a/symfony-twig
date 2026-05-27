@@ -1,10 +1,18 @@
 """Analysis rules for Twig static analyzer — pure functions.
 
 Each rule: (TemplateNode, str) → Tuple[Diagnostic, ...]
+
+Design:
+  - Pure: no mutable state except the diagnostic accumulator list
+  - Rule functions are composed with helper pure functions
+  - AST walk uses match/case for exhaustive dispatch (Python 3.10+)
+  - Collections use tuple/frozenset for immutability
 """
 
 from __future__ import annotations
 import re
+from functools import reduce
+from itertools import chain
 from typing import Callable, Dict, FrozenSet, Tuple, Sequence
 
 from .ast import (
@@ -30,12 +38,9 @@ def _collect_annotations(source: str, kind: str) -> FrozenSet[str]:
     """Extract names from {# @kind name Type? #} annotations.
 
     Supports:
-      {# @filter my_filter #}
-      {# @function my_func #}
-      {# @test my_test #}
-      {# @tag my_tag #}
-      {# @var my_var Type #}
-      {# @param my_param Type #}
+      {# @filter my_filter #}   {# @function my_func #}
+      {# @test my_test #}       {# @tag my_tag #}
+      {# @var my_var Type #}    {# @param my_param Type #}
     """
     return frozenset(
         m.group(1)
@@ -44,54 +49,62 @@ def _collect_annotations(source: str, kind: str) -> FrozenSet[str]:
 
 
 # ═══════════════════════════════════════════════════════════════════════
-# 1. AST walker (pure: (Node, Callable) → None, but collects via side-list)
+# 1. AST walker — match/case dispatch, pure visitor pattern
 # ═══════════════════════════════════════════════════════════════════════
 
+_WALK_CHILDREN: Dict[type, Tuple[str, ...]] = {
+    TemplateNode:    ("body",),
+    BlockTagNode:    ("body", "else_body"),
+    PrintNode:       ("expression",),
+    FilterNode:      ("target", "args"),
+    FunctionCallNode: ("args",),
+    TestNode:        ("target", "args"),
+    BinaryOpNode:    ("left", "right"),
+    UnaryOpNode:     ("operand",),
+    ArrayNode:       ("items",),
+    MappingNode:     ("items",),  # .values()
+    NamedArgNode:    ("value",),
+}
+
 def walk(node: Node, visitor: Callable[[Node], None]) -> None:
-    """Walk AST depth-first, calling visitor on each node."""
+    """Walk AST depth-first, calling visitor(node) then recursing children.
+
+    Uses match/case for exhaustive type dispatch (Python 3.10+).
+    """
     visitor(node)
 
-    if isinstance(node, TemplateNode):
-        for c in node.body:
-            walk(c, visitor)
-    elif isinstance(node, BlockTagNode):
-        for c in node.body:
-            walk(c, visitor)
-        for c in node.else_body:
-            walk(c, visitor)
-        for clause in node.elseif_clauses:
-            for c in clause.get("body", ()):
-                walk(c, visitor)
-    elif isinstance(node, PrintNode) and node.expression:
-        walk(node.expression, visitor)
-    elif isinstance(node, FilterNode):
-        if node.target:
-            walk(node.target, visitor)
-        for a in node.args:
-            walk(a, visitor)
-    elif isinstance(node, FunctionCallNode):
-        for a in node.args:
-            walk(a, visitor)
-    elif isinstance(node, TestNode):
-        if node.target:
-            walk(node.target, visitor)
-        for a in node.args:
-            walk(a, visitor)
-    elif isinstance(node, BinaryOpNode):
-        if node.left:
-            walk(node.left, visitor)
-        if node.right:
-            walk(node.right, visitor)
-    elif isinstance(node, UnaryOpNode) and node.operand:
-        walk(node.operand, visitor)
-    elif isinstance(node, ArrayNode):
-        for item in node.items:
-            walk(item, visitor)
-    elif isinstance(node, MappingNode):
-        for v in node.items.values():
+    match node:
+        case TemplateNode(body=body):
+            for child in body: walk(child, visitor)
+        case BlockTagNode(body=body, else_body=eb, elseif_clauses=ec):
+            for child in chain(body, eb):
+                walk(child, visitor)
+            for clause in ec:
+                for child in clause.get("body", ()):
+                    walk(child, visitor)
+        case PrintNode(expression=expr) if expr is not None:
+            walk(expr, visitor)
+        case FilterNode(target=tgt, args=args):
+            if tgt: walk(tgt, visitor)
+            for a in args: walk(a, visitor)
+        case FunctionCallNode(args=args):
+            for a in args: walk(a, visitor)
+        case TestNode(target=tgt, args=args):
+            if tgt: walk(tgt, visitor)
+            for a in args: walk(a, visitor)
+        case BinaryOpNode(left=l, right=r):
+            if l: walk(l, visitor)
+            if r: walk(r, visitor)
+        case UnaryOpNode(operand=op) if op is not None:
+            walk(op, visitor)
+        case ArrayNode(items=items):
+            for item in items: walk(item, visitor)
+        case MappingNode(items=items):
+            for v in items.values(): walk(v, visitor)
+        case NamedArgNode(value=v) if v is not None:
             walk(v, visitor)
-    elif isinstance(node, NamedArgNode) and node.value:
-        walk(node.value, visitor)
+        case _:
+            pass  # TextNode, CommentNode, LiteralNode, VariableNode — leaf nodes
 
 
 # ═══════════════════════════════════════════════════════════════════════

@@ -73,3 +73,4 @@ field_help:            { args: 1, since: "—" }
 field_errors:          { args: 1, since: "—" }
 field_id:              { args: 1, since: "—" }
 field_choices:         { args: 1, since: "—" }
+fragment_uri:          { args: 1, since: "—" }

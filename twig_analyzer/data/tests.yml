@@ -20,3 +20,7 @@ odd:          { args: 0, since: "1.0" }
 same as:      { args: 1, since: "1.0" }
 sameas:       { args: 1, since: "1.0", alias_of: "same as" }
 sequence:     { args: 0, since: "3.14" }
+
+# ── Symfony Tests ──
+rootform:     { args: 0, since: "—" }
+selectedchoice: { args: 1, since: "—" }

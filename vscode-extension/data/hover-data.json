@@ -138,10 +138,10 @@
     "link": "https://twig.symfony.com/doc/3.x/tags/form_theme.html"
   },
   "trans": {
-    "description": "[Symfony] Renders translated content block",
+    "description": "Twig filter — —",
     "since": "—",
-    "example": "{% trans %}Hello %name%{% endtrans %}",
-    "link": "https://twig.symfony.com/doc/3.x/tags/trans.html"
+    "example": "{{ data|trans }}",
+    "link": "https://twig.symfony.com/doc/3.x/filters/trans.html"
   },
   "trans_default_domain": {
     "description": "[Symfony] Sets the default translation domain for a template",
@@ -527,6 +527,96 @@
     "example": "{{ data|url_encode }}",
     "link": "https://twig.symfony.com/doc/3.x/filters/url_encode.html"
   },
+  "abbr_class": {
+    "description": "Twig filter — —",
+    "since": "—",
+    "example": "{{ data|abbr_class }}",
+    "link": "https://twig.symfony.com/doc/3.x/filters/abbr_class.html"
+  },
+  "abbr_method": {
+    "description": "Twig filter — —",
+    "since": "—",
+    "example": "{{ data|abbr_method }}",
+    "link": "https://twig.symfony.com/doc/3.x/filters/abbr_method.html"
+  },
+  "emojify": {
+    "description": "Twig filter — —",
+    "since": "—",
+    "example": "{{ data|emojify }}",
+    "link": "https://twig.symfony.com/doc/3.x/filters/emojify.html"
+  },
+  "file_excerpt": {
+    "description": "Twig filter — —",
+    "since": "—",
+    "example": "{{ data|file_excerpt }}",
+    "link": "https://twig.symfony.com/doc/3.x/filters/file_excerpt.html"
+  },
+  "file_link": {
+    "description": "Twig filter — —",
+    "since": "—",
+    "example": "{{ data|file_link }}",
+    "link": "https://twig.symfony.com/doc/3.x/filters/file_link.html"
+  },
+  "file_relative": {
+    "description": "Twig filter — —",
+    "since": "—",
+    "example": "{{ data|file_relative }}",
+    "link": "https://twig.symfony.com/doc/3.x/filters/file_relative.html"
+  },
+  "format_args": {
+    "description": "Twig filter — —",
+    "since": "—",
+    "example": "{{ data|format_args }}",
+    "link": "https://twig.symfony.com/doc/3.x/filters/format_args.html"
+  },
+  "format_args_as_text": {
+    "description": "Twig filter — —",
+    "since": "—",
+    "example": "{{ data|format_args_as_text }}",
+    "link": "https://twig.symfony.com/doc/3.x/filters/format_args_as_text.html"
+  },
+  "format_file": {
+    "description": "Twig filter — —",
+    "since": "—",
+    "example": "{{ data|format_file }}",
+    "link": "https://twig.symfony.com/doc/3.x/filters/format_file.html"
+  },
+  "format_file_from_text": {
+    "description": "Twig filter — —",
+    "since": "—",
+    "example": "{{ data|format_file_from_text }}",
+    "link": "https://twig.symfony.com/doc/3.x/filters/format_file_from_text.html"
+  },
+  "humanize": {
+    "description": "Twig filter — —",
+    "since": "—",
+    "example": "{{ data|humanize }}",
+    "link": "https://twig.symfony.com/doc/3.x/filters/humanize.html"
+  },
+  "sanitize_html": {
+    "description": "Twig filter — —",
+    "since": "—",
+    "example": "{{ data|sanitize_html }}",
+    "link": "https://twig.symfony.com/doc/3.x/filters/sanitize_html.html"
+  },
+  "serialize": {
+    "description": "Twig filter — —",
+    "since": "—",
+    "example": "{{ data|serialize }}",
+    "link": "https://twig.symfony.com/doc/3.x/filters/serialize.html"
+  },
+  "yaml_dump": {
+    "description": "Twig filter — —",
+    "since": "—",
+    "example": "{{ data|yaml_dump }}",
+    "link": "https://twig.symfony.com/doc/3.x/filters/yaml_dump.html"
+  },
+  "yaml_encode": {
+    "description": "Twig filter — —",
+    "since": "—",
+    "example": "{{ data|yaml_encode }}",
+    "link": "https://twig.symfony.com/doc/3.x/filters/yaml_encode.html"
+  },
   "attribute": {
     "description": "Twig function — 1.0",
     "since": "1.0",
@@ -893,6 +983,12 @@
     "example": "{{ field_choices() }}",
     "link": "https://twig.symfony.com/doc/3.x/functions/field_choices.html"
   },
+  "fragment_uri": {
+    "description": "Twig function — —",
+    "since": "—",
+    "example": "{{ fragment_uri() }}",
+    "link": "https://twig.symfony.com/doc/3.x/functions/fragment_uri.html"
+  },
   "defined": {
     "description": "Twig test — 1.0",
     "since": "1.0",
@@ -964,6 +1060,18 @@
     "since": "3.14",
     "example": "{% if x is sequence %}...{% endif %}",
     "link": "https://twig.symfony.com/doc/3.x/tests/sequence.html"
+  },
+  "rootform": {
+    "description": "Twig test — —",
+    "since": "—",
+    "example": "{% if x is rootform %}...{% endif %}",
+    "link": "https://twig.symfony.com/doc/3.x/tests/rootform.html"
+  },
+  "selectedchoice": {
+    "description": "Twig test — —",
+    "since": "—",
+    "example": "{% if x is selectedchoice %}...{% endif %}",
+    "link": "https://twig.symfony.com/doc/3.x/tests/selectedchoice.html"
   },
   "endapply": {
     "description": "Closes a {% apply %} block",
@@ -1059,7 +1167,7 @@
     "description": "Closes a {% trans %} block",
     "since": "—",
     "example": "{% endtrans %}",
-    "link": "https://twig.symfony.com/doc/3.x/tags/trans.html"
+    "link": "https://twig.symfony.com/doc/3.x/filters/trans.html"
   },
   "endstopwatch": {
     "description": "Closes a {% stopwatch %} block",

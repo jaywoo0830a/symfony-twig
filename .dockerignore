@@ -1,0 +1,40 @@
+# Twig Analyzer — .dockerignore
+# Exclude files not needed in Docker build context
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Tests & coverage
+.pytest_cache/
+htmlcov/
+.coverage
+reports/
+test-reports/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Git
+.git/
+.gitignore
+
+# Node (VS Code extension — built separately)
+vscode-extension/node_modules/
+vscode-extension/out/
+
+# Docs
+doc/
+
+# Misc
+*.md
+.env

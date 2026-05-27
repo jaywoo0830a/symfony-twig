@@ -6,10 +6,11 @@ build-backend = "setuptools.build_meta"
 name = "twig-analyzer"
 version = "1.0.0"
 description = "A static analyzer for Twig 3.x templates"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = { text = "MIT" }
 dependencies = [
     "colorama>=0.4.6",
+    "pyyaml>=6.0",
 ]
 
 [project.optional-dependencies]
@@ -20,6 +21,7 @@ dev = [
 
 [project.scripts]
 twig-analyze = "twig_analyzer.cli:main"
+twig-lsp = "twig_analyzer.lsp_server:run"
 
 [tool.setuptools.packages.find]
 include = ["twig_analyzer*"]

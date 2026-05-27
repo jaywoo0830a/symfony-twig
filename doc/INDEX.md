@@ -9,8 +9,7 @@ A comprehensive static analysis tool for Twig 3.x templates with VS Code Intelli
 | [Installation](installation.md) | Python package, VS Code extension setup |
 | [Configuration](configuration.md) | `.twig-analyzer.yml`, annotation syntax, per-file overrides |
 | [Rules](rules.md) | All 11 analysis rules with examples |
-| [VS Code Extension](vscode-extension.md) | IntelliSense, hover, completion, go-to-definition, formatting |
-| [CLI Reference](cli.md) | Command-line usage, JSON/JUnit output, CI integration |
+| [VS Code Extension](vscode-extension.md) | IntelliSense, hover, completion, go-to-definition, formatting || [LSP & Docker](lsp-docker.md) | Language Server Protocol server, Docker, docker-compose || [CLI Reference](cli.md) | Command-line usage, JSON/JUnit output, CI integration |
 
 ## Quick Start
 

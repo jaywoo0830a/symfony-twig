@@ -70,3 +70,21 @@ trim:         { args: 0, since: "1.0" }
 u:            { args: 0, since: "2.12" }
 upper:        { args: 0, since: "1.0" }
 url_encode:   { args: 0, since: "1.0" }
+
+# ── Symfony Filters ──
+abbr_class:       { args: 0, since: "—" }
+abbr_method:      { args: 0, since: "—" }
+emojify:          { args: 0, since: "—" }
+file_excerpt:     { args: 2, since: "—" }
+file_link:        { args: 2, since: "—" }
+file_relative:    { args: 0, since: "—" }
+format_args:      { args: 1, since: "—" }
+format_args_as_text: { args: 1, since: "—" }
+format_file:      { args: 2, since: "—" }
+format_file_from_text: { args: 1, since: "—" }
+humanize:         { args: 0, since: "—" }
+sanitize_html:    { args: 0, since: "—" }
+serialize:        { args: 1, since: "—" }
+trans:            { args: 2, since: "—" }
+yaml_dump:        { args: 1, since: "—" }
+yaml_encode:      { args: 1, since: "—" }

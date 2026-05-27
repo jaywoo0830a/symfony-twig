@@ -1,0 +1,134 @@
+# ═══════════════════════════════════════════════════════════════════════
+# Twig Analyzer — Docker Compose (v3.9+)
+# ═══════════════════════════════════════════════════════════════════════
+#
+# Services:
+#   lsp      → production LSP server (TCP :2087)
+#   lsp-dev  → development with hot-reload  (TCP :2088, profile: dev)
+#   test     → CI test runner (profile: ci)
+#   cli      → one-shot CLI commands (profile: tools)
+#
+# Quick start:
+#   ./run/up.sh                       # production
+#   ./run/up.sh --dev                 # development
+#   ./run/test.sh --docker            # run tests
+#   ./run/up.sh --cli "analyze templates/"   # CLI
+
+version: "3.9"
+
+x-env: &default-env
+  PYTHONUNBUFFERED: 1
+  PYTHONDONTWRITEBYTECODE: 1
+
+services:
+  # ═══════════════════════════════════════════════════════════════════
+  # Production: LSP server over TCP
+  # ═══════════════════════════════════════════════════════════════════
+  lsp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    image: twig-analyzer-lsp:latest
+    container_name: twig-lsp
+    restart: unless-stopped
+    command: >
+      sh -c "apt-get update -qq && apt-get install -y -qq socat >/dev/null 2>&1 &&
+             socat TCP-LISTEN:2087,reuseaddr,fork EXEC:'python -m twig_analyzer.lsp_server',pty,stderr"
+    ports:
+      - "2087:2087"
+    volumes:
+      - .:/workspace:ro
+    environment:
+      <<: *default-env
+      LSP_LOG_LEVEL: info
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: "256M"
+    networks:
+      - lsp-network
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f lsp_server || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  # ═══════════════════════════════════════════════════════════════════
+  # Development: LSP with auto-reload on code changes
+  # ═══════════════════════════════════════════════════════════════════
+  lsp-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    image: twig-analyzer-dev:latest
+    container_name: twig-lsp-dev
+    profiles: ["dev"]
+    command: >
+      sh -c "apt-get update -qq && apt-get install -y -qq socat >/dev/null 2>&1 &&
+             socat TCP-LISTEN:2087,reuseaddr,fork EXEC:'watchmedo auto-restart --pattern=*.py --directory=/workspace/twig_analyzer -- python -m twig_analyzer.lsp_server',pty,stderr"
+    ports:
+      - "2088:2087"
+    volumes:
+      - .:/workspace:ro
+    environment:
+      <<: *default-env
+    networks:
+      - lsp-network
+
+  # ═══════════════════════════════════════════════════════════════════
+  # Test / CI: run pytest suite
+  # ═══════════════════════════════════════════════════════════════════
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: test
+    image: twig-analyzer-test:latest
+    container_name: twig-test
+    profiles: ["ci"]
+    volumes:
+      - ./tests:/workspace/tests:ro
+      - ./twig_analyzer:/workspace/twig_analyzer:ro
+      - ./examples:/workspace/examples:ro
+      - ./.twig-analyzer.yml:/workspace/.twig-analyzer.yml:ro
+      - test-reports:/workspace/reports
+    environment:
+      <<: *default-env
+    command: >
+      tests/ -v --tb=short
+      --junitxml=reports/junit.xml
+      --cov=twig_analyzer
+      --cov-report=term-missing
+      --cov-report=html:reports/coverage
+    networks:
+      - lsp-network
+
+  # ═══════════════════════════════════════════════════════════════════
+  # CLI: one-shot analysis / formatting commands
+  # ═══════════════════════════════════════════════════════════════════
+  cli:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    image: twig-analyzer-lsp:latest
+    profiles: ["tools"]
+    entrypoint: ["twig-analyze"]
+    command: ["analyze", "--help"]
+    volumes:
+      - .:/workspace:ro
+    environment:
+      <<: *default-env
+    networks:
+      - lsp-network
+
+volumes:
+  test-reports:
+
+networks:
+  lsp-network:
+    driver: bridge

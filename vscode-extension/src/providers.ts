@@ -360,6 +360,109 @@ export class TwigDefinitionProvider implements vscode.DefinitionProvider {
     }
 }
 
+// ── Document Link provider: makes full template paths clickable ──
+// VS Code's default word detection splits on . and /, so paths like
+// 'public/_partials/cta/_block_body.html.twig' only underline parts.
+// This provider returns DocumentLink objects so the ENTIRE path string
+// (between quotes) renders as a single underlined, clickable link.
+// ═══════════════════════════════════════════════════════════════════════
+
+const TEMPLATE_PATH_PATTERNS: RegExp[] = [
+    // {% extends 'path' %} / {% include 'path' %} / {% embed 'path' %}
+    // {% import 'path' %} / {% from 'path' import ... %} / {% use 'path' %}
+    /\{%\s*(?:extends|include|embed|import|from|use)\s+(['"])([^'"]+)\1/g,
+    // {{ include('path') }} / {{ source('path') }} / {{ block('path') }}
+    /\{\{\s*(?:include|source|block)\s*\(\s*(['"])([^'"]+)\1\s*\)/g,
+    // {{ asset('path') }}
+    /\{\{\s*asset\s*\(\s*(['"])([^'"]+)\1\s*\)/g,
+    // {{ path('route') }} / {{ url('route') }}
+    /\{\{\s*(?:path|url)\s*\(\s*(['"])([^'"]+)\1\s*\)/g,
+];
+
+export class TwigDocumentLinkProvider implements vscode.DocumentLinkProvider {
+    provideDocumentLinks(
+        document: vscode.TextDocument,
+    ): vscode.ProviderResult<vscode.DocumentLink[]> {
+        const links: vscode.DocumentLink[] = [];
+        const baseDir = path.dirname(document.uri.fsPath);
+        const workspaceDir = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? baseDir;
+        const text = document.getText();
+
+        for (const pattern of TEMPLATE_PATH_PATTERNS) {
+            let match: RegExpExecArray | null;
+            while ((match = pattern.exec(text)) !== null) {
+                const fullMatch = match[0];
+                const pathStr = match[2];
+                const matchStart = match.index;
+
+                // Find the path portion within the full match (between quotes)
+                const quoteOffset = fullMatch.indexOf(match[1]);
+                const pathStart = matchStart + quoteOffset + 1;
+                const pathEnd = pathStart + pathStr.length;
+
+                const target = this.resolveTarget(pathStr, baseDir, workspaceDir);
+                if (target !== null) {
+                    const range = new vscode.Range(
+                        document.positionAt(pathStart),
+                        document.positionAt(pathEnd),
+                    );
+                    const link = new vscode.DocumentLink(range, target);
+                    link.tooltip = pathStr; // Show full path on hover
+                    links.push(link);
+                }
+            }
+        }
+
+        return links;
+    }
+
+    private resolveTarget(
+        clean: string,
+        baseDir: string,
+        workspaceDir: string,
+    ): vscode.Uri | null {
+        // Skip route names — path('route_name') and url('route_name') are not files
+        // (but asset() paths are)
+
+        // @Bundle notation
+        if (clean.startsWith('@')) {
+            const atPath = clean.replace(/^@(\w+)\//, 'bundles/$1/');
+            const twigDir = path.join(workspaceDir, 'templates', atPath);
+            if (fs.existsSync(twigDir)) return vscode.Uri.file(twigDir);
+        }
+
+        // Relative to current file
+        const relative = path.join(baseDir, clean);
+        if (fs.existsSync(relative)) return vscode.Uri.file(relative);
+
+        // Try adding .twig / .html.twig extensions
+        if (!clean.endsWith('.twig') && !clean.endsWith('.html.twig')) {
+            for (const ext of ['.twig', '.html.twig']) {
+                const p = path.join(baseDir, clean + ext);
+                if (fs.existsSync(p)) return vscode.Uri.file(p);
+            }
+        }
+
+        // templates/ directory (Symfony convention)
+        for (const templatesDir of ['templates', 'Resources/views']) {
+            const p = path.join(workspaceDir, templatesDir, clean);
+            if (fs.existsSync(p)) return vscode.Uri.file(p);
+            if (!clean.endsWith('.twig')) {
+                for (const ext of ['.twig', '.html.twig']) {
+                    const pe = path.join(workspaceDir, templatesDir, clean + ext);
+                    if (fs.existsSync(pe)) return vscode.Uri.file(pe);
+                }
+            }
+        }
+
+        // public/ directory (for asset() paths)
+        const publicPath = path.join(workspaceDir, 'public', clean);
+        if (fs.existsSync(publicPath)) return vscode.Uri.file(publicPath);
+
+        return null;
+    }
+}
+
 // ═══════════════════════════════════════════════════════════════════════
 // 12. Completion provider — Twig keywords
 // ═══════════════════════════════════════════════════════════════════════

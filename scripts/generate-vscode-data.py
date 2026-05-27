@@ -94,11 +94,66 @@ def main():
     end_tag_map = {n: f"end{n}" for n in block_tags}
     json.dump({"endTagMap": end_tag_map}, open(OUT_DIR / "end-tag-map.json", "w"), indent=2)
 
+    # ── html-completions.json ──
+    html_elements = yaml.safe_load(open(DATA_DIR / "html-elements.yml"))
+    html_attributes = yaml.safe_load(open(DATA_DIR / "html-attributes.yml"))
+
+    html_completions = {
+        "tags": [
+            {
+                "label": name,
+                "detail": info.get("completion_detail", f"HTML <{name}>"),
+                "insertText": info.get("snippet", f"{name}>$1</{name}>"),
+            }
+            for name, info in html_elements.items()
+        ],
+        "attributes": [
+            {
+                "label": name,
+                "detail": info.get("completion_detail", f"HTML {name}"),
+                "insertText": info.get("snippet", f'{name}="$1"'),
+            }
+            for name, info in html_attributes.items()
+        ],
+        "voidElements": sorted(
+            [name for name, info in html_elements.items() if info.get("void")]
+        ),
+    }
+    json.dump(html_completions, open(OUT_DIR / "html-completions.json", "w"), indent=2, ensure_ascii=False)
+
+    # ── html-hover.json ──
+    MDN_BASE = "https://developer.mozilla.org/en-US/docs"
+
+    html_hover = {
+        "elements": {
+            name: {
+                "description": info.get("description", ""),
+                "category": info.get("category", ""),
+                "link": f"{MDN_BASE}/{info.get('mdn', 'Web/HTML/Element')}",
+            }
+            for name, info in html_elements.items()
+        },
+        "attributes": {
+            name: {
+                "description": info.get("description", ""),
+                "link": f"{MDN_BASE}/{info.get('mdn', 'Web/HTML/Attributes')}",
+            }
+            for name, info in html_attributes.items()
+        },
+    }
+    json.dump(html_hover, open(OUT_DIR / "html-hover.json", "w"), indent=2, ensure_ascii=False)
+
+    tag_count = len(html_elements)
+    attr_count = len(html_attributes)
+    void_count = len(html_completions["voidElements"])
+
     print(f"Generated {len(hover)} hover entries, {len(sig_out)} signatures")
     print(f"  → {OUT_DIR}/hover-data.json")
     print(f"  → {OUT_DIR}/signatures.json")
     print(f"  → {OUT_DIR}/completion-names.json")
     print(f"  → {OUT_DIR}/end-tag-map.json")
+    print(f"  → {OUT_DIR}/html-completions.json ({tag_count} tags, {attr_count} attrs, {void_count} void)")
+    print(f"  → {OUT_DIR}/html-hover.json")
 
 
 if __name__ == "__main__":

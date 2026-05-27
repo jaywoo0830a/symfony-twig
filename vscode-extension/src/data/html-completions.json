@@ -1,83 +1,956 @@
 {
   "tags": [
-    { "label": "div",        "detail": "HTML Block Container",       "insertText": "div" },
-    { "label": "span",       "detail": "HTML Inline Container",      "insertText": "span" },
-    { "label": "p",          "detail": "HTML Paragraph",             "insertText": "p" },
-    { "label": "a",          "detail": "HTML Anchor/Link",           "insertText": "a href=\"$1\"$0" },
-    { "label": "img",        "detail": "HTML Image",                 "insertText": "img src=\"$1\" alt=\"$2\"$0" },
-    { "label": "ul",         "detail": "HTML Unordered List",        "insertText": "ul" },
-    { "label": "ol",         "detail": "HTML Ordered List",          "insertText": "ol" },
-    { "label": "li",         "detail": "HTML List Item",             "insertText": "li" },
-    { "label": "table",      "detail": "HTML Table",                 "insertText": "table" },
-    { "label": "tr",         "detail": "HTML Table Row",             "insertText": "tr" },
-    { "label": "td",         "detail": "HTML Table Cell",            "insertText": "td" },
-    { "label": "th",         "detail": "HTML Table Header",          "insertText": "th" },
-    { "label": "thead",      "detail": "HTML Table Head",            "insertText": "thead" },
-    { "label": "tbody",      "detail": "HTML Table Body",            "insertText": "tbody" },
-    { "label": "form",       "detail": "HTML Form",                  "insertText": "form action=\"$1\" method=\"$2\"$0" },
-    { "label": "input",      "detail": "HTML Input",                 "insertText": "input type=\"$1\"$0" },
-    { "label": "button",     "detail": "HTML Button",                "insertText": "button type=\"$1\"$0" },
-    { "label": "label",      "detail": "HTML Label",                 "insertText": "label for=\"$1\"$0" },
-    { "label": "select",     "detail": "HTML Select Dropdown",       "insertText": "select" },
-    { "label": "option",     "detail": "HTML Option",                "insertText": "option value=\"$1\"$0" },
-    { "label": "textarea",   "detail": "HTML Textarea",              "insertText": "textarea" },
-    { "label": "h1",         "detail": "HTML Heading 1",             "insertText": "h1" },
-    { "label": "h2",         "detail": "HTML Heading 2",             "insertText": "h2" },
-    { "label": "h3",         "detail": "HTML Heading 3",             "insertText": "h3" },
-    { "label": "h4",         "detail": "HTML Heading 4",             "insertText": "h4" },
-    { "label": "h5",         "detail": "HTML Heading 5",             "insertText": "h5" },
-    { "label": "h6",         "detail": "HTML Heading 6",             "insertText": "h6" },
-    { "label": "section",    "detail": "HTML Section",               "insertText": "section" },
-    { "label": "article",    "detail": "HTML Article",               "insertText": "article" },
-    { "label": "nav",        "detail": "HTML Navigation",            "insertText": "nav" },
-    { "label": "header",     "detail": "HTML Header",                "insertText": "header" },
-    { "label": "footer",     "detail": "HTML Footer",                "insertText": "footer" },
-    { "label": "main",       "detail": "HTML Main Content",          "insertText": "main" },
-    { "label": "aside",      "detail": "HTML Aside",                 "insertText": "aside" },
-    { "label": "figure",     "detail": "HTML Figure",                "insertText": "figure" },
-    { "label": "figcaption", "detail": "HTML Figure Caption",        "insertText": "figcaption" },
-    { "label": "video",      "detail": "HTML Video",                 "insertText": "video src=\"$1\"$0" },
-    { "label": "audio",      "detail": "HTML Audio",                 "insertText": "audio src=\"$1\"$0" },
-    { "label": "canvas",     "detail": "HTML Canvas",                "insertText": "canvas" },
-    { "label": "script",     "detail": "HTML Script",                "insertText": "script" },
-    { "label": "style",      "detail": "HTML Style",                 "insertText": "style" },
-    { "label": "link",       "detail": "HTML Link (CSS, etc.)",      "insertText": "link rel=\"$1\" href=\"$2\"$0" },
-    { "label": "meta",       "detail": "HTML Meta",                  "insertText": "meta name=\"$1\" content=\"$2\"$0" },
-    { "label": "title",      "detail": "HTML Title",                 "insertText": "title" },
-    { "label": "br",         "detail": "HTML Line Break",            "insertText": "br" },
-    { "label": "hr",         "detail": "HTML Horizontal Rule",       "insertText": "hr" },
-    { "label": "strong",     "detail": "HTML Strong (bold)",         "insertText": "strong" },
-    { "label": "em",         "detail": "HTML Emphasis (italic)",     "insertText": "em" },
-    { "label": "code",       "detail": "HTML Code",                  "insertText": "code" },
-    { "label": "pre",        "detail": "HTML Preformatted Text",     "insertText": "pre" },
-    { "label": "blockquote", "detail": "HTML Blockquote",            "insertText": "blockquote" },
-    { "label": "details",    "detail": "HTML Details/Accordion",     "insertText": "details" },
-    { "label": "summary",    "detail": "HTML Summary (for details)", "insertText": "summary" }
+    {
+      "label": "a",
+      "detail": "HTML Anchor",
+      "insertText": "a href=\"$1\">$2</a>"
+    },
+    {
+      "label": "abbr",
+      "detail": "Abbreviation",
+      "insertText": "abbr title=\"$1\">$2</abbr>"
+    },
+    {
+      "label": "address",
+      "detail": "Contact address",
+      "insertText": "address>$1</address>"
+    },
+    {
+      "label": "area",
+      "detail": "Image map area",
+      "insertText": "area shape=\"$1\" coords=\"$2\" href=\"$3\" alt=\"$4\">"
+    },
+    {
+      "label": "article",
+      "detail": "Article section",
+      "insertText": "article>\n  $1\n</article>"
+    },
+    {
+      "label": "aside",
+      "detail": "Aside (sidebar)",
+      "insertText": "aside>\n  $1\n</aside>"
+    },
+    {
+      "label": "audio",
+      "detail": "Audio player",
+      "insertText": "audio controls>\n  <source src=\"$1\" type=\"audio/$2\">\n</audio>"
+    },
+    {
+      "label": "b",
+      "detail": "Bold text",
+      "insertText": "b>$1</b>"
+    },
+    {
+      "label": "base",
+      "detail": "Base URL",
+      "insertText": "base href=\"$1\">"
+    },
+    {
+      "label": "bdi",
+      "detail": "Bidirectional isolate",
+      "insertText": "bdi>$1</bdi>"
+    },
+    {
+      "label": "bdo",
+      "detail": "Bidirectional override",
+      "insertText": "bdo dir=\"$1\">$2</bdo>"
+    },
+    {
+      "label": "blockquote",
+      "detail": "Block quotation",
+      "insertText": "blockquote cite=\"$1\">\n  $2\n</blockquote>"
+    },
+    {
+      "label": "body",
+      "detail": "Document body",
+      "insertText": "body>\n  $1\n</body>"
+    },
+    {
+      "label": "br",
+      "detail": "Line break",
+      "insertText": "br>"
+    },
+    {
+      "label": "button",
+      "detail": "Clickable button",
+      "insertText": "button type=\"$1\">$2</button>"
+    },
+    {
+      "label": "canvas",
+      "detail": "Graphics canvas",
+      "insertText": "canvas id=\"$1\" width=\"$2\" height=\"$3\"></canvas>"
+    },
+    {
+      "label": "caption",
+      "detail": "Table caption",
+      "insertText": "caption>$1</caption>"
+    },
+    {
+      "label": "cite",
+      "detail": "Citation",
+      "insertText": "cite>$1</cite>"
+    },
+    {
+      "label": "code",
+      "detail": "Inline code",
+      "insertText": "code>$1</code>"
+    },
+    {
+      "label": "col",
+      "detail": "Table column",
+      "insertText": "col span=\"$1\">"
+    },
+    {
+      "label": "colgroup",
+      "detail": "Table column group",
+      "insertText": "colgroup>\n  $1\n</colgroup>"
+    },
+    {
+      "label": "data",
+      "detail": "Machine-readable data",
+      "insertText": "data value=\"$1\">$2</data>"
+    },
+    {
+      "label": "datalist",
+      "detail": "Data list options",
+      "insertText": "datalist id=\"$1\">\n  $2\n</datalist>"
+    },
+    {
+      "label": "dd",
+      "detail": "Description detail",
+      "insertText": "dd>$1</dd>"
+    },
+    {
+      "label": "del",
+      "detail": "Deleted text",
+      "insertText": "del>$1</del>"
+    },
+    {
+      "label": "details",
+      "detail": "Disclosure widget",
+      "insertText": "details>\n  <summary>$1</summary>\n  $2\n</details>"
+    },
+    {
+      "label": "dfn",
+      "detail": "Definition term",
+      "insertText": "dfn>$1</dfn>"
+    },
+    {
+      "label": "dialog",
+      "detail": "Dialog box",
+      "insertText": "dialog open>\n  $1\n</dialog>"
+    },
+    {
+      "label": "div",
+      "detail": "Generic container",
+      "insertText": "div>\n  $1\n</div>"
+    },
+    {
+      "label": "dl",
+      "detail": "Description list",
+      "insertText": "dl>\n  <dt>$1</dt>\n  <dd>$2</dd>\n</dl>"
+    },
+    {
+      "label": "dt",
+      "detail": "Description term",
+      "insertText": "dt>$1</dt>"
+    },
+    {
+      "label": "em",
+      "detail": "Emphasized text",
+      "insertText": "em>$1</em>"
+    },
+    {
+      "label": "embed",
+      "detail": "External embed",
+      "insertText": "embed src=\"$1\" type=\"$2\">"
+    },
+    {
+      "label": "fieldset",
+      "detail": "Form field group",
+      "insertText": "fieldset>\n  <legend>$1</legend>\n  $2\n</fieldset>"
+    },
+    {
+      "label": "figcaption",
+      "detail": "Figure caption",
+      "insertText": "figcaption>$1</figcaption>"
+    },
+    {
+      "label": "figure",
+      "detail": "Figure with caption",
+      "insertText": "figure>\n  $1\n  <figcaption>$2</figcaption>\n</figure>"
+    },
+    {
+      "label": "footer",
+      "detail": "Page footer",
+      "insertText": "footer>\n  $1\n</footer>"
+    },
+    {
+      "label": "form",
+      "detail": "HTML Form",
+      "insertText": "form action=\"$1\" method=\"$2\">\n  $3\n</form>"
+    },
+    {
+      "label": "h1",
+      "detail": "Heading level 1",
+      "insertText": "h1>$1</h1>"
+    },
+    {
+      "label": "h2",
+      "detail": "Heading level 2",
+      "insertText": "h2>$1</h2>"
+    },
+    {
+      "label": "h3",
+      "detail": "Heading level 3",
+      "insertText": "h3>$1</h3>"
+    },
+    {
+      "label": "h4",
+      "detail": "Heading level 4",
+      "insertText": "h4>$1</h4>"
+    },
+    {
+      "label": "h5",
+      "detail": "Heading level 5",
+      "insertText": "h5>$1</h5>"
+    },
+    {
+      "label": "h6",
+      "detail": "Heading level 6",
+      "insertText": "h6>$1</h6>"
+    },
+    {
+      "label": "head",
+      "detail": "Document head",
+      "insertText": "head>\n  $1\n</head>"
+    },
+    {
+      "label": "header",
+      "detail": "Page header",
+      "insertText": "header>\n  $1\n</header>"
+    },
+    {
+      "label": "hgroup",
+      "detail": "Heading group",
+      "insertText": "hgroup>\n  <h1>$1</h1>\n  <p>$2</p>\n</hgroup>"
+    },
+    {
+      "label": "hr",
+      "detail": "Horizontal rule",
+      "insertText": "hr>"
+    },
+    {
+      "label": "html",
+      "detail": "Root element",
+      "insertText": "html lang=\"$1\">\n  $2\n</html>"
+    },
+    {
+      "label": "i",
+      "detail": "Italic/idiomatic text",
+      "insertText": "i>$1</i>"
+    },
+    {
+      "label": "iframe",
+      "detail": "Inline frame",
+      "insertText": "iframe src=\"$1\" title=\"$2\" loading=\"lazy\"></iframe>"
+    },
+    {
+      "label": "img",
+      "detail": "Image",
+      "insertText": "img src=\"$1\" alt=\"$2\" loading=\"lazy\">"
+    },
+    {
+      "label": "input",
+      "detail": "Form input",
+      "insertText": "input type=\"$1\" name=\"$2\" placeholder=\"$3\">"
+    },
+    {
+      "label": "ins",
+      "detail": "Inserted text",
+      "insertText": "ins>$1</ins>"
+    },
+    {
+      "label": "kbd",
+      "detail": "Keyboard input",
+      "insertText": "kbd>$1</kbd>"
+    },
+    {
+      "label": "label",
+      "detail": "Form label",
+      "insertText": "label for=\"$1\">$2</label>"
+    },
+    {
+      "label": "legend",
+      "detail": "Fieldset legend",
+      "insertText": "legend>$1</legend>"
+    },
+    {
+      "label": "li",
+      "detail": "List item",
+      "insertText": "li>$1</li>"
+    },
+    {
+      "label": "link",
+      "detail": "External resource link",
+      "insertText": "link rel=\"$1\" href=\"$2\">"
+    },
+    {
+      "label": "main",
+      "detail": "Main content",
+      "insertText": "main>\n  $1\n</main>"
+    },
+    {
+      "label": "map",
+      "detail": "Image map",
+      "insertText": "map name=\"$1\">\n  $2\n</map>"
+    },
+    {
+      "label": "mark",
+      "detail": "Highlighted text",
+      "insertText": "mark>$1</mark>"
+    },
+    {
+      "label": "menu",
+      "detail": "Menu list",
+      "insertText": "menu>\n  <li>$1</li>\n</menu>"
+    },
+    {
+      "label": "meta",
+      "detail": "Metadata",
+      "insertText": "meta name=\"$1\" content=\"$2\">"
+    },
+    {
+      "label": "meter",
+      "detail": "Scalar gauge",
+      "insertText": "meter value=\"$1\" min=\"$2\" max=\"$3\">$1</meter>"
+    },
+    {
+      "label": "nav",
+      "detail": "Navigation",
+      "insertText": "nav>\n  $1\n</nav>"
+    },
+    {
+      "label": "noscript",
+      "detail": "No-script fallback",
+      "insertText": "noscript>\n  $1\n</noscript>"
+    },
+    {
+      "label": "object",
+      "detail": "External object",
+      "insertText": "object data=\"$1\" type=\"$2\">$3</object>"
+    },
+    {
+      "label": "ol",
+      "detail": "Ordered list",
+      "insertText": "ol>\n  <li>$1</li>\n</ol>"
+    },
+    {
+      "label": "optgroup",
+      "detail": "Option group",
+      "insertText": "optgroup label=\"$1\">\n  $2\n</optgroup>"
+    },
+    {
+      "label": "option",
+      "detail": "Select option",
+      "insertText": "option value=\"$1\">$2</option>"
+    },
+    {
+      "label": "output",
+      "detail": "Calculation output",
+      "insertText": "output name=\"$1\">$2</output>"
+    },
+    {
+      "label": "p",
+      "detail": "Paragraph",
+      "insertText": "p>$1</p>"
+    },
+    {
+      "label": "picture",
+      "detail": "Responsive image",
+      "insertText": "picture>\n  <source srcset=\"$1\" media=\"$2\">\n  <img src=\"$3\" alt=\"$4\">\n</picture>"
+    },
+    {
+      "label": "pre",
+      "detail": "Preformatted text",
+      "insertText": "pre>$1</pre>"
+    },
+    {
+      "label": "progress",
+      "detail": "Progress bar",
+      "insertText": "progress value=\"$1\" max=\"$2\"></progress>"
+    },
+    {
+      "label": "q",
+      "detail": "Inline quotation",
+      "insertText": "q cite=\"$1\">$2</q>"
+    },
+    {
+      "label": "rp",
+      "detail": "Ruby fallback",
+      "insertText": "rp>($1</rp>"
+    },
+    {
+      "label": "rt",
+      "detail": "Ruby text",
+      "insertText": "rt>$1</rt>"
+    },
+    {
+      "label": "ruby",
+      "detail": "Ruby annotation",
+      "insertText": "ruby>$1<rt>$2</rt></ruby>"
+    },
+    {
+      "label": "s",
+      "detail": "Strikethrough",
+      "insertText": "s>$1</s>"
+    },
+    {
+      "label": "samp",
+      "detail": "Sample output",
+      "insertText": "samp>$1</samp>"
+    },
+    {
+      "label": "script",
+      "detail": "Script",
+      "insertText": "script src=\"$1\" defer></script>"
+    },
+    {
+      "label": "search",
+      "detail": "Search section",
+      "insertText": "search>\n  $1\n</search>"
+    },
+    {
+      "label": "section",
+      "detail": "Document section",
+      "insertText": "section>\n  $1\n</section>"
+    },
+    {
+      "label": "select",
+      "detail": "Dropdown select",
+      "insertText": "select name=\"$1\">\n  $2\n</select>"
+    },
+    {
+      "label": "slot",
+      "detail": "Web component slot",
+      "insertText": "slot name=\"$1\">$2</slot>"
+    },
+    {
+      "label": "small",
+      "detail": "Small/side text",
+      "insertText": "small>$1</small>"
+    },
+    {
+      "label": "source",
+      "detail": "Media source",
+      "insertText": "source src=\"$1\" type=\"$2\">"
+    },
+    {
+      "label": "span",
+      "detail": "Inline container",
+      "insertText": "span>$1</span>"
+    },
+    {
+      "label": "strong",
+      "detail": "Important text",
+      "insertText": "strong>$1</strong>"
+    },
+    {
+      "label": "style",
+      "detail": "CSS styles",
+      "insertText": "style>\n  $1\n</style>"
+    },
+    {
+      "label": "sub",
+      "detail": "Subscript",
+      "insertText": "sub>$1</sub>"
+    },
+    {
+      "label": "summary",
+      "detail": "Details summary",
+      "insertText": "summary>$1</summary>"
+    },
+    {
+      "label": "sup",
+      "detail": "Superscript",
+      "insertText": "sup>$1</sup>"
+    },
+    {
+      "label": "svg",
+      "detail": "SVG graphics",
+      "insertText": "svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 $1 $2\">\n  $3\n</svg>"
+    },
+    {
+      "label": "table",
+      "detail": "Table",
+      "insertText": "table>\n  <thead>\n    <tr>$1</tr>\n  </thead>\n  <tbody>\n    <tr>$2</tr>\n  </tbody>\n</table>"
+    },
+    {
+      "label": "tbody",
+      "detail": "Table body",
+      "insertText": "tbody>\n  $1\n</tbody>"
+    },
+    {
+      "label": "td",
+      "detail": "Table cell",
+      "insertText": "td>$1</td>"
+    },
+    {
+      "label": "template",
+      "detail": "HTML template",
+      "insertText": "template>\n  $1\n</template>"
+    },
+    {
+      "label": "textarea",
+      "detail": "Multiline text",
+      "insertText": "textarea name=\"$1\" rows=\"$2\" cols=\"$3\"></textarea>"
+    },
+    {
+      "label": "tfoot",
+      "detail": "Table footer",
+      "insertText": "tfoot>\n  $1\n</tfoot>"
+    },
+    {
+      "label": "th",
+      "detail": "Table header cell",
+      "insertText": "th scope=\"$1\">$2</th>"
+    },
+    {
+      "label": "thead",
+      "detail": "Table head",
+      "insertText": "thead>\n  $1\n</thead>"
+    },
+    {
+      "label": "time",
+      "detail": "Time/date",
+      "insertText": "time datetime=\"$1\">$2</time>"
+    },
+    {
+      "label": "title",
+      "detail": "Document title",
+      "insertText": "title>$1</title>"
+    },
+    {
+      "label": "tr",
+      "detail": "Table row",
+      "insertText": "tr>\n  $1\n</tr>"
+    },
+    {
+      "label": "track",
+      "detail": "Text track",
+      "insertText": "track src=\"$1\" kind=\"$2\" srclang=\"$3\" label=\"$4\">"
+    },
+    {
+      "label": "u",
+      "detail": "Underline",
+      "insertText": "u>$1</u>"
+    },
+    {
+      "label": "ul",
+      "detail": "Unordered list",
+      "insertText": "ul>\n  <li>$1</li>\n</ul>"
+    },
+    {
+      "label": "var",
+      "detail": "Variable",
+      "insertText": "var>$1</var>"
+    },
+    {
+      "label": "video",
+      "detail": "Video player",
+      "insertText": "video controls width=\"$1\">\n  <source src=\"$2\" type=\"video/$3\">\n</video>"
+    },
+    {
+      "label": "wbr",
+      "detail": "Word break opportunity",
+      "insertText": "wbr>"
+    }
   ],
   "attributes": [
-    { "label": "class",       "detail": "HTML Attribute", "insertText": "class=\"$1\"$0" },
-    { "label": "id",          "detail": "HTML Attribute", "insertText": "id=\"$1\"$0" },
-    { "label": "style",       "detail": "HTML Attribute", "insertText": "style=\"$1\"$0" },
-    { "label": "title",       "detail": "HTML Attribute", "insertText": "title=\"$1\"$0" },
-    { "label": "href",        "detail": "HTML Attribute", "insertText": "href=\"$1\"$0" },
-    { "label": "src",         "detail": "HTML Attribute", "insertText": "src=\"$1\"$0" },
-    { "label": "alt",         "detail": "HTML Attribute", "insertText": "alt=\"$1\"$0" },
-    { "label": "type",        "detail": "HTML Attribute", "insertText": "type=\"$1\"$0" },
-    { "label": "name",        "detail": "HTML Attribute", "insertText": "name=\"$1\"$0" },
-    { "label": "value",       "detail": "HTML Attribute", "insertText": "value=\"$1\"$0" },
-    { "label": "placeholder", "detail": "HTML Attribute", "insertText": "placeholder=\"$1\"$0" },
-    { "label": "required",    "detail": "HTML Attribute", "insertText": "required" },
-    { "label": "disabled",    "detail": "HTML Attribute", "insertText": "disabled" },
-    { "label": "checked",     "detail": "HTML Attribute", "insertText": "checked" },
-    { "label": "selected",    "detail": "HTML Attribute", "insertText": "selected" },
-    { "label": "readonly",    "detail": "HTML Attribute", "insertText": "readonly" },
-    { "label": "target",      "detail": "HTML Attribute", "insertText": "target=\"$1\"$0" },
-    { "label": "rel",         "detail": "HTML Attribute", "insertText": "rel=\"$1\"$0" },
-    { "label": "data-",       "detail": "HTML Attribute", "insertText": "data-$1=\"$2\"$0" },
-    { "label": "aria-",       "detail": "HTML Attribute", "insertText": "aria-$1=\"$2\"$0" }
+    {
+      "label": "class",
+      "detail": "CSS class name",
+      "insertText": "class=\"$1\""
+    },
+    {
+      "label": "id",
+      "detail": "Unique identifier",
+      "insertText": "id=\"$1\""
+    },
+    {
+      "label": "style",
+      "detail": "Inline CSS",
+      "insertText": "style=\"$1\""
+    },
+    {
+      "label": "title",
+      "detail": "Tooltip text",
+      "insertText": "title=\"$1\""
+    },
+    {
+      "label": "lang",
+      "detail": "Language code",
+      "insertText": "lang=\"$1\""
+    },
+    {
+      "label": "dir",
+      "detail": "Text direction",
+      "insertText": "dir=\"$1\""
+    },
+    {
+      "label": "tabindex",
+      "detail": "Tab order",
+      "insertText": "tabindex=\"$1\""
+    },
+    {
+      "label": "accesskey",
+      "detail": "Keyboard shortcut",
+      "insertText": "accesskey=\"$1\""
+    },
+    {
+      "label": "contenteditable",
+      "detail": "Content editable",
+      "insertText": "contenteditable=\"$1\""
+    },
+    {
+      "label": "draggable",
+      "detail": "Draggable",
+      "insertText": "draggable=\"$1\""
+    },
+    {
+      "label": "hidden",
+      "detail": "Hidden element",
+      "insertText": "hidden"
+    },
+    {
+      "label": "spellcheck",
+      "detail": "Spell checking",
+      "insertText": "spellcheck=\"$1\""
+    },
+    {
+      "label": "translate",
+      "detail": "Translate flag",
+      "insertText": "translate=\"$1\""
+    },
+    {
+      "label": "data-*",
+      "detail": "Custom data attribute",
+      "insertText": "data-$1=\"$2\""
+    },
+    {
+      "label": "role",
+      "detail": "ARIA role",
+      "insertText": "role=\"$1\""
+    },
+    {
+      "label": "aria-label",
+      "detail": "ARIA label",
+      "insertText": "aria-label=\"$1\""
+    },
+    {
+      "label": "aria-hidden",
+      "detail": "ARIA hidden",
+      "insertText": "aria-hidden=\"$1\""
+    },
+    {
+      "label": "aria-describedby",
+      "detail": "ARIA description",
+      "insertText": "aria-describedby=\"$1\""
+    },
+    {
+      "label": "aria-labelledby",
+      "detail": "ARIA label reference",
+      "insertText": "aria-labelledby=\"$1\""
+    },
+    {
+      "label": "aria-expanded",
+      "detail": "ARIA expanded state",
+      "insertText": "aria-expanded=\"$1\""
+    },
+    {
+      "label": "aria-controls",
+      "detail": "ARIA controls",
+      "insertText": "aria-controls=\"$1\""
+    },
+    {
+      "label": "href",
+      "detail": "Hyperlink URL",
+      "insertText": "href=\"$1\""
+    },
+    {
+      "label": "src",
+      "detail": "Source URL",
+      "insertText": "src=\"$1\""
+    },
+    {
+      "label": "alt",
+      "detail": "Alternative text",
+      "insertText": "alt=\"$1\""
+    },
+    {
+      "label": "type",
+      "detail": "Input type",
+      "insertText": "type=\"$1\""
+    },
+    {
+      "label": "name",
+      "detail": "Form field name",
+      "insertText": "name=\"$1\""
+    },
+    {
+      "label": "value",
+      "detail": "Input value",
+      "insertText": "value=\"$1\""
+    },
+    {
+      "label": "placeholder",
+      "detail": "Placeholder text",
+      "insertText": "placeholder=\"$1\""
+    },
+    {
+      "label": "disabled",
+      "detail": "Disabled state",
+      "insertText": "disabled"
+    },
+    {
+      "label": "required",
+      "detail": "Required field",
+      "insertText": "required"
+    },
+    {
+      "label": "readonly",
+      "detail": "Read-only field",
+      "insertText": "readonly"
+    },
+    {
+      "label": "checked",
+      "detail": "Checked state",
+      "insertText": "checked"
+    },
+    {
+      "label": "selected",
+      "detail": "Selected option",
+      "insertText": "selected"
+    },
+    {
+      "label": "multiple",
+      "detail": "Multiple values",
+      "insertText": "multiple"
+    },
+    {
+      "label": "autofocus",
+      "detail": "Auto-focus",
+      "insertText": "autofocus"
+    },
+    {
+      "label": "autocomplete",
+      "detail": "Autocomplete",
+      "insertText": "autocomplete=\"$1\""
+    },
+    {
+      "label": "maxlength",
+      "detail": "Maximum length",
+      "insertText": "maxlength=\"$1\""
+    },
+    {
+      "label": "minlength",
+      "detail": "Minimum length",
+      "insertText": "minlength=\"$1\""
+    },
+    {
+      "label": "min",
+      "detail": "Minimum value",
+      "insertText": "min=\"$1\""
+    },
+    {
+      "label": "max",
+      "detail": "Maximum value",
+      "insertText": "max=\"$1\""
+    },
+    {
+      "label": "step",
+      "detail": "Step increment",
+      "insertText": "step=\"$1\""
+    },
+    {
+      "label": "pattern",
+      "detail": "Validation pattern",
+      "insertText": "pattern=\"$1\""
+    },
+    {
+      "label": "accept",
+      "detail": "Accepted file types",
+      "insertText": "accept=\"$1\""
+    },
+    {
+      "label": "target",
+      "detail": "Link target",
+      "insertText": "target=\"$1\""
+    },
+    {
+      "label": "rel",
+      "detail": "Relationship",
+      "insertText": "rel=\"$1\""
+    },
+    {
+      "label": "action",
+      "detail": "Form action URL",
+      "insertText": "action=\"$1\""
+    },
+    {
+      "label": "method",
+      "detail": "Form method",
+      "insertText": "method=\"$1\""
+    },
+    {
+      "label": "enctype",
+      "detail": "Form encoding",
+      "insertText": "enctype=\"$1\""
+    },
+    {
+      "label": "width",
+      "detail": "Element width",
+      "insertText": "width=\"$1\""
+    },
+    {
+      "label": "height",
+      "detail": "Element height",
+      "insertText": "height=\"$1\""
+    },
+    {
+      "label": "for",
+      "detail": "Label target",
+      "insertText": "for=\"$1\""
+    },
+    {
+      "label": "rows",
+      "detail": "Textarea rows",
+      "insertText": "rows=\"$1\""
+    },
+    {
+      "label": "cols",
+      "detail": "Textarea columns",
+      "insertText": "cols=\"$1\""
+    },
+    {
+      "label": "wrap",
+      "detail": "Text wrap mode",
+      "insertText": "wrap=\"$1\""
+    },
+    {
+      "label": "loading",
+      "detail": "Lazy loading",
+      "insertText": "loading=\"$1\""
+    },
+    {
+      "label": "decoding",
+      "detail": "Image decoding hint",
+      "insertText": "decoding=\"$1\""
+    },
+    {
+      "label": "srcset",
+      "detail": "Responsive image set",
+      "insertText": "srcset=\"$1\""
+    },
+    {
+      "label": "sizes",
+      "detail": "Image sizes",
+      "insertText": "sizes=\"$1\""
+    },
+    {
+      "label": "media",
+      "detail": "Media query",
+      "insertText": "media=\"$1\""
+    },
+    {
+      "label": "controls",
+      "detail": "Playback controls",
+      "insertText": "controls"
+    },
+    {
+      "label": "autoplay",
+      "detail": "Auto-play media",
+      "insertText": "autoplay"
+    },
+    {
+      "label": "loop",
+      "detail": "Loop media",
+      "insertText": "loop"
+    },
+    {
+      "label": "muted",
+      "detail": "Muted media",
+      "insertText": "muted"
+    },
+    {
+      "label": "poster",
+      "detail": "Video poster image",
+      "insertText": "poster=\"$1\""
+    },
+    {
+      "label": "scope",
+      "detail": "Header scope",
+      "insertText": "scope=\"$1\""
+    },
+    {
+      "label": "colspan",
+      "detail": "Column span",
+      "insertText": "colspan=\"$1\""
+    },
+    {
+      "label": "rowspan",
+      "detail": "Row span",
+      "insertText": "rowspan=\"$1\""
+    },
+    {
+      "label": "cite",
+      "detail": "Citation URL",
+      "insertText": "cite=\"$1\""
+    },
+    {
+      "label": "datetime",
+      "detail": "Date/time value",
+      "insertText": "datetime=\"$1\""
+    },
+    {
+      "label": "async",
+      "detail": "Async script",
+      "insertText": "async"
+    },
+    {
+      "label": "defer",
+      "detail": "Defer script",
+      "insertText": "defer"
+    },
+    {
+      "label": "charset",
+      "detail": "Character encoding",
+      "insertText": "charset=\"$1\""
+    },
+    {
+      "label": "content",
+      "detail": "Metadata content",
+      "insertText": "content=\"$1\""
+    },
+    {
+      "label": "http-equiv",
+      "detail": "HTTP equivalent",
+      "insertText": "http-equiv=\"$1\""
+    }
   ],
   "voidElements": [
-    "br", "hr", "img", "input", "meta", "link", "area", "base",
-    "col", "embed", "source", "track", "wbr"
+    "area",
+    "base",
+    "br",
+    "col",
+    "embed",
+    "hr",
+    "img",
+    "input",
+    "link",
+    "meta",
+    "source",
+    "track",
+    "wbr"
   ]
 }

@@ -1,0 +1,815 @@
+# HTML5 Elements — reference data for VS Code IntelliSense
+# https://developer.mozilla.org/en-US/docs/Web/HTML/Element
+#
+# Schema:
+#   tag_name:
+#     description: "..."      # hover description (Markdown)
+#     category: Sectioning    # one of: Root, Metadata, Sectioning, Block,
+#     mdn: "HTML/Element/..." # MDN URL path suffix
+#     void: false             # true = self-closing (no end tag)
+#     snippet: "..."          # completion insert text ($1, $2 = tab stops)
+#     completion_detail: "…" # short label shown in completion list
+
+a:
+  description: "The **Anchor** element creates a hyperlink to web pages, files, email addresses, locations on the same page, or anything else a URL can address."
+  category: Inline
+  mdn: "HTML/Element/a"
+  snippet: "a href=\"$1\">$2</a>"
+  completion_detail: "HTML Anchor"
+
+abbr:
+  description: "The **Abbreviation** element represents an abbreviation or acronym. The optional `title` attribute provides an expansion or description."
+  category: Inline
+  mdn: "HTML/Element/abbr"
+  snippet: "abbr title=\"$1\">$2</abbr>"
+  completion_detail: "Abbreviation"
+
+address:
+  description: "The **Address** element indicates that the enclosed HTML provides contact information for a person or organization."
+  category: Block
+  mdn: "HTML/Element/address"
+  snippet: "address>$1</address>"
+  completion_detail: "Contact address"
+
+area:
+  description: "The **Area** element defines a hot-spot region on an image and optionally associates it with a hypertext link. Used inside `<map>`."
+  category: Embedded
+  mdn: "HTML/Element/area"
+  void: true
+  snippet: "area shape=\"$1\" coords=\"$2\" href=\"$3\" alt=\"$4\">"
+  completion_detail: "Image map area"
+
+article:
+  description: "The **Article** element represents a self-contained composition in a document, page, application, or site, which is intended to be independently distributable or reusable (e.g., forum post, blog entry, news story)."
+  category: Sectioning
+  mdn: "HTML/Element/article"
+  snippet: "article>\n  $1\n</article>"
+  completion_detail: "Article section"
+
+aside:
+  description: "The **Aside** element represents a portion of a document whose content is only indirectly related to the document's main content. Frequently used for sidebars."
+  category: Sectioning
+  mdn: "HTML/Element/aside"
+  snippet: "aside>\n  $1\n</aside>"
+  completion_detail: "Aside (sidebar)"
+
+audio:
+  description: "The **Audio** element embeds sound content in documents. It may contain one or more `<source>` elements with different audio sources."
+  category: Embedded
+  mdn: "HTML/Element/audio"
+  snippet: "audio controls>\n  <source src=\"$1\" type=\"audio/$2\">\n</audio>"
+  completion_detail: "Audio player"
+
+b:
+  description: "The **Bring Attention To** element draws the reader's attention to the element's contents. Use when no other more specific element fits (e.g., `<strong>`, `<em>`, `<mark>`)."
+  category: Inline
+  mdn: "HTML/Element/b"
+  snippet: "b>$1</b>"
+  completion_detail: "Bold text"
+
+base:
+  description: "The **Base** element specifies the base URL to use for all relative URLs in a document. There can be only one per document, inside `<head>`."
+  category: Metadata
+  mdn: "HTML/Element/base"
+  void: true
+  snippet: "base href=\"$1\">"
+  completion_detail: "Base URL"
+
+bdi:
+  description: "The **Bidirectional Isolate** element tells the browser's bidirectional algorithm to treat the text it contains in isolation from its surroundings."
+  category: Inline
+  mdn: "HTML/Element/bdi"
+  snippet: "bdi>$1</bdi>"
+  completion_detail: "Bidirectional isolate"
+
+bdo:
+  description: "The **Bidirectional Text Override** element overrides the current directionality of text, so that the text within is rendered in a different direction."
+  category: Inline
+  mdn: "HTML/Element/bdo"
+  snippet: "bdo dir=\"$1\">$2</bdo>"
+  completion_detail: "Bidirectional override"
+
+blockquote:
+  description: "The **Block Quotation** element indicates that the enclosed text is an extended quotation. Use the `cite` attribute for the source URL."
+  category: Block
+  mdn: "HTML/Element/blockquote"
+  snippet: "blockquote cite=\"$1\">\n  $2\n</blockquote>"
+  completion_detail: "Block quotation"
+
+body:
+  description: "The **Body** element represents the content of an HTML document. There can be only one `<body>` element in a document."
+  category: Root
+  mdn: "HTML/Element/body"
+  snippet: "body>\n  $1\n</body>"
+  completion_detail: "Document body"
+
+br:
+  description: "The **Line Break** element produces a line break in text (carriage-return). It is useful for writing a poem or an address, where the division of lines is significant."
+  category: Inline
+  mdn: "HTML/Element/br"
+  void: true
+  snippet: "br>"
+  completion_detail: "Line break"
+
+button:
+  description: "The **Button** element is an interactive element activated by a user with a mouse, keyboard, finger, voice command, or other assistive technology. Once activated, it performs an action such as submitting a form or opening a dialog."
+  category: Interactive
+  mdn: "HTML/Element/button"
+  snippet: "button type=\"$1\">$2</button>"
+  completion_detail: "Clickable button"
+
+canvas:
+  description: "The **Canvas** element is used with the Canvas API or WebGL API to draw graphics and animations. Provide fallback content between the tags."
+  category: Embedded
+  mdn: "HTML/Element/canvas"
+  snippet: "canvas id=\"$1\" width=\"$2\" height=\"$3\"></canvas>"
+  completion_detail: "Graphics canvas"
+
+caption:
+  description: "The **Table Caption** element specifies the caption (or title) of a table. Must be the first child of a `<table>` element."
+  category: Table
+  mdn: "HTML/Element/caption"
+  snippet: "caption>$1</caption>"
+  completion_detail: "Table caption"
+
+cite:
+  description: "The **Citation** element is used to mark up the title of a cited creative work (book, paper, poem, movie, etc.)."
+  category: Inline
+  mdn: "HTML/Element/cite"
+  snippet: "cite>$1</cite>"
+  completion_detail: "Citation"
+
+code:
+  description: "The **Code** element displays its contents styled to indicate that the text is a short fragment of computer code. For multi-line code blocks, wrap in `<pre>`."
+  category: Inline
+  mdn: "HTML/Element/code"
+  snippet: "code>$1</code>"
+  completion_detail: "Inline code"
+
+col:
+  description: "The **Table Column** element defines a column within a table and is used for defining common semantics on all common cells. Found within `<colgroup>`."
+  category: Table
+  mdn: "HTML/Element/col"
+  void: true
+  snippet: "col span=\"$1\">"
+  completion_detail: "Table column"
+
+colgroup:
+  description: "The **Table Column Group** element defines a group of columns within a table."
+  category: Table
+  mdn: "HTML/Element/colgroup"
+  snippet: "colgroup>\n  $1\n</colgroup>"
+  completion_detail: "Table column group"
+
+data:
+  description: "The **Data** element links a given piece of content with a machine-readable translation via the `value` attribute."
+  category: Inline
+  mdn: "HTML/Element/data"
+  snippet: "data value=\"$1\">$2</data>"
+  completion_detail: "Machine-readable data"
+
+datalist:
+  description: "The **Data List** element contains a set of `<option>` elements that represent the permissible or recommended options available to choose from within other controls."
+  category: Form
+  mdn: "HTML/Element/datalist"
+  snippet: "datalist id=\"$1\">\n  $2\n</datalist>"
+  completion_detail: "Data list options"
+
+dd:
+  description: "The **Description Details** element provides the description, definition, or value for the preceding `<dt>` element inside a `<dl>` description list."
+  category: List
+  mdn: "HTML/Element/dd"
+  snippet: "dd>$1</dd>"
+  completion_detail: "Description detail"
+
+del:
+  description: "The **Deleted Text** element represents a range of text that has been deleted from a document. Use `<ins>` for inserted text."
+  category: Inline
+  mdn: "HTML/Element/del"
+  snippet: "del>$1</del>"
+  completion_detail: "Deleted text"
+
+details:
+  description: "The **Details** disclosure widget creates a widget that shows/hides additional information. The `<summary>` child provides the visible label."
+  category: Interactive
+  mdn: "HTML/Element/details"
+  snippet: "details>\n  <summary>$1</summary>\n  $2\n</details>"
+  completion_detail: "Disclosure widget"
+
+dfn:
+  description: "The **Definition** element specifies a term that is going to be defined within the content. The nearest parent `<p>`, `<dt>`/`<dd>` pair, or `<section>` is the definition context."
+  category: Inline
+  mdn: "HTML/Element/dfn"
+  snippet: "dfn>$1</dfn>"
+  completion_detail: "Definition term"
+
+dialog:
+  description: "The **Dialog** element represents a dialog box or other interactive component, such as a dismissible alert, inspector, or subwindow. Use `showModal()` for modal behavior."
+  category: Interactive
+  mdn: "HTML/Element/dialog"
+  snippet: "dialog open>\n  $1\n</dialog>"
+  completion_detail: "Dialog box"
+
+div:
+  description: "The **Content Division** element is the generic container for flow content. It has no effect on content or layout until styled with CSS."
+  category: Block
+  mdn: "HTML/Element/div"
+  snippet: "div>\n  $1\n</div>"
+  completion_detail: "Generic container"
+
+dl:
+  description: "The **Description List** element represents a description list. It encloses a list of groups of terms (using `<dt>`) and descriptions (using `<dd>`)."
+  category: List
+  mdn: "HTML/Element/dl"
+  snippet: "dl>\n  <dt>$1</dt>\n  <dd>$2</dd>\n</dl>"
+  completion_detail: "Description list"
+
+dt:
+  description: "The **Description Term** element specifies a term in a description or definition list. Must be used inside a `<dl>` element, usually followed by `<dd>`."
+  category: List
+  mdn: "HTML/Element/dt"
+  snippet: "dt>$1</dt>"
+  completion_detail: "Description term"
+
+em:
+  description: "The **Emphasis** element marks text that has stress emphasis. Nesting `<em>` elements increases the level of emphasis."
+  category: Inline
+  mdn: "HTML/Element/em"
+  snippet: "em>$1</em>"
+  completion_detail: "Emphasized text"
+
+embed:
+  description: "The **Embed** element embeds external content at the specified point in the document. This content is provided by an external application or other source of interactive content."
+  category: Embedded
+  mdn: "HTML/Element/embed"
+  void: true
+  snippet: "embed src=\"$1\" type=\"$2\">"
+  completion_detail: "External embed"
+
+fieldset:
+  description: "The **Field Set** element is used to group several controls as well as labels within a web form. Use `<legend>` as the first child for a caption."
+  category: Form
+  mdn: "HTML/Element/fieldset"
+  snippet: "fieldset>\n  <legend>$1</legend>\n  $2\n</fieldset>"
+  completion_detail: "Form field group"
+
+figcaption:
+  description: "The **Figure Caption** element represents a caption or legend describing the rest of the contents of its parent `<figure>` element."
+  category: Block
+  mdn: "HTML/Element/figcaption"
+  snippet: "figcaption>$1</figcaption>"
+  completion_detail: "Figure caption"
+
+figure:
+  description: "The **Figure** element represents self-contained content, potentially with an optional caption specified using `<figcaption>`. Commonly used for images, code snippets, diagrams."
+  category: Block
+  mdn: "HTML/Element/figure"
+  snippet: "figure>\n  $1\n  <figcaption>$2</figcaption>\n</figure>"
+  completion_detail: "Figure with caption"
+
+footer:
+  description: "The **Footer** element represents a footer for its nearest ancestor sectioning content or sectioning root element. Typically contains author info, copyright, related links."
+  category: Sectioning
+  mdn: "HTML/Element/footer"
+  snippet: "footer>\n  $1\n</footer>"
+  completion_detail: "Page footer"
+
+form:
+  description: "The **Form** element represents a document section containing interactive controls for submitting information. Use `action` for the submission URL and `method` for HTTP method."
+  category: Form
+  mdn: "HTML/Element/form"
+  snippet: "form action=\"$1\" method=\"$2\">\n  $3\n</form>"
+  completion_detail: "HTML Form"
+
+h1:
+  description: "**Heading level 1** — the highest section heading level. Use only one `<h1>` per page for the main topic."
+  category: Heading
+  mdn: "HTML/Element/Heading_Elements"
+  snippet: "h1>$1</h1>"
+  completion_detail: "Heading level 1"
+
+h2:
+  description: "**Heading level 2** — sub-section heading under `<h1>`."
+  category: Heading
+  mdn: "HTML/Element/Heading_Elements"
+  snippet: "h2>$1</h2>"
+  completion_detail: "Heading level 2"
+
+h3:
+  description: "**Heading level 3** — sub-sub-section heading."
+  category: Heading
+  mdn: "HTML/Element/Heading_Elements"
+  snippet: "h3>$1</h3>"
+  completion_detail: "Heading level 3"
+
+h4:
+  description: "**Heading level 4** — deeply nested section heading."
+  category: Heading
+  mdn: "HTML/Element/Heading_Elements"
+  snippet: "h4>$1</h4>"
+  completion_detail: "Heading level 4"
+
+h5:
+  description: "**Heading level 5** — rarely used deep section heading."
+  category: Heading
+  mdn: "HTML/Element/Heading_Elements"
+  snippet: "h5>$1</h5>"
+  completion_detail: "Heading level 5"
+
+h6:
+  description: "**Heading level 6** — the deepest (least important) section heading."
+  category: Heading
+  mdn: "HTML/Element/Heading_Elements"
+  snippet: "h6>$1</h6>"
+  completion_detail: "Heading level 6"
+
+head:
+  description: "The **Head** element contains machine-readable information (metadata) about the document, like its title, scripts, and style sheets. Not visible to users."
+  category: Root
+  mdn: "HTML/Element/head"
+  snippet: "head>\n  $1\n</head>"
+  completion_detail: "Document head"
+
+header:
+  description: "The **Header** element represents introductory content, typically a group of introductory or navigational aids. May contain heading, logo, search form."
+  category: Sectioning
+  mdn: "HTML/Element/header"
+  snippet: "header>\n  $1\n</header>"
+  completion_detail: "Page header"
+
+hgroup:
+  description: "The **Heading Group** element represents a multi-level heading for a section. It groups `<h1>`–`<h6>` elements, treating the first as the primary heading."
+  category: Sectioning
+  mdn: "HTML/Element/hgroup"
+  snippet: "hgroup>\n  <h1>$1</h1>\n  <p>$2</p>\n</hgroup>"
+  completion_detail: "Heading group"
+
+hr:
+  description: "The **Horizontal Rule** element represents a thematic break between paragraph-level elements: e.g., a scene change in a story, or a shift of topic within a section."
+  category: Block
+  mdn: "HTML/Element/hr"
+  void: true
+  snippet: "hr>"
+  completion_detail: "Horizontal rule"
+
+html:
+  description: "The **HTML** element represents the root (top-level element) of an HTML document. All other elements must be descendants of this element. Always include `lang` attribute."
+  category: Root
+  mdn: "HTML/Element/html"
+  snippet: "html lang=\"$1\">\n  $2\n</html>"
+  completion_detail: "Root element"
+
+i:
+  description: "The **Idiomatic Text** element represents a range of text set off from the normal text for some reason (technical terms, foreign phrases, thoughts, etc.)."
+  category: Inline
+  mdn: "HTML/Element/i"
+  snippet: "i>$1</i>"
+  completion_detail: "Italic/idiomatic text"
+
+iframe:
+  description: "The **Inline Frame** element represents a nested browsing context, embedding another HTML page into the current one. Always provide a `title` for accessibility."
+  category: Embedded
+  mdn: "HTML/Element/iframe"
+  snippet: "iframe src=\"$1\" title=\"$2\" loading=\"lazy\"></iframe>"
+  completion_detail: "Inline frame"
+
+img:
+  description: "The **Image** element embeds an image into the document. Always provide `alt` text for accessibility. Use `loading=\"lazy\"` for off-screen images."
+  category: Embedded
+  mdn: "HTML/Element/img"
+  void: true
+  snippet: "img src=\"$1\" alt=\"$2\" loading=\"lazy\">"
+  completion_detail: "Image"
+
+input:
+  description: "The **Input** element creates interactive controls for web-based forms. The `type` attribute determines the control: text, password, email, number, checkbox, radio, file, etc."
+  category: Form
+  mdn: "HTML/Element/input"
+  void: true
+  snippet: "input type=\"$1\" name=\"$2\" placeholder=\"$3\">"
+  completion_detail: "Form input"
+
+ins:
+  description: "The **Inserted Text** element represents a range of text that has been added to a document. Use `<del>` for deleted text."
+  category: Inline
+  mdn: "HTML/Element/ins"
+  snippet: "ins>$1</ins>"
+  completion_detail: "Inserted text"
+
+kbd:
+  description: "The **Keyboard Input** element represents a span of inline text denoting textual user input from a keyboard, voice input, or any other text entry device."
+  category: Inline
+  mdn: "HTML/Element/kbd"
+  snippet: "kbd>$1</kbd>"
+  completion_detail: "Keyboard input"
+
+label:
+  description: "The **Label** element represents a caption for an item in a user interface. Associating a `<label>` with a form control improves accessibility and usability."
+  category: Form
+  mdn: "HTML/Element/label"
+  snippet: "label for=\"$1\">$2</label>"
+  completion_detail: "Form label"
+
+legend:
+  description: "The **Fieldset Legend** element represents a caption for the content of its parent `<fieldset>`. Must be the first child."
+  category: Form
+  mdn: "HTML/Element/legend"
+  snippet: "legend>$1</legend>"
+  completion_detail: "Fieldset legend"
+
+li:
+  description: "The **List Item** element represents an item in a list. Must be contained in an ordered list (`<ol>`), unordered list (`<ul>`), or menu (`<menu>`)."
+  category: List
+  mdn: "HTML/Element/li"
+  snippet: "li>$1</li>"
+  completion_detail: "List item"
+
+link:
+  description: "The **External Resource Link** element specifies relationships between the current document and an external resource. Most commonly used for CSS stylesheets."
+  category: Metadata
+  mdn: "HTML/Element/link"
+  void: true
+  snippet: "link rel=\"$1\" href=\"$2\">"
+  completion_detail: "External resource link"
+
+main:
+  description: "The **Main** element represents the dominant content of the `<body>` of a document. There should be only one `<main>` per page (excluding hidden ones)."
+  category: Sectioning
+  mdn: "HTML/Element/main"
+  snippet: "main>\n  $1\n</main>"
+  completion_detail: "Main content"
+
+map:
+  description: "The **Image Map** element is used with `<area>` elements to define an image map (a clickable link area on an image)."
+  category: Embedded
+  mdn: "HTML/Element/map"
+  snippet: "map name=\"$1\">\n  $2\n</map>"
+  completion_detail: "Image map"
+
+mark:
+  description: "The **Mark** element represents text which is marked or highlighted for reference or notation purposes due to the passage's relevance in the enclosing context."
+  category: Inline
+  mdn: "HTML/Element/mark"
+  snippet: "mark>$1</mark>"
+  completion_detail: "Highlighted text"
+
+menu:
+  description: "The **Menu** element represents a group of commands that a user can perform or activate. This includes both list menus (toolbar) and context menus."
+  category: List
+  mdn: "HTML/Element/menu"
+  snippet: "menu>\n  <li>$1</li>\n</menu>"
+  completion_detail: "Menu list"
+
+meta:
+  description: "The **Metadata** element represents metadata that cannot be represented by other HTML meta-related elements (`<base>`, `<link>`, `<script>`, `<style>`, `<title>`)."
+  category: Metadata
+  mdn: "HTML/Element/meta"
+  void: true
+  snippet: "meta name=\"$1\" content=\"$2\">"
+  completion_detail: "Metadata"
+
+meter:
+  description: "The **Meter** element represents either a scalar value within a known range or a fractional value. Used for disk usage, relevance scores, etc."
+  category: Form
+  mdn: "HTML/Element/meter"
+  snippet: "meter value=\"$1\" min=\"$2\" max=\"$3\">$1</meter>"
+  completion_detail: "Scalar gauge"
+
+nav:
+  description: "The **Navigation** Section element represents a section of a page whose purpose is to provide navigation links, either within the current document or to other documents."
+  category: Sectioning
+  mdn: "HTML/Element/nav"
+  snippet: "nav>\n  $1\n</nav>"
+  completion_detail: "Navigation"
+
+noscript:
+  description: "The **No Script** element defines a section of HTML to be inserted if a script type on the page is unsupported or if scripting is turned off in the browser."
+  category: Metadata
+  mdn: "HTML/Element/noscript"
+  snippet: "noscript>\n  $1\n</noscript>"
+  completion_detail: "No-script fallback"
+
+object:
+  description: "The **Object** element represents an external resource, which can be treated as an image, a nested browsing context, or a resource to be handled by a plugin."
+  category: Embedded
+  mdn: "HTML/Element/object"
+  snippet: "object data=\"$1\" type=\"$2\">$3</object>"
+  completion_detail: "External object"
+
+ol:
+  description: "The **Ordered List** element represents an ordered list of items — typically rendered as a numbered list. Use `type` for numbering style (1, A, a, I, i)."
+  category: List
+  mdn: "HTML/Element/ol"
+  snippet: "ol>\n  <li>$1</li>\n</ol>"
+  completion_detail: "Ordered list"
+
+optgroup:
+  description: "The **Option Group** element creates a grouping of options within a `<select>` element. Use `label` for the group name."
+  category: Form
+  mdn: "HTML/Element/optgroup"
+  snippet: "optgroup label=\"$1\">\n  $2\n</optgroup>"
+  completion_detail: "Option group"
+
+option:
+  description: "The **Option** element defines an item contained in a `<select>`, an `<optgroup>`, or a `<datalist>` element."
+  category: Form
+  mdn: "HTML/Element/option"
+  snippet: "option value=\"$1\">$2</option>"
+  completion_detail: "Select option"
+
+output:
+  description: "The **Output** element is a container into which a site or app can inject the results of a calculation or the outcome of a user action."
+  category: Form
+  mdn: "HTML/Element/output"
+  snippet: "output name=\"$1\">$2</output>"
+  completion_detail: "Calculation output"
+
+p:
+  description: "The **Paragraph** element represents a paragraph. Paragraphs are block-level elements; they automatically close if another block element is encountered before the closing `</p>`."
+  category: Block
+  mdn: "HTML/Element/p"
+  snippet: "p>$1</p>"
+  completion_detail: "Paragraph"
+
+picture:
+  description: "The **Picture** element contains zero or more `<source>` elements and one `<img>` element to offer alternative versions of an image for different display/device scenarios."
+  category: Embedded
+  mdn: "HTML/Element/picture"
+  snippet: "picture>\n  <source srcset=\"$1\" media=\"$2\">\n  <img src=\"$3\" alt=\"$4\">\n</picture>"
+  completion_detail: "Responsive image"
+
+pre:
+  description: "The **Preformatted Text** element represents preformatted text which is to be presented exactly as written in the HTML file. Whitespace is preserved."
+  category: Block
+  mdn: "HTML/Element/pre"
+  snippet: "pre>$1</pre>"
+  completion_detail: "Preformatted text"
+
+progress:
+  description: "The **Progress** element displays an indicator showing the completion progress of a task, typically displayed as a progress bar."
+  category: Form
+  mdn: "HTML/Element/progress"
+  snippet: "progress value=\"$1\" max=\"$2\"></progress>"
+  completion_detail: "Progress bar"
+
+q:
+  description: "The **Inline Quotation** element indicates that the enclosed text is a short inline quotation. Browsers typically insert quotation marks around it."
+  category: Inline
+  mdn: "HTML/Element/q"
+  snippet: "q cite=\"$1\">$2</q>"
+  completion_detail: "Inline quotation"
+
+rp:
+  description: "The **Ruby Fallback Parenthesis** element provides fallback parentheses for browsers that do not support ruby annotations. Used inside `<ruby>`."
+  category: Inline
+  mdn: "HTML/Element/rp"
+  snippet: "rp>($1</rp>"
+  completion_detail: "Ruby fallback"
+
+rt:
+  description: "The **Ruby Text** element specifies the ruby text component of a ruby annotation, used for East Asian typography. Used inside `<ruby>`."
+  category: Inline
+  mdn: "HTML/Element/rt"
+  snippet: "rt>$1</rt>"
+  completion_detail: "Ruby text"
+
+ruby:
+  description: "The **Ruby** element represents small annotations that are rendered above, below, or next to base text (usually for East Asian characters showing pronunciation)."
+  category: Inline
+  mdn: "HTML/Element/ruby"
+  snippet: "ruby>$1<rt>$2</rt></ruby>"
+  completion_detail: "Ruby annotation"
+
+s:
+  description: "The **Strikethrough** element renders text with a strikethrough, indicating things that are no longer relevant or accurate. Use `<del>` for document edits."
+  category: Inline
+  mdn: "HTML/Element/s"
+  snippet: "s>$1</s>"
+  completion_detail: "Strikethrough"
+
+samp:
+  description: "The **Sample Output** element represents sample (or quoted) output from a computer program."
+  category: Inline
+  mdn: "HTML/Element/samp"
+  snippet: "samp>$1</samp>"
+  completion_detail: "Sample output"
+
+script:
+  description: "The **Script** element embeds executable code or data (typically JavaScript). Use `src` for external scripts and `defer` for non-blocking loading."
+  category: Scripting
+  mdn: "HTML/Element/script"
+  snippet: "script src=\"$1\" defer></script>"
+  completion_detail: "Script"
+
+search:
+  description: "The **Search** element represents a part of the document that contains form controls or other content related to a search or filtering operation."
+  category: Sectioning
+  mdn: "HTML/Element/search"
+  snippet: "search>\n  $1\n</search>"
+  completion_detail: "Search section"
+
+section:
+  description: "The **Section** element represents a generic standalone section of a document, which doesn't have a more specific semantic element to represent it."
+  category: Sectioning
+  mdn: "HTML/Element/section"
+  snippet: "section>\n  $1\n</section>"
+  completion_detail: "Document section"
+
+select:
+  description: "The **Select** element represents a control that provides a menu of options. Use `multiple` for multi-select and `size` for visible rows."
+  category: Form
+  mdn: "HTML/Element/select"
+  snippet: "select name=\"$1\">\n  $2\n</select>"
+  completion_detail: "Dropdown select"
+
+slot:
+  description: "The **Slot** element — part of the Web Components technology suite — is a placeholder inside a web component that you can fill with your own markup."
+  category: WebComponent
+  mdn: "HTML/Element/slot"
+  snippet: "slot name=\"$1\">$2</slot>"
+  completion_detail: "Web component slot"
+
+small:
+  description: "The **Small** element represents side-comments and small print, like copyright and legal text, independent of its styled presentation."
+  category: Inline
+  mdn: "HTML/Element/small"
+  snippet: "small>$1</small>"
+  completion_detail: "Small/side text"
+
+source:
+  description: "The **Media Source** element specifies multiple media resources for `<picture>`, `<audio>`, or `<video>` elements. Use `srcset`+`media` for responsive images."
+  category: Embedded
+  mdn: "HTML/Element/source"
+  void: true
+  snippet: "source src=\"$1\" type=\"$2\">"
+  completion_detail: "Media source"
+
+span:
+  description: "The **Span** element is a generic inline container for phrasing content, which does not inherently represent anything. Use it to group elements for styling."
+  category: Inline
+  mdn: "HTML/Element/span"
+  snippet: "span>$1</span>"
+  completion_detail: "Inline container"
+
+strong:
+  description: "The **Strong Importance** element indicates that its contents have strong importance, seriousness, or urgency. Browsers typically render the contents in bold type."
+  category: Inline
+  mdn: "HTML/Element/strong"
+  snippet: "strong>$1</strong>"
+  completion_detail: "Important text"
+
+style:
+  description: "The **Style** element contains style information (CSS) for a document, or part of a document. For external stylesheets, use `<link>` instead."
+  category: Metadata
+  mdn: "HTML/Element/style"
+  snippet: "style>\n  $1\n</style>"
+  completion_detail: "CSS styles"
+
+sub:
+  description: "The **Subscript** element specifies inline text which should be displayed as subscript for solely typographical reasons (e.g., H₂O)."
+  category: Inline
+  mdn: "HTML/Element/sub"
+  snippet: "sub>$1</sub>"
+  completion_detail: "Subscript"
+
+summary:
+  description: "The **Disclosure Summary** element specifies a summary, caption, or legend for a `<details>` element's disclosure box. Must be the first child."
+  category: Interactive
+  mdn: "HTML/Element/summary"
+  snippet: "summary>$1</summary>"
+  completion_detail: "Details summary"
+
+sup:
+  description: "The **Superscript** element specifies inline text which is to be displayed as superscript for solely typographical reasons (e.g., x², footnotes)."
+  category: Inline
+  mdn: "HTML/Element/sup"
+  snippet: "sup>$1</sup>"
+  completion_detail: "Superscript"
+
+svg:
+  description: "The **SVG** element is a container that defines a new coordinate system and viewport. It is used as the outermost element of SVG documents embedded in HTML."
+  category: Embedded
+  mdn: "Web/SVG/Element/svg"
+  snippet: "svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 $1 $2\">\n  $3\n</svg>"
+  completion_detail: "SVG graphics"
+
+table:
+  description: "The **Table** element represents tabular data — information presented in a two-dimensional table comprised of rows and columns."
+  category: Table
+  mdn: "HTML/Element/table"
+  snippet: "table>\n  <thead>\n    <tr>$1</tr>\n  </thead>\n  <tbody>\n    <tr>$2</tr>\n  </tbody>\n</table>"
+  completion_detail: "Table"
+
+tbody:
+  description: "The **Table Body** element encapsulates a set of table rows (`<tr>`), indicating that they comprise the body of the table."
+  category: Table
+  mdn: "HTML/Element/tbody"
+  snippet: "tbody>\n  $1\n</tbody>"
+  completion_detail: "Table body"
+
+td:
+  description: "The **Table Data Cell** element defines a cell of a table that contains data. Use `colspan` and `rowspan` for spanning cells."
+  category: Table
+  mdn: "HTML/Element/td"
+  snippet: "td>$1</td>"
+  completion_detail: "Table cell"
+
+template:
+  description: "The **Template** element holds HTML that is not rendered immediately when a page is loaded but may be instantiated during runtime using JavaScript."
+  category: Scripting
+  mdn: "HTML/Element/template"
+  snippet: "template>\n  $1\n</template>"
+  completion_detail: "HTML template"
+
+textarea:
+  description: "The **Textarea** element represents a multi-line plain-text editing control. Use `rows` and `cols` for size; use CSS `resize` to control resizability."
+  category: Form
+  mdn: "HTML/Element/textarea"
+  snippet: "textarea name=\"$1\" rows=\"$2\" cols=\"$3\"></textarea>"
+  completion_detail: "Multiline text"
+
+tfoot:
+  description: "The **Table Foot** element defines a set of rows summarizing the columns of the table. Must appear after `<thead>`, before `<tbody>`."
+  category: Table
+  mdn: "HTML/Element/tfoot"
+  snippet: "tfoot>\n  $1\n</tfoot>"
+  completion_detail: "Table footer"
+
+th:
+  description: "The **Table Header Cell** element defines a cell as header of a group of table cells. Use `scope` attribute for accessibility (`col`, `row`, `colgroup`, `rowgroup`)."
+  category: Table
+  mdn: "HTML/Element/th"
+  snippet: "th scope=\"$1\">$2</th>"
+  completion_detail: "Table header cell"
+
+thead:
+  description: "The **Table Head** element defines a set of rows defining the head of the columns of the table."
+  category: Table
+  mdn: "HTML/Element/thead"
+  snippet: "thead>\n  $1\n</thead>"
+  completion_detail: "Table head"
+
+time:
+  description: "The **Time** element represents a specific period in time. Use `datetime` attribute to translate dates into machine-readable format."
+  category: Inline
+  mdn: "HTML/Element/time"
+  snippet: "time datetime=\"$1\">$2</time>"
+  completion_detail: "Time/date"
+
+title:
+  description: "The **Title** element defines the document's title that is shown in a browser's title bar or a page's tab. Required in every HTML document."
+  category: Metadata
+  mdn: "HTML/Element/title"
+  snippet: "title>$1</title>"
+  completion_detail: "Document title"
+
+tr:
+  description: "The **Table Row** element defines a row of cells in a table. The row's cells can then be established using a mix of `<td>` and `<th>` elements."
+  category: Table
+  mdn: "HTML/Element/tr"
+  snippet: "tr>\n  $1\n</tr>"
+  completion_detail: "Table row"
+
+track:
+  description: "The **Embed Text Track** element is used as a child of `<audio>` or `<video>` to specify timed text tracks (subtitles, captions, descriptions, chapters)."
+  category: Embedded
+  mdn: "HTML/Element/track"
+  void: true
+  snippet: "track src=\"$1\" kind=\"$2\" srclang=\"$3\" label=\"$4\">"
+  completion_detail: "Text track"
+
+u:
+  description: "The **Unarticulated Annotation** element represents a span of inline text which should be rendered with a non-textual annotation (underline). Use for Chinese proper names or misspelled words."
+  category: Inline
+  mdn: "HTML/Element/u"
+  snippet: "u>$1</u>"
+  completion_detail: "Underline"
+
+ul:
+  description: "The **Unordered List** element represents an unordered list of items, typically rendered as a bulleted list."
+  category: List
+  mdn: "HTML/Element/ul"
+  snippet: "ul>\n  <li>$1</li>\n</ul>"
+  completion_detail: "Unordered list"
+
+var:
+  description: "The **Variable** element represents the name of a variable in a mathematical expression or a programming context."
+  category: Inline
+  mdn: "HTML/Element/var"
+  snippet: "var>$1</var>"
+  completion_detail: "Variable"
+
+video:
+  description: "The **Video** element embeds a media player which supports video playback into the document. Use `<source>` for multiple formats, include `controls` for playback UI."
+  category: Embedded
+  mdn: "HTML/Element/video"
+  snippet: "video controls width=\"$1\">\n  <source src=\"$2\" type=\"video/$3\">\n</video>"
+  completion_detail: "Video player"
+
+wbr:
+  description: "The **Word Break Opportunity** element represents a position within text where the browser may optionally break a line. Used for long URLs or code."
+  category: Inline
+  mdn: "HTML/Element/wbr"
+  void: true
+  snippet: "wbr>"
+  completion_detail: "Word break opportunity"

@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
 
-import { TwigFormattingProvider, TwigHoverProvider, TwigDefinitionProvider, TwigCompletionProvider, TwigSymbolProvider, TwigFoldingProvider, TwigSignatureHelpProvider, TwigCodeActionProvider, TwigHighlightProvider, TwigRenameProvider, TwigColorProvider, HtmlHoverProvider } from './providers';
+import { TwigFormattingProvider, TwigHoverProvider, TwigDefinitionProvider, TwigDocumentLinkProvider, TwigCompletionProvider, TwigSymbolProvider, TwigFoldingProvider, TwigSignatureHelpProvider, TwigCodeActionProvider, TwigHighlightProvider, TwigRenameProvider, TwigColorProvider, HtmlHoverProvider } from './providers';
 
 // ── Data loaded from JSON ──
 import htmlCompletions from './data/html-completions.json';
@@ -566,6 +566,14 @@ export function activate(context: vscode.ExtensionContext): void {
         vscode.languages.registerDefinitionProvider(
             { language: 'twig', scheme: 'file' },
             new TwigDefinitionProvider(),
+        ),
+    );
+
+    // ---- Document links: full template path underlines on Ctrl+hover ----
+    context.subscriptions.push(
+        vscode.languages.registerDocumentLinkProvider(
+            { language: 'twig', scheme: 'file' },
+            new TwigDocumentLinkProvider(),
         ),
     );
 

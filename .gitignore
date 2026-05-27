@@ -1,34 +1,89 @@
-# Python
+# ═══════════════════════════════════════════════════════════════════════
+# Python — bytecode, build, packaging
+# ═══════════════════════════════════════════════════════════════════════
 __pycache__/
 *.py[cod]
 *.egg-info/
+*.egg
 dist/
 build/
-*.egg
-.pytest_cache/
+*.whl
 
-# Virtual Environment
+# ═══════════════════════════════════════════════════════════════════════
+# Python — virtual environments
+# ═══════════════════════════════════════════════════════════════════════
 .venv/
 venv/
 env/
+.eggs/
 
-# IDE
+# ═══════════════════════════════════════════════════════════════════════
+# Python — testing / coverage / type-checking
+# ═══════════════════════════════════════════════════════════════════════
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+coverage.xml
+*.cover
+
+# ═══════════════════════════════════════════════════════════════════════
+# VS Code Extension — compiled output (TypeScript → JS)
+# ═══════════════════════════════════════════════════════════════════════
+vscode-extension/out/
+vscode-extension/dist/
+
+# ═══════════════════════════════════════════════════════════════════════
+# VS Code Extension — generated JSON data (from YAML via Docker data stage)
+# ═══════════════════════════════════════════════════════════════════════
+vscode-extension/data/
+vscode-extension/src/data/
+
+# ═══════════════════════════════════════════════════════════════════════
+# VS Code Extension — dependencies & packaging
+# ═══════════════════════════════════════════════════════════════════════
+vscode-extension/node_modules/
+vscode-extension/*.vsix
+vscode-extension/*.tgz
+vscode-extension/package-lock.json
+
+# ═══════════════════════════════════════════════════════════════════════
+# VS Code Extension — install/uninstall runtime artifacts
+# ═══════════════════════════════════════════════════════════════════════
+vscode-extension/.backups/
+vscode-extension/.vscode/
+
+# ═══════════════════════════════════════════════════════════════════════
+# IDE / editor
+# ═══════════════════════════════════════════════════════════════════════
 .idea/
 *.swp
 *.swo
+*~
+.vscode/
 
-# VS Code Extension
-vscode-extension/out/
-vscode-extension/node_modules/
-vscode-extension/*.vsix
-
-# OS
+# ═══════════════════════════════════════════════════════════════════════
+# OS junk
+# ═══════════════════════════════════════════════════════════════════════
 .DS_Store
 Thumbs.db
+ehthumbs.db
+Desktop.ini
 
-# Coverage
-htmlcov/
-.coverage
+# ═══════════════════════════════════════════════════════════════════════
+# Environment & secrets
+# ═══════════════════════════════════════════════════════════════════════
+.env
+.env.*
+!.env.example
 
-# MyPy
-.mypy_cache/
+# ═══════════════════════════════════════════════════════════════════════
+# Docker — build cache (images managed externally)
+# ═══════════════════════════════════════════════════════════════════════
+.docker/
+
+# ═══════════════════════════════════════════════════════════════════════
+# Logs
+# ═══════════════════════════════════════════════════════════════════════
+*.log

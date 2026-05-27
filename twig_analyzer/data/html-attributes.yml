@@ -1,0 +1,493 @@
+# HTML5 Attributes — reference data for VS Code IntelliSense
+# https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes
+#
+# Schema:
+#   attr_name:
+#     description: "..."      # hover description (Markdown)
+#     mdn: "Web/HTML/..."     # MDN URL path suffix
+#     global: true|false      # true = global attribute (applies to all elements)
+#     snippet: "..."          # completion insert text ($1 = tab stop)
+#     completion_detail: "…"  # short label shown in completion list
+#     boolean: true|false     # true = boolean attribute (no value needed)
+
+class:
+  description: "A space-separated list of the CSS classes of the element. Classes allow CSS and JavaScript to select and access specific elements via the class selector or `document.getElementsByClassName`."
+  mdn: "Web/HTML/Global_attributes/class"
+  global: true
+  snippet: "class=\"$1\""
+  completion_detail: "CSS class name"
+
+id:
+  description: "Defines a unique identifier (ID) which must be unique in the whole document. Its purpose is to identify the element when linking (fragment identifier), scripting, or styling with CSS."
+  mdn: "Web/HTML/Global_attributes/id"
+  global: true
+  snippet: "id=\"$1\""
+  completion_detail: "Unique identifier"
+
+style:
+  description: "Contains CSS styling declarations to be applied to the element. Note that it is recommended for styles to be defined in separate files. Inline styles have the highest specificity."
+  mdn: "Web/HTML/Global_attributes/style"
+  global: true
+  snippet: "style=\"$1\""
+  completion_detail: "Inline CSS"
+
+title:
+  description: "Contains text representing advisory information related to the element it belongs to. Typically displayed as a tooltip on mouse hover."
+  mdn: "Web/HTML/Global_attributes/title"
+  global: true
+  snippet: "title=\"$1\""
+  completion_detail: "Tooltip text"
+
+lang:
+  description: "Specifies the primary language of the element's contents and for any of the element's attributes that contain text. Use BCP 47 language tags (e.g., `en`, `ko`, `ja`, `fr`, `de`)."
+  mdn: "Web/HTML/Global_attributes/lang"
+  global: true
+  snippet: "lang=\"$1\""
+  completion_detail: "Language code"
+
+dir:
+  description: "Specifies the text direction of the element's content. Values: `ltr` (left-to-right), `rtl` (right-to-left), or `auto` (browser determines)."
+  mdn: "Web/HTML/Global_attributes/dir"
+  global: true
+  snippet: "dir=\"$1\""
+  completion_detail: "Text direction"
+
+tabindex:
+  description: "Allows developers to make an element focusable (allow or prevent sequential focus navigation). `0` = normal tab order, `-1` = not reachable via tab but focusable via script, positive = custom tab order (avoid)."
+  mdn: "Web/HTML/Global_attributes/tabindex"
+  global: true
+  snippet: "tabindex=\"$1\""
+  completion_detail: "Tab order"
+
+accesskey:
+  description: "Provides a hint for generating a keyboard shortcut for the current element. The shortcut consists of Alt+key (Windows/Linux) or Ctrl+Option+key (Mac)."
+  mdn: "Web/HTML/Global_attributes/accesskey"
+  global: true
+  snippet: "accesskey=\"$1\""
+  completion_detail: "Keyboard shortcut"
+
+contenteditable:
+  description: "An enumerated attribute indicating if the element should be editable by the user. Values: `true` (editable), `false` (not editable), or `plaintext-only` (editable with plain text only)."
+  mdn: "Web/HTML/Global_attributes/contenteditable"
+  global: true
+  snippet: "contenteditable=\"$1\""
+  completion_detail: "Content editable"
+
+draggable:
+  description: "Enumerated attribute indicating whether the element can be dragged using the Drag and Drop API. Values: `true` (draggable), `false` (not draggable)."
+  mdn: "Web/HTML/Global_attributes/draggable"
+  global: true
+  snippet: "draggable=\"$1\""
+  completion_detail: "Draggable"
+
+hidden:
+  description: "Boolean global attribute indicating that the element is not yet, or is no longer, relevant. The browser won't render hidden elements. Do not use to hide visible content — use CSS instead."
+  mdn: "Web/HTML/Global_attributes/hidden"
+  global: true
+  boolean: true
+  snippet: "hidden"
+  completion_detail: "Hidden element"
+
+spellcheck:
+  description: "Enumerated attribute defines whether the element may be checked for spelling errors. Values: `true` (check), `false` (don't check). Defaults to browser behavior."
+  mdn: "Web/HTML/Global_attributes/spellcheck"
+  global: true
+  snippet: "spellcheck=\"$1\""
+  completion_detail: "Spell checking"
+
+translate:
+  description: "Enumerated attribute that specifies whether an element's translatable attribute values and text node children should be translated when the page is localized. Values: `yes` or `no`."
+  mdn: "Web/HTML/Global_attributes/translate"
+  global: true
+  snippet: "translate=\"$1\""
+  completion_detail: "Translate flag"
+
+data-*:
+  description: "Custom data attributes allow proprietary information to be exchanged between HTML and its DOM representation via scripts. The `*` can be replaced by any name following XML naming rules (e.g., `data-user-id=\"42\"`)."
+  mdn: "Web/HTML/Global_attributes/data-*"
+  global: true
+  snippet: "data-$1=\"$2\""
+  completion_detail: "Custom data attribute"
+
+role:
+  description: "ARIA role attribute. Defines the explicit ARIA role of the element for assistive technologies. Common roles: `button`, `navigation`, `banner`, `main`, `complementary`, `dialog`, `alert`, `tabpanel`."
+  mdn: "Web/Accessibility/ARIA/Roles"
+  global: true
+  snippet: "role=\"$1\""
+  completion_detail: "ARIA role"
+
+aria-label:
+  description: "Defines a string value that labels an interactive element. Used when no visible text label exists. Essential for accessibility when an element has no text content but conveys meaning visually."
+  mdn: "Web/Accessibility/ARIA/Attributes/aria-label"
+  global: true
+  snippet: "aria-label=\"$1\""
+  completion_detail: "ARIA label"
+
+aria-hidden:
+  description: "Indicates whether the element is exposed to the accessibility API. `true` = hidden from screen readers, `false` = visible. Use for purely decorative content."
+  mdn: "Web/Accessibility/ARIA/Attributes/aria-hidden"
+  global: true
+  snippet: "aria-hidden=\"$1\""
+  completion_detail: "ARIA hidden"
+
+aria-describedby:
+  description: "Identifies the element (or elements) that describes the object. Similar to `aria-labelledby`, but for descriptive text rather than a label."
+  mdn: "Web/Accessibility/ARIA/Attributes/aria-describedby"
+  global: true
+  snippet: "aria-describedby=\"$1\""
+  completion_detail: "ARIA description"
+
+aria-labelledby:
+  description: "Identifies the element (or elements) that labels the current element. Used when a visible text label is present elsewhere in the document."
+  mdn: "Web/Accessibility/ARIA/Attributes/aria-labelledby"
+  global: true
+  snippet: "aria-labelledby=\"$1\""
+  completion_detail: "ARIA label reference"
+
+aria-expanded:
+  description: "Set on an element to indicate whether a control is expanded or collapsed and whether its child elements are displayed or hidden. Used for accordions, dropdowns, etc."
+  mdn: "Web/Accessibility/ARIA/Attributes/aria-expanded"
+  global: true
+  snippet: "aria-expanded=\"$1\""
+  completion_detail: "ARIA expanded state"
+
+aria-controls:
+  description: "Identifies the element (or elements) whose contents or presence are controlled by the current element. Used for tabs, accordions, etc."
+  mdn: "Web/Accessibility/ARIA/Attributes/aria-controls"
+  global: true
+  snippet: "aria-controls=\"$1\""
+  completion_detail: "ARIA controls"
+
+# ── Element-specific attributes ──
+
+href:
+  description: "The URL that the hyperlink points to. Used on `<a>`, `<area>`, `<base>`, `<link>` elements. Can be an absolute URL, relative URL, fragment (`#id`), or JavaScript (`javascript:void(0)`)."
+  mdn: "Web/HTML/Element/a#href"
+  snippet: "href=\"$1\""
+  completion_detail: "Hyperlink URL"
+
+src:
+  description: "The URL of the embeddable content. Used on `<img>`, `<script>`, `<iframe>`, `<audio>`, `<video>`, `<source>`, `<embed>`, `<track>`, `<input type=image>`."
+  mdn: "Web/HTML/Element/img#src"
+  snippet: "src=\"$1\""
+  completion_detail: "Source URL"
+
+alt:
+  description: "Defines an alternative text description of the image. Required for accessibility — screen readers read this text. Leave empty (`alt=\"\"`) for purely decorative images."
+  mdn: "Web/HTML/Element/img#alt"
+  snippet: "alt=\"$1\""
+  completion_detail: "Alternative text"
+
+type:
+  description: "Defines the type of the element. For `<input>`: text, password, email, number, tel, url, search, date, checkbox, radio, file, submit, reset, button, color, range. For `<script>`: MIME type (default: `text/javascript`)."
+  mdn: "Web/HTML/Element/input#type"
+  snippet: "type=\"$1\""
+  completion_detail: "Input type"
+
+name:
+  description: "Name of the element. For form controls, this is used as the key when submitting form data. For `<iframe>`, it sets a targetable name for the browsing context. For `<meta>`, sets the metadata name."
+  mdn: "Web/HTML/Element/input#name"
+  snippet: "name=\"$1\""
+  completion_detail: "Form field name"
+
+value:
+  description: "Defines the default value for the element. For `<input>`: initial value. For `<button>`, `<option>`: the value submitted with the form. For `<li>` (in `<ol>`): sets the list item's ordinal number."
+  mdn: "Web/HTML/Element/input#value"
+  snippet: "value=\"$1\""
+  completion_detail: "Input value"
+
+placeholder:
+  description: "Provides a hint to the user of what can be entered in the field. Disappears when the user starts typing. Should not be used as a replacement for `<label>`."
+  mdn: "Web/HTML/Element/input#placeholder"
+  snippet: "placeholder=\"$1\""
+  completion_detail: "Placeholder text"
+
+disabled:
+  description: "Boolean attribute: if present, the form control is not mutable, focusable, or submitted with the form. Applies to `<button>`, `<fieldset>`, `<input>`, `<optgroup>`, `<option>`, `<select>`, `<textarea>`."
+  mdn: "Web/HTML/Attributes/disabled"
+  boolean: true
+  snippet: "disabled"
+  completion_detail: "Disabled state"
+
+required:
+  description: "Boolean attribute: if present on an `<input>`, `<select>`, or `<textarea>`, the user must specify a value before the form can be submitted."
+  mdn: "Web/HTML/Attributes/required"
+  boolean: true
+  snippet: "required"
+  completion_detail: "Required field"
+
+readonly:
+  description: "Boolean attribute: if present on `<input>` or `<textarea>`, the value is not editable by the user but is still submitted with the form. The element can still receive focus."
+  mdn: "Web/HTML/Attributes/readonly"
+  boolean: true
+  snippet: "readonly"
+  completion_detail: "Read-only field"
+
+checked:
+  description: "Boolean attribute: if present on `<input type=checkbox>` or `<input type=radio>`, the element is checked (toggled on) by default."
+  mdn: "Web/HTML/Element/input/checkbox#checked"
+  boolean: true
+  snippet: "checked"
+  completion_detail: "Checked state"
+
+selected:
+  description: "Boolean attribute: if present on an `<option>` element, the option is initially selected when the page loads. Only one `<option>` in a single-select should have this."
+  mdn: "Web/HTML/Element/option#selected"
+  boolean: true
+  snippet: "selected"
+  completion_detail: "Selected option"
+
+multiple:
+  description: "Boolean attribute: if present on `<input type=file>` or `<select>`, the user may select more than one value."
+  mdn: "Web/HTML/Attributes/multiple"
+  boolean: true
+  snippet: "multiple"
+  completion_detail: "Multiple values"
+
+autofocus:
+  description: "Boolean attribute: if present, the element should automatically receive focus when the page loads (or when the `<dialog>` it's in is shown). Only one element per document should have `autofocus`."
+  mdn: "Web/HTML/Global_attributes/autofocus"
+  global: true
+  boolean: true
+  snippet: "autofocus"
+  completion_detail: "Auto-focus"
+
+autocomplete:
+  description: "Specifies whether the browser should provide autocomplete suggestions. Values: `on`, `off`, or specific tokens like `name`, `email`, `tel`, `new-password`, `current-password`, `street-address`, etc."
+  mdn: "Web/HTML/Attributes/autocomplete"
+  snippet: "autocomplete=\"$1\""
+  completion_detail: "Autocomplete"
+
+maxlength:
+  description: "The maximum string length (in UTF-16 code units) that the user can enter into the field. Constraint validation. For `<input>` and `<textarea>`."
+  mdn: "Web/HTML/Attributes/maxlength"
+  snippet: "maxlength=\"$1\""
+  completion_detail: "Maximum length"
+
+minlength:
+  description: "The minimum string length (in UTF-16 code units) that the user can enter. Constraint validation. For `<input>` and `<textarea>`."
+  mdn: "Web/HTML/Attributes/minlength"
+  snippet: "minlength=\"$1\""
+  completion_detail: "Minimum length"
+
+min:
+  description: "The minimum value accepted by the element. For `<input>` (type number, range, date, etc.) and `<meter>`."
+  mdn: "Web/HTML/Attributes/min"
+  snippet: "min=\"$1\""
+  completion_detail: "Minimum value"
+
+max:
+  description: "The maximum value accepted by the element. For `<input>` and `<meter>`. Must be greater than or equal to `min`."
+  mdn: "Web/HTML/Attributes/max"
+  snippet: "max=\"$1\""
+  completion_detail: "Maximum value"
+
+step:
+  description: "The granularity that the value must adhere to. For `<input>` (number, range, date, etc.). Defaults to 1 for numeric types."
+  mdn: "Web/HTML/Attributes/step"
+  snippet: "step=\"$1\""
+  completion_detail: "Step increment"
+
+pattern:
+  description: "A regular expression that the control's value is checked against. For `<input>`. The pattern must match the entire value (not just a substring). Use `title` to describe the expected pattern."
+  mdn: "Web/HTML/Attributes/pattern"
+  snippet: "pattern=\"$1\""
+  completion_detail: "Validation pattern"
+
+accept:
+  description: "For `<input type=file>`, specifies which file types the server accepts. Values: MIME types (e.g., `image/*`), file extensions (`.pdf,.doc`), or `audio/*`, `video/*`, `image/*`."
+  mdn: "Web/HTML/Attributes/accept"
+  snippet: "accept=\"$1\""
+  completion_detail: "Accepted file types"
+
+target:
+  description: "Specifies where to display the linked URL. Values: `_self` (same frame), `_blank` (new tab/window), `_parent`, `_top`. For `<a>`, `<area>`, `<base>`, `<form>`."
+  mdn: "Web/HTML/Element/a#target"
+  snippet: "target=\"$1\""
+  completion_detail: "Link target"
+
+rel:
+  description: "Specifies the relationship between the current document and the linked resource. Common values: `stylesheet`, `icon`, `preload`, `nofollow`, `noopener`, `noreferrer`, `alternate`, `canonical`. For `<a>`, `<area>`, `<link>`, `<form>`."
+  mdn: "Web/HTML/Attributes/rel"
+  snippet: "rel=\"$1\""
+  completion_detail: "Relationship"
+
+action:
+  description: "The URL that processes the form submission. For `<form>`. If omitted, the form submits to the current page URL."
+  mdn: "Web/HTML/Element/form#action"
+  snippet: "action=\"$1\""
+  completion_detail: "Form action URL"
+
+method:
+  description: "The HTTP method to submit the form with. Values: `GET` (data in URL query string), `POST` (data in request body), or `dialog` (closes dialog without submitting). For `<form>`."
+  mdn: "Web/HTML/Element/form#method"
+  snippet: "method=\"$1\""
+  completion_detail: "Form method"
+
+enctype:
+  description: "The MIME type used to encode form data. Values: `application/x-www-form-urlencoded` (default), `multipart/form-data` (for file uploads), `text/plain`."
+  mdn: "Web/HTML/Element/form#enctype"
+  snippet: "enctype=\"$1\""
+  completion_detail: "Form encoding"
+
+width:
+  description: "Specifies the width of the element in CSS pixels. For `<img>`, `<iframe>`, `<canvas>`, `<embed>`, `<object>`, `<video>`, `<input type=image>`. Use CSS for layout width."
+  mdn: "Web/HTML/Element/img#width"
+  snippet: "width=\"$1\""
+  completion_detail: "Element width"
+
+height:
+  description: "Specifies the height of the element in CSS pixels. For `<img>`, `<iframe>`, `<canvas>`, `<embed>`, `<object>`, `<video>`, `<input type=image>`."
+  mdn: "Web/HTML/Element/img#height"
+  snippet: "height=\"$1\""
+  completion_detail: "Element height"
+
+for:
+  description: "Specifies which form element a `<label>` is bound to. Must match the `id` of the target element. Also used on `<output>` to list element ids that contributed to the calculation."
+  mdn: "Web/HTML/Element/label#for"
+  snippet: "for=\"$1\""
+  completion_detail: "Label target"
+
+rows:
+  description: "The number of visible text lines for the `<textarea>` control. Default is 2."
+  mdn: "Web/HTML/Element/textarea#rows"
+  snippet: "rows=\"$1\""
+  completion_detail: "Textarea rows"
+
+cols:
+  description: "The visible width of the `<textarea>` text control, in average character widths. Default is 20."
+  mdn: "Web/HTML/Element/textarea#cols"
+  snippet: "cols=\"$1\""
+  completion_detail: "Textarea columns"
+
+wrap:
+  description: "Indicates how the `<textarea>` control wraps text for form submission. Values: `hard` (adds line breaks), `soft` (no line breaks, default)."
+  mdn: "Web/HTML/Element/textarea#wrap"
+  snippet: "wrap=\"$1\""
+  completion_detail: "Text wrap mode"
+
+loading:
+  description: "Indicates how the browser should load the resource. Values: `eager` (immediately), `lazy` (defer until near viewport). For `<img>` and `<iframe>`."
+  mdn: "Web/HTML/Element/img#loading"
+  snippet: "loading=\"$1\""
+  completion_detail: "Lazy loading"
+
+decoding:
+  description: "Provides an image decoding hint to the browser. Values: `sync` (decode synchronously), `async` (decode asynchronously to avoid blocking), `auto` (default, no preference)."
+  mdn: "Web/HTML/Element/img#decoding"
+  snippet: "decoding=\"$1\""
+  completion_detail: "Image decoding hint"
+
+srcset:
+  description: "One or more strings separated by commas, indicating possible image sources for the user agent to use. Each string is composed of a URL followed by a width descriptor or pixel density descriptor."
+  mdn: "Web/HTML/Element/img#srcset"
+  snippet: "srcset=\"$1\""
+  completion_detail: "Responsive image set"
+
+sizes:
+  description: "One or more strings separated by commas, indicating a set of source sizes. Each source size consists of a media condition followed by a size value. Used with `srcset`."
+  mdn: "Web/HTML/Element/img#sizes"
+  snippet: "sizes=\"$1\""
+  completion_detail: "Image sizes"
+
+media:
+  description: "Specifies a media condition (similar to a media query) for `<source>`, `<link>`, `<style>`, `<a>`. The resource is only used if the condition matches."
+  mdn: "Web/HTML/Element/source#media"
+  snippet: "media=\"$1\""
+  completion_detail: "Media query"
+
+controls:
+  description: "Boolean attribute: if present on `<audio>` or `<video>`, the browser offers controls to allow the user to control playback (play, pause, volume, seeking)."
+  mdn: "Web/HTML/Element/video#controls"
+  boolean: true
+  snippet: "controls"
+  completion_detail: "Playback controls"
+
+autoplay:
+  description: "Boolean attribute: if present on `<audio>` or `<video>`, the media automatically begins playback as soon as it can, without waiting for the entire file to load."
+  mdn: "Web/HTML/Element/video#autoplay"
+  boolean: true
+  snippet: "autoplay"
+  completion_detail: "Auto-play media"
+
+loop:
+  description: "Boolean attribute: if present on `<audio>` or `<video>`, the media player will automatically seek back to the start upon reaching the end."
+  mdn: "Web/HTML/Element/video#loop"
+  boolean: true
+  snippet: "loop"
+  completion_detail: "Loop media"
+
+muted:
+  description: "Boolean attribute: if present on `<audio>` or `<video>`, the audio output will be muted. Useful with `autoplay` since many browsers block unmuted autoplay."
+  mdn: "Web/HTML/Element/video#muted"
+  boolean: true
+  snippet: "muted"
+  completion_detail: "Muted media"
+
+poster:
+  description: "A URL for an image to be shown while the video is downloading, or until the user hits the play button. For `<video>`. If not specified, the first frame is used."
+  mdn: "Web/HTML/Element/video#poster"
+  snippet: "poster=\"$1\""
+  completion_detail: "Video poster image"
+
+scope:
+  description: "Defines the cells that the `<th>` header element relates to. Values: `row`, `col`, `rowgroup`, `colgroup`. Essential for table accessibility."
+  mdn: "Web/HTML/Element/th#scope"
+  snippet: "scope=\"$1\""
+  completion_detail: "Header scope"
+
+colspan:
+  description: "Specifies the number of columns a `<td>` or `<th>` cell should span. Default is 1. Values higher than 1000 are clamped."
+  mdn: "Web/HTML/Element/td#colspan"
+  snippet: "colspan=\"$1\""
+  completion_detail: "Column span"
+
+rowspan:
+  description: "Specifies the number of rows a `<td>` or `<th>` cell should span. Default is 1. Values higher than 65534 are clamped."
+  mdn: "Web/HTML/Element/td#rowspan"
+  snippet: "rowspan=\"$1\""
+  completion_detail: "Row span"
+
+cite:
+  description: "Contains a URL which points to the source of the quotation or edit. For `<blockquote>`, `<q>`, `<del>`, `<ins>`. Not rendered visually by browsers."
+  mdn: "Web/HTML/Element/blockquote#cite"
+  snippet: "cite=\"$1\""
+  completion_detail: "Citation URL"
+
+datetime:
+  description: "Indicates the date and time associated with the element. For `<time>`: a machine-readable format for the human-readable content. For `<del>`/`<ins>`: the date the change was made."
+  mdn: "Web/HTML/Element/time#datetime"
+  snippet: "datetime=\"$1\""
+  completion_detail: "Date/time value"
+
+async:
+  description: "Boolean attribute for `<script>`: if present, the script is fetched in parallel and executed as soon as it is available (potentially before HTML parsing completes)."
+  mdn: "Web/HTML/Element/script#async"
+  boolean: true
+  snippet: "async"
+  completion_detail: "Async script"
+
+defer:
+  description: "Boolean attribute for `<script>`: if present, the script is fetched in parallel and executed after the page has finished parsing. Has no effect on inline scripts."
+  mdn: "Web/HTML/Element/script#defer"
+  boolean: true
+  snippet: "defer"
+  completion_detail: "Defer script"
+
+charset:
+  description: "Declares the character encoding of the document. Must be present on the `<meta charset=\"utf-8\">` element. Should always be UTF-8."
+  mdn: "Web/HTML/Element/meta#charset"
+  snippet: "charset=\"$1\""
+  completion_detail: "Character encoding"
+
+content:
+  description: "The value of the metadata. For `<meta name=\"description\" content=\"...\">`: the page description shown in search results. For `<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">`: responsive viewport settings."
+  mdn: "Web/HTML/Element/meta#content"
+  snippet: "content=\"$1\""
+  completion_detail: "Metadata content"
+
+http-equiv:
+  description: "Defines a pragma directive. Values: `content-security-policy`, `content-type`, `default-style`, `refresh`, `x-ua-compatible`. For `<meta>`."
+  mdn: "Web/HTML/Element/meta#http-equiv"
+  snippet: "http-equiv=\"$1\""
+  completion_detail: "HTTP equivalent"

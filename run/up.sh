@@ -1,18 +1,22 @@
 #!/usr/bin/env bash
 # run/up.sh — Start Twig Analyzer services
-#
-# Usage:
-#   ./run/up.sh                  # production LSP (TCP :2087)
-#   ./run/up.sh --dev            # development + hot-reload (TCP :2088)
-#   ./run/up.sh --stdio          # stdio mode (editor pipe)
-#   ./run/up.sh --cli "args"     # run CLI command
-#   ./run/up.sh --all            # all services (prod + dev)
-#   ./run/up.sh --build          # force rebuild
+# ============================================================================
+source "$(dirname "$0")/common.sh"
 
-set -euo pipefail
-ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-cd "$ROOT"
+usage() {
+    echo "Usage: run/up.sh [MODE]"
+    echo ""
+    echo "Modes:"
+    echo "  (default)  Start production LSP server       → http://localhost:2087"
+    echo "  --dev      Start dev server (hot-reload)     → http://localhost:2088"
+    echo "  --stdio    Run LSP in stdio mode             → for editor piping"
+    echo "  --cli ...  Run one-shot CLI command          → e.g. --cli \"analyze templates/\""
+    echo "  --build    Force rebuild Docker images"
+    echo "  --help     Show this help"
+    exit 0
+}
 
+# ── Parse arguments ──────────────────────────────────────────────────
 MODE="prod"
 BUILD_FLAG=""
 
@@ -22,38 +26,39 @@ for arg in "$@"; do
         --stdio)   MODE="stdio" ;;
         --cli)     MODE="cli"; CLI_ARGS="${*:2}"; break ;;
         --build)   BUILD_FLAG="--build" ;;
-        --all)     MODE="all" ;;
-        -h|--help) MODE="help" ;;
-        *)         echo "Unknown: $arg"; exit 1 ;;
+        -h|--help) usage ;;
+        *)         err "Unknown option: $arg"; usage ;;
     esac
 done
 
+require_docker
+
+# ── Execute ──────────────────────────────────────────────────────────
 case "$MODE" in
-    help)
-        echo "Usage: ./run/up.sh [MODE]"
-        echo "  (default)  Production LSP  → :2087"
-        echo "  --dev      Dev + hot-reload → :2088"
-        echo "  --stdio    Editor pipe mode"
-        echo "  --cli ...  Run CLI command"
-        echo "  --all      All services"
-        echo "  --build    Force rebuild"
-        exit 0 ;;
     stdio)
-        docker build --target runtime -t twig-analyzer-lsp .
-        exec docker run -i --rm -v "$ROOT:/workspace:ro" twig-analyzer-lsp ;;
+        info "LSP Server (stdio mode)"
+        docker build --target runtime -t "$DOCKER_IMAGE" "$ROOT"
+        exec docker run -i --rm -v "$ROOT:/workspace:ro" "$DOCKER_IMAGE"
+        ;;
     dev)
-        docker compose --profile dev up -d $BUILD_FLAG lsp-dev
-        echo "Dev → http://localhost:2088" ;;
-    all)
-        docker compose --profile dev up -d $BUILD_FLAG
-        echo "Prod → :2087  |  Dev → :2088" ;;
+        info "Starting dev server (hot-reload)..."
+        compose_up dev "$BUILD_FLAG"
+        ok "Dev server → http://localhost:2088"
+        ;;
     cli)
         shift 2 2>/dev/null || true
-        docker compose --profile tools build $BUILD_FLAG cli
-        docker compose --profile tools run --rm cli ${CLI_ARGS:-$*} ;;
+        info "twig-analyze ${CLI_ARGS:-$*}"
+        compose build cli
+        exec docker compose run --rm cli ${CLI_ARGS:-$*}
+        ;;
     *)
-        docker compose up -d $BUILD_FLAG lsp
-        echo "LSP → http://localhost:2087" ;;
+        info "Starting production server..."
+        compose_up "" "$BUILD_FLAG"
+        ok "LSP Server → http://localhost:2087"
+        ;;
 esac
 
-echo "Status: docker compose ps  |  Stop: ./run/down.sh"
+echo ""
+info "Status:  docker compose ps"
+info "Logs:    docker compose logs -f"
+info "Stop:    run/down.sh"

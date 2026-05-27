@@ -2,7 +2,7 @@
 
 Static analysis & VS Code IntelliSense for Twig 3.x templates.
 
-**Runs entirely in Docker. No local Python, Node.js, or virtualenv required.**
+**Runs entirely in Docker.** No Python, Node.js, or virtualenv required on your machine.
 
 ---
 
@@ -11,34 +11,42 @@ Static analysis & VS Code IntelliSense for Twig 3.x templates.
 ```bash
 git clone <repo> && cd symfony-twig
 
-# Install VS Code extension (Docker handles everything)
-cd vscode-extension && bash install.sh
-# → Ctrl+Shift+P → Developer: Reload Window
-# → Open any .twig file — done.
+# 1. Start the LSP server
+./run/up.sh
+
+# 2. Install the VS Code extension
+bash vscode-extension/install.sh
+
+# 3. Reload VS Code
+#    Ctrl+Shift+P → Developer: Reload Window
+#    Open any .twig file → done.
 ```
 
-> **Prerequisite:** [Docker Desktop](https://docker.com) only. Nothing else.
+> **Prerequisite:** [Docker Desktop](https://docker.com) only.
 
----
+## Stop / Uninstall
 
-## How Do I…?
+```bash
+bash vscode-extension/uninstall.sh   # remove extension
+./run/down.sh                        # stop server
+```
 
-| I want to… | How |
+## Run Tests
+
+```bash
+./run/test.sh                        # all 137 tests
+./run/test.sh -k "filter"            # filter by name
+./run/test.sh tests/test_tags.py     # single file
+```
+## Editor Features
+
+| Action | How |
 |---|---|
-| **Install in VS Code** | `cd vscode-extension && bash install.sh` |
-| **See warnings in editor** | Open `.twig` → Problems panel (`Ctrl+Shift+M`) |
-| **Get docs when hovering** | Hover over `date`, `if`, `path()`, HTML tags |
-| **Auto-complete** | Type `{%` → Ctrl+Space (tags, filters, functions, HTML) |
-| **Suppress "undefined variable"** | Add to `.twig-analyzer.yml` `globals:` |
-| **Register custom filters** | Add `{# @filter my_filter #}` comment |
-| **Format a template** | `Shift+Alt+F` |
-| **Jump to included template** | `F12` or Ctrl+Click |
-| **Run LSP server** | `./run/up.sh` |
-| **Run LSP in dev mode** | `./run/up.sh --dev` |
-| **Run tests** | `./run/test.sh` |
-| **Run CLI analysis** | `./run/up.sh --cli "analyze templates/"` |
-
----
+| **See warnings** | Open `.twig` → Problems panel (`Ctrl+Shift+M`) |
+| **Hover docs** | Hover over `date`, `if`, `path()`, HTML tags |
+| **Auto-complete** | Type `{%`, `\|`, `{{`, `<` → Ctrl+Space |
+| **Format** | `Shift+Alt+F` |
+| **Go to definition** | `F12` or Ctrl+Click on template paths |
 
 ## Quick Config: `.twig-analyzer.yml`
 

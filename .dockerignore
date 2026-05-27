@@ -34,7 +34,4 @@ vscode-extension/out/
 
 # Docs
 doc/
-
-# Misc
-*.md
 .env

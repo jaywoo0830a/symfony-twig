@@ -24,11 +24,10 @@ FROM python:3.14-slim AS builder
 WORKDIR /build
 COPY pyproject.toml .
 COPY twig_analyzer/ twig_analyzer/
-COPY README.md .
 
 RUN pip install --no-cache-dir build && \
     python -m build --wheel && \
-    pip install --no-cache-dir dist/*.whl
+    pip install --no-cache-dir dist/*.whl pyyaml
 
 # ═══════════════════════════════════════════
 # Stage 1: Production Runtime
@@ -39,8 +38,6 @@ LABEL org.opencontainers.image.title="Twig Analyzer LSP"
 LABEL org.opencontainers.image.description="Language Server Protocol server for Twig 3.x templates"
 LABEL org.opencontainers.image.version="1.0.0"
 LABEL org.opencontainers.image.authors="twig-analyzer"
-
-RUN pip install --no-cache-dir pyyaml==6.2
 
 COPY --from=builder /usr/local/lib/python3.14/site-packages/ /usr/local/lib/python3.14/site-packages/
 COPY --from=builder /usr/local/bin/twig-analyze /usr/local/bin/twig-analyze
@@ -64,8 +61,7 @@ USER root
 RUN pip install --no-cache-dir \
     watchdog==6.1 \
     pytest==8.3 \
-    pytest-cov==6.0 \
-    pyyaml==6.2
+    pytest-cov==6.0
 
 USER twig
 

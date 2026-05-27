@@ -14,8 +14,6 @@
 #   ./run/test.sh --docker            # run tests
 #   ./run/up.sh --cli "analyze templates/"   # CLI
 
-version: "3.9"
-
 x-env: &default-env
   PYTHONUNBUFFERED: 1
   PYTHONDONTWRITEBYTECODE: 1
@@ -100,10 +98,8 @@ services:
       <<: *default-env
     command: >
       tests/ -v --tb=short
-      --junitxml=reports/junit.xml
       --cov=twig_analyzer
       --cov-report=term-missing
-      --cov-report=html:reports/coverage
     networks:
       - lsp-network
 

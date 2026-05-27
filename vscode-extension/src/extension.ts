@@ -187,56 +187,38 @@ const basename = (filePath: string): string =>
     filePath.split('/').pop() ?? filePath;
 
 // ═══════════════════════════════════════════════════════════════════════
-// 3. Strategy functions — find commands via ordered strategies
+// 3. Docker command — all analysis runs in a container
 // ═══════════════════════════════════════════════════════════════════════
 
-type Strategy = () => CliCommand | undefined;
-
-const firstOf = (strategies: readonly Strategy[]): CliCommand => {
-    for (const s of strategies) {
-        const result = s();
-        if (result !== undefined) return result;
-    }
-    return { cmd: 'python3', args: ['-m', 'twig_analyzer'], env: { ...process.env } };
-};
+const DOCKER_IMAGE = 'twig-analyzer-lsp:latest';
+const CONTAINER_WORKSPACE = '/workspace';
 
 export const findAnalyzerCommand = (): CliCommand => {
-    const config = vscode.workspace.getConfiguration('twigAnalyzer');
-    const extDir = path.resolve(__dirname, '..');
-    const homeDir = process.env.HOME ?? '/home/rlawjddn';
+    const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? process.cwd();
 
-    const strategies: readonly Strategy[] = [
-        // Strategy 1: User-configured pythonPath
-        () => {
-            const configured = config.get<string>('pythonPath', '');
-            if (configured && fs.existsSync(configured)) {
-                return { cmd: configured, args: ['-m', 'twig_analyzer'], env: { ...process.env } };
-            }
-            return undefined;
-        },
-        // Strategy 2: Known project venv
-        () => {
-            const candidates = [
-                path.join(homeDir, 'symfony-twig', '.venv', 'bin', 'python3'),
-                path.join(homeDir, 'symfony-twig', '.venv', 'bin', 'python'),
-            ];
-            const found = candidates.find(p => fs.existsSync(p));
-            return found
-                ? { cmd: found, args: ['-m', 'twig_analyzer'], env: { ...process.env } }
-                : undefined;
-        },
-        // Strategy 3: python3 on PATH, with extension dir as fallback
-        () => {
-            const env = { ...process.env };
-            const twigPath = path.join(extDir, 'twig_analyzer');
-            if (fs.existsSync(twigPath)) {
-                env.PYTHONPATH = extDir + (env.PYTHONPATH ? `:${env.PYTHONPATH}` : '');
-            }
-            return { cmd: 'python3', args: ['-m', 'twig_analyzer'], env };
-        },
-    ];
+    return {
+        cmd: 'docker',
+        args: [
+            'run', '--rm',
+            '-v', `${workspaceRoot}:${CONTAINER_WORKSPACE}:ro`,
+            '-i',  // keep stdin open for LSP
+            DOCKER_IMAGE,
+            'twig-analyze',
+        ],
+        env: { ...process.env },
+    };
+};
 
-    return firstOf(strategies);
+/**
+ * Convert a host file path to a Docker container path.
+ * /home/user/project/templates/base.html.twig → /workspace/templates/base.html.twig
+ */
+const toContainerPath = (hostPath: string): string => {
+    const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? '';
+    if (workspaceRoot && hostPath.startsWith(workspaceRoot)) {
+        return CONTAINER_WORKSPACE + hostPath.slice(workspaceRoot.length);
+    }
+    return hostPath;
 };
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -252,7 +234,8 @@ interface CliResult {
 
 const runAnalyzerCli = async (cmd: CliCommand, filePath: string): Promise<Result<CliResult, CliError>> => {
     const analyzerArgs = buildAnalyzerArgs();
-    const allArgs = [...cmd.args, ...analyzerArgs, '--format', 'json', filePath];
+    const containerPath = toContainerPath(filePath);
+    const allArgs = [...cmd.args, ...analyzerArgs, '--format', 'json', containerPath];
 
     try {
         const { stdout, stderr } = await execFileAsync(cmd.cmd, allArgs, {

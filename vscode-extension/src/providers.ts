@@ -41,20 +41,22 @@ export class TwigFormattingProvider implements vscode.DocumentFormattingEditProv
         cmd: CliCommand,
         document: vscode.TextDocument,
     ): Promise<string | undefined> {
-        const tmp = require('os').tmpdir();
-        const tmpFile = require('path').join(tmp, `twig-fmt-${Date.now()}.twig`);
-
+        // Docker stdin mode: pipe content through container
+        const formatArgs = [...cmd.args, 'format', '--stdin'];
         try {
-            require('fs').writeFileSync(tmpFile, document.getText(), 'utf-8');
-            await execFileAsync(cmd.cmd, [...cmd.args, 'format', tmpFile], {
+            const cp = require('child_process');
+            const result = cp.spawnSync(cmd.cmd, formatArgs, {
+                input: document.getText(),
                 timeout: 30000,
                 env: cmd.env,
+                encoding: 'utf-8',
             });
-            return require('fs').readFileSync(tmpFile, 'utf-8') as string;
+            if (result.status === 0 && result.stdout) {
+                return result.stdout;
+            }
+            return undefined;
         } catch {
             return undefined;
-        } finally {
-            try { require('fs').unlinkSync(tmpFile); } catch { /* ignore */ }
         }
     }
 }

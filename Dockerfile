@@ -91,3 +91,19 @@ USER twig
 # Run tests by default; override command for specific options
 ENTRYPOINT ["python", "-m", "pytest"]
 CMD ["tests/", "-v", "--tb=short"]
+
+# ═══════════════════════════════════════════
+# Stage 4: TypeScript Compiler
+# ═══════════════════════════════════════════
+FROM node:22-slim AS compile
+
+WORKDIR /build
+COPY vscode-extension/package.json vscode-extension/package-lock.json* ./
+RUN npm install --silent 2>/dev/null || npm install
+
+COPY vscode-extension/tsconfig.json .
+COPY vscode-extension/src/ ./src/
+RUN npx tsc -p ./ 2>/dev/null || npx tsc -p ./
+
+# Output is in /build/out/
+VOLUME /build/out

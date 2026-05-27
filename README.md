@@ -1,45 +1,53 @@
 # Twig Static Analyzer
 
-A comprehensive static analysis tool for Twig 3.x templates with VS Code IntelliSense integration.
+Static analysis & VS Code IntelliSense for Twig 3.x templates.
 
-Detects syntax errors, undefined variables/filters/functions/tests/tags, deprecated features, missing escaping, hardcoded strings, and more.
+**Runs entirely in Docker. No local Python, Node.js, or virtualenv required.**
 
-## Documentation
-
-**[📖 Full Documentation →](doc/INDEX.md)**
-
-| Section | Description |
-|---|---|
-| [Installation](doc/installation.md) | Python package & VS Code extension setup |
-| [Configuration](doc/configuration.md) | `.twig-analyzer.yml`, annotations, settings |
-| [Rules](doc/rules.md) | All 11 analysis rules with examples |
-| [VS Code Extension](doc/vscode-extension.md) | IntelliSense, hover, completion, go-to-definition |
-| [CLI Reference](doc/cli.md) | Command-line usage, JSON/JUnit, CI integration |
+---
 
 ## Quick Start
 
 ```bash
-pip install -e .
-twig-analyze templates/
+git clone <repo> && cd symfony-twig
+
+# Install VS Code extension (Docker handles everything)
+cd vscode-extension && bash install.sh
+# → Ctrl+Shift+P → Developer: Reload Window
+# → Open any .twig file — done.
 ```
 
-## Features
+> **Prerequisite:** [Docker Desktop](https://docker.com) only. Nothing else.
 
-- **11 analysis rules** — extends placement, undefined names, deprecations, security, i18n
-- **Project config** — `.twig-analyzer.yml` with auto-discovery (ESLint-style)
-- **Per-file annotations** — `{# @var user Type #}`, `{# @filter name #}`, etc.
-- **VS Code IntelliSense** — diagnostics, hover, completion, go-to-definition, formatting, folding, signature help, rename, color preview
-- **JSON/JUnit output** — CI/CD integration ready
-- **Pure functional design** — frozen dataclasses, immutable AST, pure rule functions
-- **137 unit tests** — based on official Twig 3.x documentation
+---
 
-## Run Tests
+## How Do I…?
 
-```bash
-pip install pytest
-pytest tests/ -v
+| I want to… | How |
+|---|---|
+| **Install in VS Code** | `cd vscode-extension && bash install.sh` |
+| **See warnings in editor** | Open `.twig` → Problems panel (`Ctrl+Shift+M`) |
+| **Get docs when hovering** | Hover over `date`, `if`, `path()`, HTML tags |
+| **Auto-complete** | Type `{%` → Ctrl+Space (tags, filters, functions, HTML) |
+| **Suppress "undefined variable"** | Add to `.twig-analyzer.yml` `globals:` |
+| **Register custom filters** | Add `{# @filter my_filter #}` comment |
+| **Format a template** | `Shift+Alt+F` |
+| **Jump to included template** | `F12` or Ctrl+Click |
+| **Run LSP server** | `./run/up.sh` |
+| **Run LSP in dev mode** | `./run/up.sh --dev` |
+| **Run tests** | `./run/test.sh` |
+| **Run CLI analysis** | `./run/up.sh --cli "analyze templates/"` |
+
+---
+
+## Quick Config: `.twig-analyzer.yml`
+
+```yaml
+globals: [app, form, user, articles]
+filters:  [custom_filter, markdown_to_html]
+functions:[vich_uploader_asset]
 ```
 
-## License
+---
 
-MIT
+**[📖 Full How-To Guides →](doc/INDEX.md)**

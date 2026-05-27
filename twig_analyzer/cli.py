@@ -83,6 +83,13 @@ def cmd_analyze(args: argparse.Namespace) -> None:
 def cmd_format(args: argparse.Namespace) -> None:
     from .formatter import format_twig
 
+    # --stdin mode: read from stdin, write to stdout
+    if args.stdin:
+        source = sys.stdin.read()
+        formatted = format_twig(source, indent_size=args.indent)
+        sys.stdout.write(formatted)
+        return
+
     files = find_twig_files(args.paths)
     if not files:
         print("No Twig template files found.", file=sys.stderr)
@@ -134,10 +141,11 @@ def main() -> None:
     ap.add_argument("--config", "-c", help="Path to .twig-analyzer.yml (auto-discovered if omitted)")
 
     fp = sub.add_parser("format", help="Format Twig templates")
-    fp.add_argument("paths", nargs="+")
+    fp.add_argument("paths", nargs="*")
     fp.add_argument("--indent", "-i", type=int, default=4)
     fp.add_argument("--check", "-c", action="store_true")
     fp.add_argument("--diff", action="store_true")
+    fp.add_argument("--stdin", action="store_true", help="Read from stdin, write to stdout")
 
     raw_args = sys.argv[1:]
     if raw_args and raw_args[0] in ("analyze", "format"):

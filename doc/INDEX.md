@@ -1,61 +1,125 @@
-# Twig Static Analyzer — Documentation
+# Twig Static Analyzer — How-To Guides
 
-A comprehensive static analysis tool for Twig 3.x templates with VS Code IntelliSense integration. Detects syntax errors, undefined variables/filters/functions/tests/tags, deprecated features, missing escaping, and more.
+**Runs entirely in Docker.** No local Python, no virtualenv, no pip.
 
-## Table of Contents
+---
 
-| Document | Description |
-|---|---|
-| [Installation](installation.md) | Python package, VS Code extension setup |
-| [Configuration](configuration.md) | `.twig-analyzer.yml`, annotation syntax, per-file overrides |
-| [Rules](rules.md) | All 11 analysis rules with examples |
-| [VS Code Extension](vscode-extension.md) | IntelliSense, hover, completion, go-to-definition, formatting || [LSP & Docker](lsp-docker.md) | Language Server Protocol server, Docker, docker-compose || [CLI Reference](cli.md) | Command-line usage, JSON/JUnit output, CI integration |
+## Pick Your Path
 
-## Quick Start
+| I want to… | Command | Needs |
+|---|---|---|
+| **Use in VS Code** | `cd vscode-extension && bash install.sh` | Docker + Node.js |
+| **Run LSP server** | `./run/up.sh` | Docker |
+| **Run LSP in dev mode** | `./run/up.sh --dev` | Docker |
+| **Run tests** | `./run/test.sh` | Docker |
+| **Run CLI** | `./run/up.sh --cli "analyze templates/"` | Docker |
+
+> Each path builds the Docker image automatically on first run.
+
+---
+
+## Install VS Code Extension
 
 ```bash
-pip install -e .
-twig-analyze templates/
+cd vscode-extension && bash install.sh
+# → Ctrl+Shift+P → Developer: Reload Window
+# → Open .twig file → diagnostics appear
 ```
+
+The installer:
+1. Checks Docker is running
+2. Builds `twig-analyzer-lsp` Docker image (one-time)
+3. Compiles TypeScript (or uses pre-built)
+4. Copies extension to VS Code
+
+---
+
+## Configure
+
+### How to silence "Variable may not be defined"
+
+Create `.twig-analyzer.yml` in project root:
 
 ```yaml
-# .twig-analyzer.yml (place in project root)
-globals:
-  - app
-  - user
-  - articles
-
-filters:
-  - custom_filter
+globals: [app, form, user, articles, categories]
 ```
+
+### How to register custom filters / functions
+
+```yaml
+filters:  [custom_filter, markdown_to_html]
+functions:[vich_uploader_asset, my_helper]
+tests:    [is_valid]
+tags:     [form_theme]
+```
+
+### How to declare per template
 
 ```twig
-{# templates/base.html.twig #}
 {# @var user App\Entity\User #}
-<h1>{{ user.name|e }}</h1>
+{# @filter custom_filter #}
+{# @function my_helper #}
 ```
 
-## Project Structure
+### How to disable a rule
 
+In VS Code settings: `"twigAnalyzer.disabledRules": ["raw-filter"]`
+
+---
+
+## How to use the CLI
+
+```bash
+# Analyze templates
+./run/up.sh --cli "analyze templates/"
+
+# JSON output
+./run/up.sh --cli "analyze --format json templates/"
+
+# JUnit output (CI/CD)
+./run/up.sh --cli "analyze --format junit templates/"
+
+# Format templates
+./run/up.sh --cli "format templates/"
+
+# Format check only
+./run/up.sh --cli "format --check templates/"
 ```
-symfony-twig/
-├── twig_analyzer/         # Python analyzer package
-│   ├── analyzer.py        # Core analysis pipeline
-│   ├── ast.py             # Immutable AST nodes (frozen dataclasses)
-│   ├── builtins.py        # Twig 3.x + Symfony built-in declarations
-│   ├── cli.py             # CLI entry point
-│   ├── config.py          # .twig-analyzer.yml discovery & loading
-│   ├── diagnostics.py     # LSP-compatible diagnostic types
-│   ├── formatter.py       # Template formatter
-│   ├── lexer.py           # Pure tokenizer
-│   ├── parser.py          # Recursive-descent parser
-│   ├── reporter.py        # Console/JSON/JUnit reporters
-│   └── rules.py           # 11 analysis rules (pure functions)
-├── vscode-extension/      # VS Code extension (TypeScript)
-│   ├── src/extension.ts   # Extension lifecycle, analysis pipeline
-│   └── src/providers.ts   # 18 IntelliSense providers
-├── tests/                 # 137 pytest unit tests
-├── examples/              # Sample templates
-├── doc/                   # Documentation (this directory)
-└── .twig-analyzer.yml     # Sample project config
+
+---
+
+## How to run tests
+
+```bash
+./run/test.sh                          # all tests
+./run/test.sh -k "filter"              # filter by name
+./run/test.sh tests/test_tags.py       # single file
 ```
+
+---
+
+## How to start the LSP server
+
+```bash
+./run/up.sh              # production (port 2087)
+./run/up.sh --dev        # development (hot-reload, port 2088)
+./run/down.sh            # stop
+./run/down.sh --clean    # stop + remove images
+```
+
+---
+
+## Troubleshooting
+
+| Symptom | Fix |
+|---|---|
+| "Docker not found" | Install Docker Desktop |
+| "Cannot connect to Docker" | Start Docker Desktop |
+| "Variable may not be defined" | Add to `.twig-analyzer.yml` `globals:` |
+| "Unknown filter" | Add `{# @filter name #}` or YAML `filters:` |
+| No diagnostics in VS Code | Is Docker running? `docker ps` |
+| Extension not loading | `Ctrl+Shift+P` → Reload Window |
+
+---
+
+**[Rules Reference →](rules.md)**

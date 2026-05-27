@@ -248,6 +248,7 @@
           "end": "\"",
           "beginCaptures": { "0": { "name": "punctuation.separator.key-value.html" } },
           "patterns": [
+            { "include": "#twig-tags" },
             { "include": "#html-entity" }
           ]
         },
@@ -257,6 +258,7 @@
           "end": "'",
           "beginCaptures": { "0": { "name": "punctuation.separator.key-value.html" } },
           "patterns": [
+            { "include": "#twig-tags" },
             { "include": "#html-entity" }
           ]
         },

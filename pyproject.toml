@@ -9,7 +9,6 @@ description = "A static analyzer for Twig 3.x templates"
 requires-python = ">=3.10"
 license = { text = "MIT" }
 dependencies = [
-    "colorama>=0.4.6",
     "pyyaml>=6.0",
 ]
 

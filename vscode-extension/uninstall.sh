@@ -12,7 +12,7 @@ find_dirs() {
         "${HOME}/.vscode/extensions/${EXT_NAME}" \
         "${HOME}/.vscode-insiders/extensions/${EXT_NAME}" \
         "${HOME}/.vscode-server-insiders/extensions/${EXT_NAME}"; do
-        [ -d "$d" ] && echo "$d"
+        [ -d "$d" ] && echo "$d" || true
     done
 }
 
@@ -20,18 +20,16 @@ find_dirs() {
 DIRS=$(find_dirs)
 
 if [ -z "$DIRS" ]; then
-    echo "Extension not found. Already uninstalled?"
+    echo "Extension not found. Nothing to uninstall."
     exit 0
 fi
 
 echo "Removing Twig Static Analyzer..."
 for d in $DIRS; do
-    rm -rf "$d"
-    echo "  ✓ $d"
+    rm -rf "$d" && echo "  ✓ $d"
 done
 
 echo ""
-echo "Uninstalled. Restart VS Code to complete."
+echo "Uninstalled. Reload VS Code to complete."
 echo ""
-echo "Optional cleanup:"
-echo "  docker rmi twig-analyzer-lsp twig-analyzer-compile"
+echo "Optional: docker rmi twig-analyzer-lsp twig-analyzer-compile"

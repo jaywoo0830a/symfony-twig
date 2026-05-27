@@ -25,3 +25,6 @@ twig-lsp = "twig_analyzer.lsp_server:run"
 
 [tool.setuptools.packages.find]
 include = ["twig_analyzer*"]
+
+[tool.setuptools.package-data]
+"twig_analyzer.data" = ["*.yml"]

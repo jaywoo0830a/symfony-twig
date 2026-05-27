@@ -201,9 +201,8 @@ export const findAnalyzerCommand = (): CliCommand => {
         args: [
             'run', '--rm',
             '-v', `${workspaceRoot}:${CONTAINER_WORKSPACE}:ro`,
-            '-i',  // keep stdin open for LSP
+            '--entrypoint', 'twig-analyze',
             DOCKER_IMAGE,
-            'twig-analyze',
         ],
         env: { ...process.env },
     };
@@ -235,7 +234,7 @@ interface CliResult {
 const runAnalyzerCli = async (cmd: CliCommand, filePath: string): Promise<Result<CliResult, CliError>> => {
     const analyzerArgs = buildAnalyzerArgs();
     const containerPath = toContainerPath(filePath);
-    const allArgs = [...cmd.args, ...analyzerArgs, '--format', 'json', containerPath];
+    const allArgs = [...cmd.args, 'analyze', ...analyzerArgs, '--format', 'json', containerPath];
 
     try {
         const { stdout, stderr } = await execFileAsync(cmd.cmd, allArgs, {
